@@ -1,0 +1,168 @@
+{
+  "::ai::Element::Result": {
+    "None": 0,
+    "Busy": 1,
+    "Success": 2,
+    "Failure": 3
+  },
+  "game::gfx::ToneMapType": {
+    "Exponential": 0,
+    "ACESFilmic": 1,
+    "Linear": 2
+  },
+  "SaveFileIndex": {
+    "cGame": 0,
+    "cTest": 1,
+    "cAccountData": 2,
+    "cAccountExtraData": 3
+  },
+  "ResetType": {
+    "cOnStart": 0,
+    "cOnSceneChange": 1,
+    "cOnSceneInitialize": 2,
+    "cOnAccountDataLoad": 3,
+    "cOnAccountExtraDataLoad": 4,
+    "cOnSaveDataVersionCheck": 5
+  },
+  "BlackboardType": {
+    "Local": 0,
+    "Actor": 1,
+    "Shared": 2
+  },
+  "LogicBlackboardType": {
+    "Local": 0,
+    "Shared": 1
+  },
+  "GeneralPurposeColors": {
+    "Black": 0,
+    "Gray": 1,
+    "White": 2,
+    "Red": 3,
+    "Green": 4,
+    "Blue": 5,
+    "Yellow": 6,
+    "Magenta": 7,
+    "Cyan": 8,
+    "Orange": 9
+  },
+  "FrameworkIntervalFrameType": {
+    "Fixed60Fps": 0,
+    "Variable60Fps30Fps": 1,
+    "Fixed30Fps": 2
+  },
+  "elsa::parameter::CommonSportsStartMode": {
+    "Offline": 0,
+    "Online": 1,
+    "Friend": 2,
+    "Informal": 3
+  },
+  "elsa::parameter::ControllerPlayStyle": {
+    "None": -1,
+    "Dual": 0,
+    "Single": 1
+  },
+  "elsa::parameter::NetworkP2pNetworkType": {
+    "None": 0,
+    "Local": 1,
+    "Internet": 2,
+    "Lan": 3,
+    "Emulation": 4
+  },
+  "elsa::parameter::ScreenDivType": {
+    "cNone": -1,
+    "cDefault": 0,
+    "cLeftRight": 1,
+    "cTopBottom": 2,
+    "cFourSplit": 3,
+    "cFourSplitAndVerticalDiv": 4
+  },
+  "elsa::parameter::SoccerGameMode": {
+    "Game4vs4": 0,
+    "Game1vs1": 1,
+    "FootVs": 2,
+    "Practice4vs4": 3,
+    "Practice1vs1": 4
+  },
+  "elsa::parameter::CommonTutorial": {
+    "None": -1,
+    "Volleyball": 0,
+    "SoccerHand": 1,
+    "SoccerFoot": 2,
+    "ChanbaraOneSword": 3,
+    "ChanbaraTwoSword": 4,
+    "ChanbaraMagicSword": 5,
+    "Golf": 6
+  },
+  "elsa::SoccerTutorialMgr::ImageId": {
+    "HandKickFree": 0,
+    "HandKickFly": 1,
+    "HandKickUnder": 2,
+    "HandKickSide": 3,
+    "HandDive": 4,
+    "HandMove": 5,
+    "FootKick": 6,
+    "FootMove": 7,
+    "FootDash": 8,
+    "FootJump": 9,
+    "ProgressIncomplete": 10,
+    "ProgressComplete": 11
+  },
+  "elsa::SoccerTutorialMgr::ImageLayoutId": {
+    "MotionGuideCenter": 0,
+    "MotionGuideRight": 1,
+    "ControlGuide": 2
+  },
+  "elsa::SoccerTutorialMgr::PlayerPlacementId": {
+    "Default": 0,
+    "HandTotalPractice": 1,
+    "FootTotalPractice": 2
+  },
+  "elsa::SoccerTutorialMgr::BallPlacementId": {
+    "Far": 0,
+    "ForKick": 1,
+    "ForHeading": 2,
+    "ForHandTotalPractice": 3,
+    "ForFootMove": 4,
+    "ForFootTotalPractice": 5
+  },
+  "elsa::SoccerTutorialMgr::SectionId": {
+    "HandFirstKick": 0,
+    "HandBallKick": 1,
+    "HandOverKick": 2,
+    "HandUnderKick": 3,
+    "HandSideKick": 4,
+    "HandFreeKick": 5,
+    "HandHeading": 6,
+    "HandTotalPractice": 7,
+    "FootKick": 8,
+    "FootMove": 9,
+    "FootDash": 10,
+    "FootJump": 11,
+    "FootTotalPractice": 12
+  },
+  "elsa::SoccerTutorialMgr::SkipInputModeId": {
+    "None": 0,
+    "AnyKick": 1,
+    "OverKick": 2,
+    "UnderKick": 3,
+    "SideKick": 4,
+    "FreeKick": 5,
+    "Heading": 6,
+    "Move": 7,
+    "Dash": 8,
+    "Jump": 9
+  },
+  "game::gfx::LayerID": {
+    "Main_3D_0": 0,
+    "Main_3D_1": 1,
+    "Main_3D_2": 2,
+    "Main_3D_3": 3,
+    "Main_3D_4": 4,
+    "UI_2D": 10,
+    "Tool_2D": 20,
+    "Tool_2D_Super": 21
+  },
+  "game::gfx::ModelSceneType": {
+    "Main": 0
+  }
+}

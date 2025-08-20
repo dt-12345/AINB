@@ -1,0 +1,4797 @@
+{
+  "::ai::Element::Result": {
+    "None": 0,
+    "Busy": 1,
+    "Success": 2,
+    "Failure": 3
+  },
+  "GeneralPurposeColors": {
+    "Black": 0,
+    "Gray": 1,
+    "White": 2,
+    "Red": 3,
+    "Green": 4,
+    "Blue": 5,
+    "Yellow": 6,
+    "Magenta": 7,
+    "Cyan": 8,
+    "Orange": 9
+  },
+  "EventMemberCreateMethod": {
+    "AutoJudge": 0,
+    "DynamicCreate": 1,
+    "SearchActor": 2,
+    "OnceSearchActor": 3,
+    "EachFrameSearchActor": 4
+  },
+  "engine::OptionalBool": {
+    "Null": 0,
+    "False": 1,
+    "True": 2
+  },
+  "ASTriggerEvent": {
+    "AttackTrigger": 0,
+    "CollisionTrigger": 1,
+    "EnemyRailKingSetVisibleArmL": 2,
+    "EnemyRailKingSetVisibleArmR": 3,
+    "EnemyRailKingSetVisibleBlower": 4,
+    "EnemySharkKingReleaseSalmon": 5,
+    "EnemySharkKingSaberShot": 6,
+    "EnemySharkKingSetDamageEnabled": 7,
+    "EnemySharkKingSetTrackPaintEnabled": 8,
+    "EnemyUtsuboxDown": 9,
+    "EnemyUtsuboxRotate": 10,
+    "EyeTextureScrollDisable": 11,
+    "EyeTextureScrollEnable": 12,
+    "ModelBind": 13,
+    "MorayStartTurnBack": 14,
+    "NpcAmiiboPlayerStartHairAnim": 15,
+    "NpcWorldAgent3StartClothAnim": 16,
+    "NpcWorldAgent3StartHairAnim": 17,
+    "NpcWorldFlick": 18,
+    "PrepareAttackTrigger": 19,
+    "ResetCloth": 20,
+    "SetPlayerCustomVisible": 21,
+    "SwitchCloth": 22,
+    "WeaponAS": 23
+  },
+  "ASHoldEvent": {
+    "AttackOn": 0,
+    "CollisionOn": 1,
+    "DisableBlink": 2,
+    "DisableLipSync": 3,
+    "DisableUpdateLookIK": 4,
+    "FloorContact": 5,
+    "KumasanRocketCollisionOff": 6,
+    "LipSync": 7,
+    "LipSyncClose": 8,
+    "LipSyncOpen": 9,
+    "NotUseShoesOffset": 10,
+    "NpcIdolNewsInvalidateLookIK": 11,
+    "NpcWorldInvalidateLookIK": 12,
+    "PlazaNpcNotHitReact": 13,
+    "SpectacleEmitBeam": 14,
+    "WeaponASHold": 15
+  },
+  "BlackboardType": {
+    "Local": 0,
+    "Actor": 1,
+    "Shared": 2
+  },
+  "LogicBlackboardType": {
+    "Local": 0,
+    "Shared": 1
+  },
+  "phive::game::LayerEntity": {
+    "NoHit": 0,
+    "CustomReceiver": 1,
+    "GameCustomReceiver": 2,
+    "Ground": 3,
+    "Water": 4,
+    "SplPlayer": 5,
+    "SplPlayerChariotShield": 6,
+    "SplCamera": 7,
+    "SplInkBullet": 8,
+    "SplInkBullet_FriendThrough": 9,
+    "SplSubstanceBullet": 10,
+    "SplSubstanceBullet_HitOpposite": 11,
+    "SplSubstanceBullet_HitBullet": 12,
+    "SplSubstanceBullet_Lite": 13,
+    "SplRollerBody": 14,
+    "SplStationedWeapon": 15,
+    "SplInkShield": 16,
+    "SplBlowerInhale": 17,
+    "SplBluntWeapon": 18,
+    "SplInkFilm": 19,
+    "SplInkTornado": 20,
+    "SplGreatBarrier": 21,
+    "SplSaberBombGuard": 22,
+    "SplPaintSplash": 23,
+    "SplObject": 24,
+    "MissionEnemy": 25,
+    "SplCoopEnemy": 26,
+    "SplSdodrEnemy": 27,
+    "SplItem": 28,
+    "SplWallaObj": 29
+  },
+  "phive::game::LayerSensor": {
+    "NoHit": 0,
+    "CustomReceiver": 1
+  },
+  "game::gfx::Layer3DId": {
+    "Paint": 0,
+    "PlayerPaintMonitor": 1,
+    "PaintMonitor": 2,
+    "PreMain": 3,
+    "Main": 4,
+    "MiniMap": 5,
+    "Monitor": 6,
+    "Snapshot": 7,
+    "UI": 8,
+    "Customize": 9,
+    "DrawEnd": 10,
+    "Num": 11,
+    "Dummy": 12
+  },
+  "game::gfx::ModelSceneId": {
+    "Main": 0,
+    "MiniMap": 1,
+    "Monitor": 2,
+    "Snapshot": 3,
+    "Customize": 4
+  },
+  "game::gfx::AAType": {
+    "None": 0,
+    "FXAA": 1,
+    "SMAA": 2
+  },
+  "game::ActivateReason": {
+    "System": 0,
+    "Replay": 1,
+    "EventSystem": 2,
+    "Logic": 3,
+    "Event": 4,
+    "None": 5
+  },
+  "game::ActorDeadWatcherHelperWatchType": {
+    "ByActorName": 0,
+    "ByTag": 1
+  },
+  "game::ai::ArithmeticComparator": {
+    "Equal": 0,
+    "NotEqual": 1,
+    "LessThan": 2,
+    "EqualOrLessThan": 3,
+    "GreaterThan": 4,
+    "EqualOrGreaterThan": 5
+  },
+  "game::ASFrameTriggerType": {
+    "Increase": 0,
+    "Decrease": 1
+  },
+  "game::Axis": {
+    "X": 0,
+    "Y": 1,
+    "Z": 2
+  },
+  "game::CameraInterpolationType": {
+    "Euler": 0,
+    "Quaternion": 1,
+    "Sphere": 2
+  },
+  "game::ControllerPadIndex": {
+    "A": 0,
+    "B": 1,
+    "ZL": 2,
+    "X": 3,
+    "Y": 4,
+    "ZR": 5,
+    "RS_Push": 6,
+    "LS_Push": 7,
+    "Home": 8,
+    "Minus": 9,
+    "Plus": 10,
+    "Start": 11,
+    "Select": 12,
+    "L": 13,
+    "R": 14,
+    "Touch": 15,
+    "Up": 16,
+    "Down": 17,
+    "Left": 18,
+    "Right": 19,
+    "LS_Up": 20,
+    "LS_Down": 21,
+    "LS_Left": 22,
+    "LS_Right": 23,
+    "RS_Up": 24,
+    "RS_Down": 25,
+    "RS_Left": 26,
+    "RS_Right": 27
+  },
+  "game::DamageResultType": {
+    "Through": 0,
+    "Constant": 1,
+    "Aggregated": 2,
+    "NetPriorityFailure": 3,
+    "Invincible": 4,
+    "Armored": 5,
+    "Damaged": 6,
+    "Cure": 7
+  },
+  "game::DayOfWeek": {
+    "Sunday": 0,
+    "Monday": 1,
+    "Tuesday": 2,
+    "Wednesday": 3,
+    "Thursday": 4,
+    "Friday": 5,
+    "Saturday": 6
+  },
+  "game::DuckingTriggerType": {
+    "SeqState": 0,
+    "SeqInterrupt": 1
+  },
+  "game::DynamicsMaterial": {
+    "Undefined": 0,
+    "Character": 1,
+    "Water": 2,
+    "InkWater": 3,
+    "Ice": 4,
+    "Dirt": 5,
+    "Soil": 6,
+    "Wasteland": 7,
+    "Grass": 8,
+    "Cloth": 9,
+    "Carpet": 10,
+    "Rubber": 11,
+    "Vinyl": 12,
+    "Plastic": 13,
+    "Glass": 14,
+    "Wood": 15,
+    "Stone": 16,
+    "Asphalt": 17,
+    "Sand": 18,
+    "Metal": 19,
+    "IronSand": 20,
+    "Fence": 21,
+    "RopeNet": 22,
+    "Snow": 23,
+    "CoralSand": 24,
+    "KebaInk": 25,
+    "BlowerInhale": 26,
+    "Ink": 27,
+    "Barrier": 28,
+    "Shield": 29,
+    "ThrowingWeapon": 30,
+    "ExPaint": 31,
+    "LockerObj": 32,
+    "PlayerMammal": 33,
+    "Torpedo": 34,
+    "CoopFloat": 35,
+    "Ball": 36,
+    "BallEx": 37,
+    "BallGoal": 38
+  },
+  "game::EffectPauseGroup": {
+    "Normal": 0,
+    "PauseMenu": 1
+  },
+  "game::EffectPauseType": {
+    "InGame": 0,
+    "Pause": 1
+  },
+  "game::EventFlowMessageType": {
+    "None": 0,
+    "Trigger": 1,
+    "FlowChartAction": 2,
+    "TimelineAction": 3,
+    "Action": 4,
+    "FlowChartQuery": 5
+  },
+  "game::gfx::CameraFilterExposureSettingType": {
+    "Inherit": 0,
+    "OverrideAutoIfManualExposure": 1,
+    "OverrideAutoOffsetIfManualExposure": 4,
+    "ForceOverrideAuto": 2,
+    "ForceOverrideManual": 3,
+    "LegacySetting": 100
+  },
+  "game::gfx::CoCQuality": {
+    "Low": 0,
+    "Medium": 1,
+    "Hi": 2,
+    "Custom": 3
+  },
+  "game::gfx::ColorShiftType": {
+    "None": 0,
+    "Offset": 1,
+    "ChromaticAberration": 2
+  },
+  "game::gfx::DemoShadowType": {
+    "Default": 0,
+    "CloseUp": 1,
+    "Blur": 2,
+    "HiReso": 3
+  },
+  "game::gfx::DOFCoCTapQuality": {
+    "Low": 0,
+    "Middle": 1,
+    "High": 2,
+    "Custom": 3
+  },
+  "game::gfx::DOFType": {
+    "None": 0,
+    "Gaussian": 1,
+    "CoC": 2
+  },
+  "game::gfx::DynamicLightTurnOnType": {
+    "Always": 0,
+    "OnlyGame": 1,
+    "OnlyEvent": 2
+  },
+  "game::gfx::EnvMapType": {
+    "Normal": 0,
+    "Illuminate": 1,
+    "ResourceCustomize": 2,
+    "ResourceOtherScene": 3
+  },
+  "game::gfx::ExposureType": {
+    "ManualExposure": 0,
+    "AutoExposure": 1
+  },
+  "game::gfx::FadeOutCameraXluFadeType": {
+    "Invalid": -1,
+    "Bunker": 1,
+    "Net": 2,
+    "TreeLeaf": 3,
+    "TreeBody": 4,
+    "NPC": 5,
+    "Custom": 7,
+    "InkBar": 8,
+    "PlazaObj": 9,
+    "Rope": 11,
+    "Steam": 12,
+    "VsNearDither": 13,
+    "NPCWholeModel": 105
+  },
+  "game::gfx::FestFieldEnvTarget": {
+    "Plaza": 0,
+    "Plaza_Fsodr": 1,
+    "Plaza_Sdodr": 2,
+    "LobbyVersus": 3
+  },
+  "game::gfx::FieldEnvOverrideFlag": {
+    "MainLightColor": 0,
+    "SkySphere": 1,
+    "DepthFog": 2,
+    "HeightFog": 3,
+    "Bloom": 4,
+    "ColorGrading": 5
+  },
+  "game::gfx::GraffitiMaterial": {
+    "Sticker": 0,
+    "Graffiti": 1,
+    "Paper": 2,
+    "Metal": 3,
+    "Emission": 4
+  },
+  "game::gfx::LensFlareType": {
+    "DefaultDay": 0,
+    "DefaultSunset": 1,
+    "DefaultNight": 2,
+    "DefaultDay1": 3,
+    "DefaultMission": 4
+  },
+  "game::gfx::MultiAmbientLightType": {
+    "Primary": 0,
+    "Secondary": 1
+  },
+  "game::gfx::OceanType": {
+    "cXlu": 0,
+    "cXluCaustics": 1,
+    "cXluBackFace": 2,
+    "cInvisible": 3,
+    "cCausticsLight": 4,
+    "cXluDynamicLight": 5
+  },
+  "game::gfx::SdodrDesignTemplateKey": {
+    "A": 0,
+    "B": 1,
+    "C": 2,
+    "D": 3
+  },
+  "game::gfx::SpecialEnvType": {
+    "Normal": 0,
+    "Extra": 1
+  },
+  "game::gfx::TeamColorTag": {
+    "VersusRegular": 0,
+    "VersusOption": 1,
+    "VersusOption2": 2,
+    "Mission": 3,
+    "MissionOption": 4,
+    "VersusTricolor": 5,
+    "VersusTricolorOption": 6,
+    "VersusTricolorOption2": 7,
+    "Coop": 8,
+    "CoopOption": 9,
+    "Gambit": 10,
+    "Blitz": 11
+  },
+  "game::gfx::ToyCameraType": {
+    "None": 0,
+    "ToyCameraPost": 1,
+    "ToyCamera": 2
+  },
+  "game::gfx::VignettingBlendType": {
+    "AlphaBlend": 0,
+    "Multiply": 1,
+    "Additive": 2,
+    "Screen": 3
+  },
+  "game::gfx::VignettingShapeType": {
+    "Circle": 0,
+    "Quad": 1
+  },
+  "game::HelperCalcTiming": {
+    "cBeforeBehavior": 0,
+    "cAfterBehavior": 1
+  },
+  "game::LayoutArchiveCategory": {
+    "Test": 0,
+    "Boot": 1,
+    "GameCommon": 2,
+    "VersusSync": 3,
+    "Versus": 4,
+    "LobbySync": 5,
+    "Lobby": 6,
+    "LobbyVersus": 7,
+    "LobbyVersus_CapScreen": 8,
+    "LobbyCoop": 9,
+    "LobbyCoop_LobbyLocal": 10,
+    "Plaza": 11,
+    "Mission": 12,
+    "World": 13,
+    "Shop": 14,
+    "StageSelect": 15,
+    "Tutorial": 16,
+    "TalkWin": 17,
+    "Narration": 18,
+    "MiniGame": 19,
+    "Coop": 20,
+    "HeroModeCommon": 21,
+    "MultiGameCommon": 22,
+    "News": 23,
+    "Replay": 24,
+    "XMenu": 25,
+    "Customize": 26,
+    "FestRegion": 27,
+    "NmpEdit": 28,
+    "Album": 29,
+    "Manual": 30,
+    "Takeover": 31,
+    "MiniMap": 32,
+    "MngCardEditor": 33,
+    "MngCommon": 34,
+    "ShootingRange": 35,
+    "Reward": 36,
+    "CatalogViewer": 37,
+    "AmiiboWriter": 38,
+    "Examf00": 39,
+    "Exams00": 40,
+    "Exams01": 41,
+    "Exams02": 42,
+    "BootS": 43,
+    "LockerEdit": 44,
+    "Exams03": 45,
+    "Exams04": 46
+  },
+  "game::LocalLocatorBoneRefType": {
+    "None": 0,
+    "SameName": 1,
+    "OtherName": 2
+  },
+  "game::LocatorShapeType": {
+    "Cone": 1,
+    "Cube": 2,
+    "Cylinder": 3,
+    "Plane": 4,
+    "Sphere": 5,
+    "ConeShift": 6,
+    "Hemisphere": 7
+  },
+  "game::LocatorTargetMaskType": {
+    "ControlledPlayer": 0,
+    "AnyPlayer": 1,
+    "Enemy": 2,
+    "Lift": 3,
+    "All": 4
+  },
+  "game::LocatorTargetType": {
+    "None": 0,
+    "AnyPlayer": 1,
+    "Enemy": 2,
+    "Object": 3,
+    "Item": 4,
+    "Lift": 5
+  },
+  "game::ModelDynamicsLimitRotateAxisType": {
+    "X": 0,
+    "Y": 1,
+    "Z": 2,
+    "None": 3
+  },
+  "game::NetActorType": {
+    "Player": 0,
+    "PlayerGenerate": 1,
+    "MapObject": 2,
+    "Enemy": 3,
+    "EnemyGenerate": 4,
+    "PlayerSystem": 5
+  },
+  "game::NetEnlProtocol": {
+    "Unreliable": 0,
+    "Reliable": 1
+  },
+  "game::NetSenderPolicy": {
+    "Invalid": -1,
+    "PlayerIdBased": 0,
+    "SessionMasterOnly": 1,
+    "Atomic": 2,
+    "Anyone": 3,
+    "SessionMasterOrEvent": 4,
+    "PrivateMasterOnly": 5
+  },
+  "game::OneTimeRotateType": {
+    "cOneTime": 0,
+    "cRepeat": 1,
+    "cOneTimeReverse": 2,
+    "cRepeatReverse": 3
+  },
+  "game::physics::ConstraintType": {
+    "ConstraintFixed": 0,
+    "ConstraintSlider": 1
+  },
+  "game::RailAttCalcType": {
+    "cInMove": 0,
+    "cInBreak": 1,
+    "cTangent": 2
+  },
+  "game::RailInterpolationType": {
+    "cLinear": 0,
+    "cSin": 1
+  },
+  "game::RailPatrolType": {
+    "cStop": 0,
+    "cContinue": 1
+  },
+  "game::RailSpeedCalcType": {
+    "cTime": 0,
+    "cSpeed": 1
+  },
+  "game::SoundFadeCurveType": {
+    "Linear": 0,
+    "Square": 1,
+    "Sqrt": 2,
+    "Sin": 3
+  },
+  "game::UINewFlag": {
+    "None": 0,
+    "New": 1,
+    "Read": 2
+  },
+  "game::XLinkBoolEnum": {
+    "F": 0,
+    "T": 1
+  },
+  "spl::ActorMatrixBindType": {
+    "Actor": 0,
+    "Rigid": 1,
+    "Manual": 2
+  },
+  "spl::AfroType": {
+    "Base": 0,
+    "Cap": 1,
+    "Headband": 2,
+    "HeadphoneA": 3,
+    "Fullface": 4
+  },
+  "spl::AmbienceState": {
+    "None": 0,
+    "StageView": 1,
+    "StartDemoFriend": 2,
+    "StartDemoOpposite": 3,
+    "Ready": 4,
+    "FirstHalf": 5,
+    "SecondHalf": 6,
+    "Count03": 7,
+    "Finish": 8,
+    "MsnBoss_BeforeDemo": 9,
+    "MsnBoss_InGame": 10,
+    "MsnBoss_AfterDefeat": 11
+  },
+  "spl::BadgeCategory": {
+    "Mission": 0,
+    "WinCount": 1,
+    "WinCount_Tcl": 2,
+    "Fest10xBattle": 3,
+    "Udemae": 4,
+    "ChallengeWinStreak": 5,
+    "PlayerRank": 6,
+    "XRank": 7,
+    "XPower": 8,
+    "WinCount_HighXPower": 9,
+    "XRank_Revised": 10,
+    "EventMatch": 11,
+    "WeaponLevel": 12,
+    "WinCount_WeaponSp": 13,
+    "CatalogueLevel": 14,
+    "FestRankMax": 15,
+    "GearTotalRarity": 16,
+    "CoopGrade_Normal": 17,
+    "CoopGrade_Underground": 18,
+    "CoopGrade_Pair": 19,
+    "CoopBigRunTrophy": 20,
+    "CoopContestTrophy": 21,
+    "TotalKumaPoint": 22,
+    "CoopClearDangerRateMax": 23,
+    "CoopRareEnemyKillNum": 24,
+    "CoopBossKillNum": 25,
+    "CoopKillTripleBoss": 26,
+    "NawaBattlerRank": 27,
+    "NawaBattlerCardNum": 28,
+    "NawaBattlerWinAllNpcLevel3": 29,
+    "SpendShop": 30,
+    "OrderFood": 31,
+    "OrderVendor": 32,
+    "SpendLottery": 33,
+    "LimitedRewardLottery": 34,
+    "HammerHostTournament": 35,
+    "SpendShop_Fsodr": 36,
+    "OrderVendor_Fsodr": 37,
+    "SpendShop_Sdodr": 38,
+    "Achievement_Sdodr": 39,
+    "TipColorComplete_Sdodr": 40
+  },
+  "spl::BeatLinkStopType": {
+    "None": 0,
+    "Immidiate": 1,
+    "OnNextSyncFrame": 2
+  },
+  "spl::BgmCategory": {
+    "Versus": 0,
+    "Mission": 1,
+    "Coop": 2,
+    "Plaza": 3,
+    "SideOrder": 4,
+    "Other": 5
+  },
+  "spl::BgmMidiLinkKeyPropType": {
+    "Volume": 0,
+    "Progress": 1
+  },
+  "spl::BigRunState": {
+    "Invalid": -1,
+    "None": 0,
+    "Announce": 1,
+    "BeingHeld": 2,
+    "WaitingForResult": 3
+  },
+  "spl::BigWorldStartPosType": {
+    "First": 0,
+    "AfterIntroduceComrade": 1,
+    "AfterRememberSpace": 2
+  },
+  "spl::BlowoutsWidthType": {
+    "Single": 0,
+    "Double": 1
+  },
+  "spl::BoostType": {
+    "None": -1,
+    "GearPower": 0,
+    "Exp50": 1,
+    "Money50": 2,
+    "Exp100": 3,
+    "Money100": 4,
+    "ExpParty": 5,
+    "MoneyParty": 6
+  },
+  "spl::Brand": {
+    "None": -1,
+    "B00": 0,
+    "B01": 1,
+    "B02": 2,
+    "B03": 3,
+    "B04": 4,
+    "B05": 5,
+    "B06": 6,
+    "B07": 7,
+    "B08": 8,
+    "B09": 9,
+    "B10": 10,
+    "B11": 11,
+    "B15": 15,
+    "B16": 16,
+    "B17": 17,
+    "B18": 18,
+    "B19": 19,
+    "B20": 20,
+    "B97": 97,
+    "B98": 98,
+    "B99": 99
+  },
+  "spl::BulletBlastSubSpecialSpecUpType": {
+    "PaintRadius": 0,
+    "DistanceDamageDistanceRate": 1,
+    "CrossPaintCheckLength": 2,
+    "CrossPaintRadius": 3,
+    "SplashAroundVelocityMin": 4,
+    "SplashAroundVelocityMax": 5,
+    "SplashAroundPaintRadius": 6
+  },
+  "spl::BulletBombCurlingPaintType": {
+    "Paint": 0,
+    "NoPaint": 1,
+    "Air": 2
+  },
+  "spl::BulletMoveState": {
+    "GoStraight": 0,
+    "Brake": 1,
+    "Free": 2
+  },
+  "spl::BulletPointSensorAreaType": {
+    "PointSensor": 0,
+    "Trap": 1,
+    "Firework": 2
+  },
+  "spl::BulletShelterCanopyBaseSleepType": {
+    "OverTime": 0,
+    "Close": 1,
+    "Break": 2,
+    "Water": 3,
+    "Resque": 4,
+    "TimeUp": 5
+  },
+  "spl::BulletShotGuideCollisionType": {
+    "EnemyOnFenceOn": 0,
+    "EnemyOnFenceOff": 1,
+    "EnemyOffFenceOn": 2,
+    "EnemyOffFenceOff": 3,
+    "EnemyOnFenceOnBlowerOff": 4,
+    "EnemyOnFenceOffBlowerOff": 5,
+    "EnemyOffFenceOnBlowerOff": 6,
+    "EnemyOffFenceOffBlowerOff": 7,
+    "EnemyOffFenceOnBlowerOffShieldOff": 8,
+    "EnemyOffFenceOffBlowerOffShieldOff": 9,
+    "ThrowUltraStamp": 10,
+    "SuperHook": 11,
+    "NiceBall": 12,
+    "EnemyOffFenceOnBlowerOffTorpedoOff": 13,
+    "EnemyOnFenceOnTorpedoOff": 14,
+    "EnemyOffFenceOnTorpedoOff": 15,
+    "TripleTornadoGuideDevice": 16,
+    "Clam": 17,
+    "BlowerExhale": 18,
+    "InkStorm": 19
+  },
+  "spl::BulletSpChimneyWallState": {
+    "StartUp": 0,
+    "Running": 1,
+    "Closing": 2
+  },
+  "spl::BulletSpInkStormCloudState": {
+    "Rise": 0,
+    "Cloudy": 1,
+    "Rainy": 2,
+    "Sunny": 3
+  },
+  "spl::BulletSpMultiMissileState": {
+    "Rise": 0,
+    "ApproachStart": 1,
+    "ApproachWait": 2,
+    "Approach": 3,
+    "Curve": 4,
+    "ChaseStart": 5,
+    "Chase": 6
+  },
+  "spl::BulletSpNiceBallState": {
+    "Hold": 0,
+    "Fly": 1,
+    "Ground": 2,
+    "Burst": 3,
+    "SleepWait": 4,
+    "GroundWait": 5
+  },
+  "spl::BulletSpTripleTornadoGuideDeviceState": {
+    "Fly": 0,
+    "Ground": 1,
+    "Wait": 2,
+    "Blast": 3
+  },
+  "spl::BulletSpUltraStampState": {
+    "Unset": 0,
+    "Hold": 1,
+    "SwingUp": 2,
+    "SwingBigDown": 3,
+    "SwingSmallDown": 4,
+    "SwingJump": 5,
+    "Throw": 6,
+    "Squid": 7,
+    "Keep": 8
+  },
+  "spl::BulletWallDropGravity": {
+    "value_0_008": 0,
+    "value_0_015": 1
+  },
+  "spl::BynameGender": {
+    "None": 0,
+    "Masculine": 1,
+    "Feminine": 2
+  },
+  "spl::CanolaImageType": {
+    "Horizontal": 0,
+    "Vertical": 1
+  },
+  "spl::CanolaModelType": {
+    "Deco": 0,
+    "Shot": 1,
+    "Both": 2
+  },
+  "spl::CatalogItemKind": {
+    "Gear_Head": 0,
+    "Gear_Clothes": 1,
+    "Gear_Shoes": 2,
+    "Emote": 3,
+    "LockerObj": 4,
+    "MiniGameCard": 5,
+    "Byname": 6,
+    "NameplateBg": 7,
+    "Ticket": 8,
+    "GearPower": 9,
+    "MysteryBox": 10
+  },
+  "spl::CirclePlacementObjType": {
+    "Circle": 0,
+    "Line": 1
+  },
+  "spl::CompassSEType": {
+    "Navigate": 0,
+    "AllDead": 1,
+    "None": 2
+  },
+  "spl::ControlOptionType": {
+    "Handheld": 0,
+    "Other": 1
+  },
+  "spl::CoopBuildOptionType": {
+    "ChangeMainWeapon": 0,
+    "AddSpecial": 1,
+    "GetBuild": 2
+  },
+  "spl::CoopBuildType": {
+    "Unknown": 0,
+    "OpInkEffectReduction": 1,
+    "InkCapacityUp": 2,
+    "MoveVelUp": 3,
+    "BombRankUp": 4,
+    "GetSpecial": 5
+  },
+  "spl::CoopEnemyAppearType": {
+    "General": 0,
+    "Special": 1,
+    "GeneralAll": 2,
+    "SakeSaucer": 3,
+    "BigMouth": 4,
+    "BigMouthSakelienStandard": 5,
+    "BigMouthSakelienLarge": 6,
+    "BigMouthSakelienSmall": 7,
+    "BossAppearDemo": 8,
+    "Boss": 9,
+    "Relay": 10,
+    "BigRunGeyser": 11,
+    "BossBigRunGeyser": 12,
+    "TripleBossAppearDemo": 13
+  },
+  "spl::CoopEnemyCategory": {
+    "Zako": 0,
+    "Rare": 1,
+    "EventRare": 2,
+    "Boss": 3,
+    "Other": 4
+  },
+  "spl::CoopEnemyEventType": {
+    "Rush": 0
+  },
+  "spl::CoopEnemySakeCarrierPostAttackType": {
+    "Return": 0,
+    "ReturnFinal": 1,
+    "Escape": 2
+  },
+  "spl::CoopEnemySakediverHideState": {
+    "Hide": 0,
+    "Appear": 1
+  },
+  "spl::CoopEnemySakeDolphinMaskState": {
+    "MaskOn": 0,
+    "MaskOff": 1
+  },
+  "spl::CoopEnemySakelienGeyserDamageStep": {
+    "First": 0,
+    "Second": 1,
+    "Third": 2
+  },
+  "spl::CoopEnemySakelienGoldenAppearType": {
+    "Other": 0,
+    "Rush": 1,
+    "Fog": 2,
+    "Tutorial": 3
+  },
+  "spl::CoopEnemySakelienZakoMoveState": {
+    "Walk": 0,
+    "Drop": 1,
+    "Landing": 2,
+    "Swim": 3,
+    "Jump": 4
+  },
+  "spl::CoopEnemySakePillarBabyState": {
+    "Full": 0,
+    "Seven": 1,
+    "Six": 2,
+    "Five": 3,
+    "Four": 4,
+    "Three": 5,
+    "Two": 6,
+    "One": 7
+  },
+  "spl::CoopEnemySakeRopeBombThrowDir": {
+    "Forward": 0,
+    "Left": 1,
+    "Right": 2
+  },
+  "spl::CoopEnemyType": {
+    "SakelienStandard": 0,
+    "SakelienLarge": 1,
+    "SakelienSmall": 2,
+    "SakeFlyBagman": 3,
+    "SakelienBomber": 4,
+    "SakelienCupTwins": 5,
+    "SakelienShield": 6,
+    "SakelienSnake": 7,
+    "SakelienTower": 8,
+    "Sakediver": 9,
+    "Sakerocket": 10,
+    "SakePillar": 11,
+    "SakeDolphin": 12,
+    "SakeArtillery": 13,
+    "SakeSaucer": 14,
+    "SakelienGolden": 15,
+    "SakelienGeyser": 16,
+    "Sakedozer": 17,
+    "SakeCarrier": 18,
+    "SakeCopter": 19,
+    "SakeBigMouth": 20,
+    "SakeBigMouthGold": 21,
+    "SakeShip": 22,
+    "SakelienGiant": 23,
+    "SakeRope": 24,
+    "SakeJaw": 25,
+    "SakeBigBalloon": 26,
+    "SakeGhost": 27,
+    "SakeBalloon": 28,
+    "SakeWheel": 29,
+    "Triple": 30,
+    "Random": 31
+  },
+  "spl::CoopEventType": {
+    "None": 0,
+    "Rush": 1,
+    "Geyser": 2,
+    "Dozer": 3,
+    "Hakobiya": 4,
+    "Fog": 5,
+    "Missile": 6,
+    "Relay": 7,
+    "Tamaire": 8
+  },
+  "spl::CoopGameResult": {
+    "Undecided": 0,
+    "RoundClear": 1,
+    "GameClear": 2,
+    "GameOver": 3,
+    "GameOverByAllDead": 4,
+    "GameOverByRule": 5
+  },
+  "spl::CoopGoldenIkuraSignalType": {
+    "Got": 0,
+    "Banked": 1,
+    "Lost": 2
+  },
+  "spl::CoopGrade": {
+    "Rookie": 0,
+    "Novice": 1,
+    "Middle": 2,
+    "Expert": 3,
+    "Master": 4,
+    "Legend": 5
+  },
+  "spl::CoopGradeNumber": {
+    "Rookie": 0,
+    "Novice": 1,
+    "Middle": 2,
+    "Expert": 3,
+    "Master": 4,
+    "Master1": 5,
+    "Master2": 6,
+    "Master3": 7,
+    "Legend": 8
+  },
+  "spl::CoopGuideMessagePriority": {
+    "Hide": 0,
+    "Default": 1,
+    "Tutorial": 2,
+    "Event": 3
+  },
+  "spl::CoopGuideMessagePriorityCompare": {
+    "Greater": 0,
+    "GreaterEqual": 1
+  },
+  "spl::CoopHammerRoundType": {
+    "Invalid": 0,
+    "Preliminary": 1,
+    "Finals": 2
+  },
+  "spl::CoopIkuraBankBankState": {
+    "Disappear": 0,
+    "Close": 1,
+    "Open": 2,
+    "LostIkura": 3
+  },
+  "spl::CoopItemGoldenIkuraSleepType": {
+    "None": 0,
+    "Lost": 1,
+    "Got": 2,
+    "GotByEnemy": 3
+  },
+  "spl::CoopItemSpawnType": {
+    "Spawn": 0,
+    "Respawn": 1,
+    "Spawn_FromGeyser": 2,
+    "ThrowByPlayer": 3,
+    "SpawnEventRelay": 4
+  },
+  "spl::CoopItemTakeResponseType": {
+    "Failure": 0,
+    "Success": 1,
+    "Correct": 2,
+    "FailureCorrect": 3
+  },
+  "spl::CoopItemType": {
+    "GoldenIkura": 0,
+    "GoldenIkuraLarge": 1
+  },
+  "spl::CoopJobType": {
+    "Normal": 0,
+    "Custom": 1,
+    "Tutorial0": 2,
+    "Tutorial1": 3,
+    "BigRun": 4,
+    "Pair": 5,
+    "UnderGround": 6,
+    "Contest": 7
+  },
+  "spl::CoopMode": {
+    "Coop": 0,
+    "FreeTest": 1,
+    "Replay": 2
+  },
+  "spl::CoopPlayerStationState": {
+    "Unknown": 0,
+    "Playable": 1,
+    "Finishable": 2,
+    "TimeOverFinishable": 3
+  },
+  "spl::CoopRewardMeterElementType": {
+    "Random": 0,
+    "RandomHit": 1,
+    "MonthlyGear": 2,
+    "UsedGearCapsule": 3,
+    "UrokoSilver": 4,
+    "UrokoGold": 5,
+    "UrokoRandom": 6
+  },
+  "spl::CoopRewardRarityBase": {
+    "None": 0,
+    "Unknown": 1,
+    "Common": 2,
+    "Rare": 3,
+    "VeryRare": 4,
+    "SuperRare": 5
+  },
+  "spl::CoopRewardTypeBase": {
+    "None": 0,
+    "Unknown": 1,
+    "Money": 2,
+    "Food": 3,
+    "Drink": 4,
+    "GearSkillChip": 5,
+    "GearRandom": 6,
+    "GearMonthly": 7,
+    "UrokoSilver": 8,
+    "UrokoGold": 9,
+    "UrokoRandom": 10
+  },
+  "spl::CoopRule": {
+    "Normal": 0,
+    "Custom": 1,
+    "Tutorial": 2
+  },
+  "spl::CoopScenarioCompetitionType": {
+    "Normal": 0,
+    "Tournament": 1
+  },
+  "spl::CoopSequenceSignalType": {
+    "StageViewDemo": 0,
+    "DropDemo": 1,
+    "DropDemoReady": 2,
+    "RoundPrepare": 3,
+    "RoundNotice": 4,
+    "RoundReady": 5,
+    "RoundPlayStart": 6,
+    "RoundTimeOver": 7,
+    "RoundPlayEnd": 8,
+    "RoundClearStart": 9,
+    "RoundClearEnd": 10,
+    "Finish": 11,
+    "Result": 12,
+    "BossAppeared": 13,
+    "BossAppeareDemoStart": 14,
+    "BossAppeareDemoEnd": 15
+  },
+  "spl::CoopSpawnGeyserBrightType": {
+    "None": 0,
+    "Fail_Far": 1,
+    "Fail_Near": 2,
+    "Succ": 3
+  },
+  "spl::CoopSpawnGeyserSpoutType": {
+    "None": 0,
+    "Low": 1,
+    "Middle": 2,
+    "High": 3
+  },
+  "spl::CoopTurretRiderType": {
+    "None": 0,
+    "Controlled": 1,
+    "Friend": 2,
+    "Enemy": 3
+  },
+  "spl::CoopUrokoType": {
+    "None": -1,
+    "Bronze": 0,
+    "Silver": 1,
+    "Gold": 2
+  },
+  "spl::CoopWaterLevel": {
+    "Low": 0,
+    "Mid": 1,
+    "High": 2
+  },
+  "spl::CoopWeather": {
+    "Sunny": 0,
+    "Cloudy": 1,
+    "Foggy": 2,
+    "Boss": 3
+  },
+  "spl::CustomPartMaterial": {
+    "None": 0,
+    "Cloth": 1,
+    "Rubber": 2,
+    "Metal": 3,
+    "Glass": 4,
+    "Wood": 5,
+    "Leather": 6,
+    "Plastic": 7,
+    "Paper": 8,
+    "Yoroi": 9,
+    "PoweredSuits": 10
+  },
+  "spl::DamageEffectorExtraInfo": {
+    "Normal": 0,
+    "FullCharge": 1,
+    "RollerCore": 2,
+    "ExtraBombCore": 3,
+    "BlasterWeakBlast": 4,
+    "ExtraPaintSplash": 5,
+    "ExtraPaintSplashExplosion": 6,
+    "SlosherLauncherFollower": 7,
+    "ShooterVariableRepeat": 8,
+    "ShelterCanopy": 9,
+    "UltraStampSwing": 10,
+    "BlowerInhale": 11,
+    "ShockSonarWave": 12,
+    "SaberShot": 13,
+    "SaberChargeShot": 14,
+    "SaberSlash": 15,
+    "SaberChargeSlash": 16,
+    "SaberChargeSlashPenetrate": 17,
+    "CriticalHit": 18,
+    "CurlingDirectHit": 19,
+    "MultiMissileDirectHit": 20,
+    "JetpackJet": 21,
+    "RollerInkNoDamage": 22,
+    "SlosherBig": 23,
+    "SprinklerInk": 24,
+    "ChariotBody": 25,
+    "GoldenIkuraAttack": 26,
+    "CannonMissile": 27,
+    "CastleAttack": 28,
+    "SprinklerInkWeak": 29,
+    "SdAttack": 30,
+    "ChimneyGenerator": 31,
+    "SdSaber": 32,
+    "Tenjin": 33
+  },
+  "spl::DamageEffectorType": {
+    "Default": 0,
+    "Shooter": 1,
+    "Roller": 2,
+    "Charger": 3
+  },
+  "spl::DamageReasonExtraType": {
+    "Normal": 0,
+    "RollerPressed": 1,
+    "JetpackJet": 2,
+    "CanopyPressed": 3,
+    "CurlingDirectHit": 4,
+    "GachihokoBarrierBurst": 5,
+    "Blast": 6,
+    "SlosherLauncherFollower": 7,
+    "ChariotBodyPressed": 8
+  },
+  "spl::DamageReasonOtherId": {
+    "Unknown": -1,
+    "Blood": 0,
+    "StepPaint": 1,
+    "AirFall": 2,
+    "WaterFall": 3,
+    "GachihokoTimeUpBurst": 4,
+    "GachihokoBarrierBurst": 5,
+    "GachihokoBarrierBump": 6,
+    "SalmonBuddy": 7,
+    "InkBar": 8,
+    "DamageConveyor": 9,
+    "MatoiInk": 10,
+    "Geyser": 11,
+    "Innate": 12,
+    "PropellerInk": 13,
+    "SdodrFinalLaser": 14,
+    "Tenjin": 15
+  },
+  "spl::DamageReceiverFlagType": {
+    "TargetedByBombRobot": 0,
+    "TargetedByMultiMissile": 1,
+    "CantParasiteSalmonBuddy": 2,
+    "DroneBuddySdodrTarget": 3,
+    "DroneBuddySdodrTargetAsBoss": 4
+  },
+  "spl::DashPanelAngleType": {
+    "Pitch0_Wall": 0,
+    "Pitch10_Floor": 1,
+    "Pitch30_Floor": 2,
+    "Pitch0_VTOL": 3
+  },
+  "spl::DashPanelVelAddType": {
+    "Impact": 0,
+    "Reject": 1
+  },
+  "spl::DayChangeContext": {
+    "Normal": 0,
+    "ErrorAutoRecover": 1,
+    "PlazaAuto": 2,
+    "Bypass": 3,
+    "DbgForce": 4
+  },
+  "spl::DroneBuddySdodrActionType": {
+    "BombSplash": 0,
+    "BombQuick": 1,
+    "Trap": 2,
+    "Sprinkler": 3,
+    "SuperLaser": 4,
+    "Tornado": 5,
+    "ItemDrop": 6
+  },
+  "spl::DroneBuddySdodrTargetingPriorityType": {
+    "None": 0,
+    "Obj": 1,
+    "Enemy": 2
+  },
+  "spl::DroneBuddySdodrTargetType": {
+    "None": 0,
+    "Normal": 1,
+    "Boss": 2
+  },
+  "spl::Emblem": {
+    "None": -1,
+    "E00": 0,
+    "E01": 1,
+    "E02": 2,
+    "E03": 3,
+    "E04": 4,
+    "E05": 5,
+    "E06": 6,
+    "E07": 7,
+    "E08": 8,
+    "E09": 9,
+    "E10": 10,
+    "E11": 11,
+    "E12": 12,
+    "E13": 13,
+    "E14": 14,
+    "E15": 15,
+    "E16": 16,
+    "E17": 17,
+    "E18": 18,
+    "E19": 19,
+    "E20": 20,
+    "E21": 21,
+    "E22": 22,
+    "E23": 23,
+    "E24": 24,
+    "E25": 25,
+    "E26": 26,
+    "E27": 27,
+    "E28": 28,
+    "E29": 29,
+    "E30": 30
+  },
+  "spl::EmoteFistBumpType": {
+    "None": 0,
+    "Upper": 1,
+    "Middle": 2,
+    "Lower": 3
+  },
+  "spl::EmoteType": {
+    "Normal": 0,
+    "Weapon": 1,
+    "Pair": 2,
+    "Team": 3
+  },
+  "spl::EnemyBallKingSdodrLevel": {
+    "Level1": 0,
+    "Level2": 1,
+    "Level3": 2
+  },
+  "spl::EnemyBallKingSdodrPredictType": {
+    "FrontShot": 0,
+    "BackShot": 1,
+    "AroundShot": 2
+  },
+  "spl::EnemyBallKingSdodrStrategyType": {
+    "Wait": 0,
+    "BombSplash": 1,
+    "BombSplashDouble": 2,
+    "BombSplashTriple": 3,
+    "EnemyMissile": 4,
+    "EnemyMissileDouble": 5,
+    "EnemyMissileTriple": 6,
+    "MicroLaser": 7,
+    "MicroLaserStrong": 8,
+    "Dash": 9,
+    "EnemySpawn": 10
+  },
+  "spl::EnemyBarrierKingSdodr::Level": {
+    "Level1": 0,
+    "Level2": 1,
+    "Level3": 2
+  },
+  "spl::EnemyBarrierKingSdodr::SelectCannonPolicyType": {
+    "Nearest": 0,
+    "Main": 1,
+    "Random": 2
+  },
+  "spl::EnemyBarrierKingSdodr::SpawnEnemyAlias": {
+    "None": 0,
+    "StrongA": 1,
+    "StrongB": 2,
+    "StrongC": 3
+  },
+  "spl::EnemyBarrierKingSdodr::StrategyType": {
+    "Wait": 0,
+    "BubbleShotFin": 1,
+    "BubbleShotCone": 2,
+    "SpawnEnemy": 3,
+    "SpawnEnemy2": 4,
+    "Firework": 5,
+    "TentacleArm": 6,
+    "HyperPresser": 7,
+    "Skewer": 8
+  },
+  "spl::EnemyBarrierKingSdodr::TentacleDevicePlacementType": {
+    "None": 0,
+    "FrontRight": 1,
+    "FrontLeft": 2,
+    "BackLeft": 3,
+    "BackRight": 4
+  },
+  "spl::EnemyBarrierKingSdodr::Type": {
+    "Iida": 0,
+    "Odako": 1,
+    "StoryBoss": 2,
+    "OdakoEx": 3
+  },
+  "spl::EnemyBombColor": {
+    "MyColor": 0,
+    "PlayerColor": 1
+  },
+  "spl::EnemyChargerTowerLaserState": {
+    "Normal": 0,
+    "Safe": 1,
+    "Predict0": 2,
+    "Predict1": 3
+  },
+  "spl::EnemyChargeSearchState": {
+    "LockOn": 0,
+    "Charge": 1,
+    "Shoot": 2,
+    "Patrol": 3
+  },
+  "spl::EnemyDeadReason": {
+    "Bullet": 0,
+    "Hell": 1,
+    "Water": 2,
+    "Suicide": 3,
+    "Debug": 4
+  },
+  "spl::EnemyEvacuationAreaTypeSdodr": {
+    "Default": 0,
+    "JumpPanel": 1
+  },
+  "spl::EnemyFlyingHoheiDeadReason": {
+    "Attack": 0,
+    "Defeated": 1,
+    "GndCol": 2,
+    "Senility": 3
+  },
+  "spl::EnemyHoheiFlashState": {
+    "NotFlash": 0,
+    "Flash": 1
+  },
+  "spl::EnemyHopperSdodrDeadReason": {
+    "Player": 0,
+    "NaturalExtinction": 1,
+    "VictoryBall": 2,
+    "EnemyBallKingSdodr": 3
+  },
+  "spl::EnemyKumasanRocketLevel": {
+    "Level1": 0,
+    "Level2": 1,
+    "Level3": 2
+  },
+  "spl::EnemyKumasanRocketStep": {
+    "Step1": 0,
+    "Step2": 1,
+    "Step3": 2
+  },
+  "spl::EnemyKumasanRocketStrategySelectType": {
+    "Rotation": 0,
+    "Lot": 1,
+    "SelectFirstAndLot": 2
+  },
+  "spl::EnemyKumasanRocketStrategyType": {
+    "Wait": 0,
+    "FlyingHohei": 1,
+    "FlyingHoheiStrong": 2,
+    "SaberCrow": 3,
+    "SaberCrowStrong": 4,
+    "SlamShock": 5,
+    "Tornado": 6,
+    "TornadoStrong": 7,
+    "Laser": 8,
+    "TornadoAndLaser": 9,
+    "RotateRocket": 10
+  },
+  "spl::EnemyKumasanSpectacleAnimName": {
+    "Invalid": 0,
+    "Phase02_KumaWait": 1,
+    "Phase02_KumaMenacing": 2,
+    "Phase02_KumaSlap00": 3,
+    "Phase02_KumaSlap01": 4,
+    "Phase02_KumaSlap02": 5,
+    "Phase02_KumaGrab00": 6,
+    "Phase02_KumaGrab01": 7,
+    "Phase02_KumaEntwine00": 8,
+    "Phase02_KumaEntwine01": 9,
+    "Phase02_KumaEntwine02": 10,
+    "Phase02_KumaFinish00": 11,
+    "Phase02_KumaFinish01_Wait": 12,
+    "Phase02_KumaFinish01_St": 13,
+    "Phase02_KumaFinish01_Attk": 14,
+    "Phase02_KumaFinish01_Ed": 15
+  },
+  "spl::EnemyMantaKingLevel": {
+    "Level1": 0,
+    "Level2": 1,
+    "Level3": 2
+  },
+  "spl::EnemyMantaKingShadowGroupType": {
+    "Strong": 0,
+    "Normal": 1,
+    "Weak": 2
+  },
+  "spl::EnemyMantaKingShadowType": {
+    "Step1": 0,
+    "Step2": 1,
+    "Step3": 2,
+    "Step4": 3,
+    "Step5": 4,
+    "Step6": 5
+  },
+  "spl::EnemyMantaKingStrategyType": {
+    "BombSplash": 0,
+    "BombTorpedo": 1,
+    "DashAttack": 2,
+    "Stringer": 3,
+    "Tornado": 4
+  },
+  "spl::EnemyRailKingArmType": {
+    "Right": 0,
+    "Left": 1
+  },
+  "spl::EnemyRailKingASSlotType": {
+    "Body": 0,
+    "HandL": 1,
+    "HandR": 2,
+    "Blower": 3
+  },
+  "spl::EnemyRailKingLevel": {
+    "Level1": 0,
+    "Level2": 1,
+    "Level3": 2
+  },
+  "spl::EnemyRailKingPunchType": {
+    "cNormal": 0,
+    "cFast": 1,
+    "cShock": 2,
+    "cDouble": 3,
+    "cBlower": 4
+  },
+  "spl::EnemyRailKingStrategySelectType": {
+    "Rotation": 0,
+    "Lot": 1,
+    "SelectFirstAndLot": 2
+  },
+  "spl::EnemyRailKingStrategyType": {
+    "Wait": 0,
+    "Jump": 1,
+    "SingleHandPunch": 2,
+    "SingleHandPunchFast": 3,
+    "SingleHandPunchFastShock": 4,
+    "DoubleHandPunch": 5,
+    "Blower": 6,
+    "BlowerAndSinglePunch": 7,
+    "BlowerAndFastPunch": 8
+  },
+  "spl::EnemySharkKingAttack": {
+    "Saber": 0,
+    "Tackle": 1,
+    "Tornado": 2,
+    "Mole": 3
+  },
+  "spl::EnemySharkKingEatTarget": {
+    "Salmon": 0,
+    "BombSplash": 1,
+    "BombCurling": 2
+  },
+  "spl::EnemyShellReactionSdodr": {
+    "None": 0,
+    "Blast": 1,
+    "Reflect": 2,
+    "MovedByPlayer": 3,
+    "NoneOrReflect": 4
+  },
+  "spl::EnemyShellSdodrDeadReason": {
+    "None": 0,
+    "ShellDead": 1,
+    "AfterMovedByPlayer": 2,
+    "AfterShell": 3,
+    "AfterMovedByPlayerNoHit": 4
+  },
+  "spl::EnemyShellSdodrState": {
+    "Wait": 0,
+    "AppearJump": 1,
+    "FollowPlayer": 2,
+    "PrepareAttack": 3,
+    "Attack": 4,
+    "FaintAfterAttack": 5,
+    "WakeUpAfterFaint": 6,
+    "DownToShell": 7,
+    "BrushAway": 8,
+    "Shell": 9,
+    "MovedByPlayer": 10,
+    "Mount": 11,
+    "FallAfterMount": 12,
+    "WakeUpAfterFall": 13,
+    "Dead": 14,
+    "AppearJumpEnd": 15
+  },
+  "spl::EnemyShellStateForReactionSdodr": {
+    "Default": 0,
+    "PlayerColorAttack": 1,
+    "EnemyColorAttack": 2
+  },
+  "spl::EnemySpinnerSearchState": {
+    "Patrol": 0,
+    "LockOn": 1,
+    "Charge": 2
+  },
+  "spl::EnemyStepType": {
+    "OnNeutralGnd": 0,
+    "OnNeutralAir": 1,
+    "OnEnemyGnd": 2,
+    "OnFriendGnd": 3,
+    "OnBulletThrough": 4,
+    "OnNotPaintable": 5
+  },
+  "spl::EnemyTakolienMoveType": {
+    "Fixed": 0,
+    "Move": 1,
+    "Boost": 2
+  },
+  "spl::EnemyTowerKingAttackTypeSdodr": {
+    "Tornado": 0,
+    "BombTorpedo": 1,
+    "PoisonMist": 2
+  },
+  "spl::EnemyTowerKingLayerSearchLightStateSdodr": {
+    "None": 0,
+    "Search": 1,
+    "Alert": 2,
+    "InvalidSearch": 3
+  },
+  "spl::EnemyTowerKingLayerSearchStateSdodr": {
+    "LockOn": 0,
+    "Charge": 1,
+    "Shoot": 2,
+    "Patrol": 3
+  },
+  "spl::EnemyTowerKingSuperAttackTypeSdodr": {
+    "BombSplash": 1,
+    "Missile": 2,
+    "HyperPresser": 3,
+    "None": 0
+  },
+  "spl::EnemyUtsuboxAttackType": {
+    "Fang": 0,
+    "Mixer": 1,
+    "Missile": 2,
+    "Crowd": 3,
+    "Tackle": 4
+  },
+  "spl::EnemyWeaponType": {
+    "BubbleShot": 0,
+    "BounceShot": 1,
+    "Shooter": 2,
+    "Charger": 3,
+    "Slosher": 4,
+    "Spinner": 5,
+    "Stringer": 6,
+    "SplashBomb": 7,
+    "TorpedoBomb": 8,
+    "ShockSonarWave": 9
+  },
+  "spl::EventSLinkSpecialActionType": {
+    "D020_PMBS": 0,
+    "D020_HBS": 1,
+    "D020_RO": 2,
+    "EBT_EA": 3,
+    "EBT_PB": 4,
+    "RKD_NA": 5,
+    "D130_BKEX_OP": 6
+  },
+  "spl::FestivalState": {
+    "Invalid": 0,
+    "None": 1,
+    "Announce": 2,
+    "FirstHalf": 3,
+    "SecondHalf": 4,
+    "WaitingForResult": 5
+  },
+  "spl::FestRank": {
+    "Normal": 0,
+    "Genuine": 1,
+    "Super": 2,
+    "Charisma": 3,
+    "Forever": 4
+  },
+  "spl::FestRegion": {
+    "JP": 0,
+    "US": 1,
+    "EU": 2,
+    "ASIA": 3
+  },
+  "spl::FestSandIdolType": {
+    "None": -1,
+    "Gambit": 0,
+    "Blitz": 1,
+    "Thunder": 2,
+    "All": 3
+  },
+  "spl::FestSandPlazaPhase": {
+    "FirstHalf": 0,
+    "SecondHalf": 1,
+    "WaitingForResult": 2
+  },
+  "spl::FestSandPlazaStageType": {
+    "Large": 0,
+    "Middle": 1,
+    "Small": 2
+  },
+  "spl::FestSpecialMatchType": {
+    "None": 0,
+    "Fest10Times": 1,
+    "Fest100Times": 2,
+    "Fest333Times": 3,
+    "ConchShellScramble": 4,
+    "ConchShellScramble10": 5,
+    "ConchShellScramble33": 6
+  },
+  "spl::FestVoteAnimType": {
+    "Rotation": 0,
+    "MainOnly": 1
+  },
+  "spl::FestVoteTextType": {
+    "Top": 0,
+    "Center": 1,
+    "Bottom": 2,
+    "None": 3
+  },
+  "spl::FesWinProofType": {
+    "None": 0,
+    "Win100Match": 1,
+    "Win333Match": 2
+  },
+  "spl::FieldAngleType": {
+    "Plane": 0,
+    "Slope": 1,
+    "Cliff": 2,
+    "Air": 3
+  },
+  "spl::GachiasariClamActiveReason": {
+    "Other": 0,
+    "SpawnFromGoal": 1
+  },
+  "spl::GachiasariClamCameraType": {
+    "NotSpectator": 0,
+    "Object": 1,
+    "Bird": 2,
+    "Behind": 3
+  },
+  "spl::GachiasariClamFootPaintType": {
+    "NotPaintable": 0,
+    "Neutral": 1,
+    "Friend": 2,
+    "Enemy": 3,
+    "Air": 4,
+    "Air_AttractGoal": 5
+  },
+  "spl::GachiasariClamHoldingActiveReason": {
+    "Generated": 0,
+    "Picked": 1
+  },
+  "spl::GachiasariClamHoldingSleepReason": {
+    "Throwed": 0,
+    "Dropped": 1,
+    "RespawnPoint": 2,
+    "Other": 3
+  },
+  "spl::GachiasariClamLostType": {
+    "Drop": 0,
+    "UseSpecial": 1,
+    "Die": 2,
+    "Vanish": 3,
+    "RespawnPos": 4
+  },
+  "spl::GachiasariClamSleepReason": {
+    "Other": 0,
+    "Timer": 1,
+    "AirFall": 2,
+    "WaterFall": 3,
+    "LostByOpTeam": 4,
+    "BreakBarrier": 5,
+    "IntoGoal": 6,
+    "CollideRespawnPoint": 7,
+    "GotByPlayer": 8
+  },
+  "spl::GachiasariClamType": {
+    "Normal": 0,
+    "Golden": 1
+  },
+  "spl::GachiasariClamUserType": {
+    "Performer": 0,
+    "Spectator": 1
+  },
+  "spl::GachiasariGoalBarrierState": {
+    "Open": 0,
+    "Close": 1
+  },
+  "spl::GachiasariGoalTeamType": {
+    "None": 0,
+    "Friend": 1,
+    "Enemy": 2
+  },
+  "spl::GachiasariPlayerType": {
+    "Controlled": 0,
+    "Friend": 1,
+    "Enemy": 2,
+    "None": 3
+  },
+  "spl::GachihokoLostType": {
+    "None": 0,
+    "Accident": 1,
+    "AccidentToInitPos": 2,
+    "Recovery": 3,
+    "CheckPoint": 4,
+    "Goal": 5
+  },
+  "spl::GachiyaguraCheckPointOffensePhase": {
+    "Move": 0,
+    "Recover": 1,
+    "Anchor": 2,
+    "Damage": 3
+  },
+  "spl::GachiyaguraFillUpType": {
+    "None": 0,
+    "XPlus": 1,
+    "XMinus": 2,
+    "ZPlus": 3,
+    "ZMinus": 4
+  },
+  "spl::GachiyaguraMoveState": {
+    "Stop": 0,
+    "Move": 1,
+    "Goal": 2
+  },
+  "spl::GameRecordCoopJobType": {
+    "Normal": 0,
+    "Coop03": 1,
+    "BigRun": 2,
+    "Coop01": 3,
+    "Coop02": 4
+  },
+  "spl::GameRecordCoopMode": {
+    "Normal": 0,
+    "Limited": 1,
+    "PrivateCustom": 2,
+    "PrivateScenario": 3,
+    "BigRun": 4
+  },
+  "spl::GateManholeDestinationType": {
+    "Mission": 0,
+    "Plaza": 1
+  },
+  "spl::GearGenre": {
+    "Unknown": -1,
+    "Head_Cap": 0,
+    "Head_KnitCap": 1,
+    "Head_Hat": 2,
+    "Head_Beret": 3,
+    "Head_Band": 4,
+    "Head_Bandana": 5,
+    "Head_Glasses": 6,
+    "Head_Visor": 7,
+    "Head_Mask": 8,
+    "Head_Goggle": 9,
+    "Head_Headphone": 10,
+    "Head_Helmet": 11,
+    "Head_Accessory": 12,
+    "Head_Party": 13,
+    "Head_Spring": 14,
+    "Head_Chaos": 15,
+    "Head_Order": 16,
+    "Head_Final": 17,
+    "Head_Sand": 18,
+    "Shoes_Hicut": 19,
+    "Shoes_Lowcut": 20,
+    "Shoes_Leather": 21,
+    "Shoes_Comfort": 22,
+    "Shoes_RubberSole": 23,
+    "Shoes_Moccasin": 24,
+    "Shoes_Boots": 25,
+    "Shoes_Sandal": 26,
+    "Shoes_Slippon": 27,
+    "Shoes_Spike": 28,
+    "Shoes_RainBoots": 29,
+    "Shoes_BigFoot": 30,
+    "Shoes_Barefoot": 31,
+    "Shoes_Bouldering": 32,
+    "Shoes_Spring": 33
+  },
+  "spl::GearKind": {
+    "None": -1,
+    "Head": 0,
+    "Clothes": 1,
+    "Shoes": 2
+  },
+  "spl::GearSkill": {
+    "None": -1,
+    "MainInk_Save": 0,
+    "SubInk_Save": 1,
+    "InkRecovery_Up": 2,
+    "HumanMove_Up": 3,
+    "SquidMove_Up": 4,
+    "SpecialIncrease_Up": 5,
+    "RespawnSpecialGauge_Save": 6,
+    "SpecialSpec_Up": 7,
+    "RespawnTime_Save": 8,
+    "JumpTime_Save": 9,
+    "SubSpec_Up": 10,
+    "OpInkEffect_Reduction": 11,
+    "SubEffect_Reduction": 12,
+    "Action_Up": 13,
+    "StartAllUp": 100,
+    "EndAllUp": 101,
+    "MinorityUp": 102,
+    "ComeBack": 103,
+    "SquidMoveSpatter_Reduction": 104,
+    "DeathMarking": 105,
+    "ThermalInk": 106,
+    "Exorcist": 107,
+    "ExSkillDouble": 108,
+    "SuperJumpSign_Hide": 109,
+    "ObjectEffect_Up": 110,
+    "SomersaultLanding": 111
+  },
+  "spl::gfx::EventFieldEnvApplyFlag": {
+    "MainLight": 0,
+    "SkySphere": 1,
+    "DepthFog": 2,
+    "HeightFog": 3,
+    "RadialFog": 4,
+    "PostEffect": 5
+  },
+  "spl::gfx::MassModelAnimOffsetTypeSAND": {
+    "None": 0,
+    "Random": 1,
+    "Offset": 2
+  },
+  "spl::gfx::MassModelAreaTypeSAND": {
+    "Large": 0,
+    "Middle": 1,
+    "Small": 2
+  },
+  "spl::gfx::MassModelDrawMaterialAnimType": {
+    "Wait": 0,
+    "Wave": 1
+  },
+  "spl::gfx::MassModelLocatorTeamSAND": {
+    "None": -1,
+    "Alpha": 0,
+    "Bravo": 1,
+    "Charlie": 2
+  },
+  "spl::gfx::MassModelTypeSAND": {
+    "Jerry00": 0,
+    "Jerry01": 1,
+    "JerryShop00": 2,
+    "JerryShop01": 3,
+    "JerryShop02": 4,
+    "JerryShop03": 5,
+    "JerryShop04": 6,
+    "JerryShop05": 7,
+    "JerryStaff00": 8,
+    "JerryStaff01": 9,
+    "JerryStaff02": 10,
+    "JerryStaff03": 11,
+    "JerryCollision00": 12,
+    "JerryStop01": 13,
+    "JerryStop02": 14,
+    "JerryStop03": 15,
+    "JerryStaff04": 16,
+    "JerryStaff05": 17,
+    "JerryStaff06": 18,
+    "JerryFestResult": 19,
+    "JerryStaff07": 20
+  },
+  "spl::gfx::PhysicsBindModelColReactionType": {
+    "cIgnore": 0,
+    "cReflect": 1,
+    "cErase": 2
+  },
+  "spl::gfx::ProcCloudNoiseType": {
+    "PerlinWorleyNoise": 0,
+    "WorleyNoise": 1,
+    "Curl": 2
+  },
+  "spl::gfx::ProcCloudSamplingMode": {
+    "Sky": 0,
+    "Sphere": 1,
+    "Cylinder": 2,
+    "PlaneLower": 3
+  },
+  "spl::gfx::ProcCloudSamplingNum": {
+    "Mode_20": 0,
+    "Mode_30": 1,
+    "Mode_40": 2
+  },
+  "spl::gfx::SdodrDesignTemplatePaintColAttr": {
+    "Normal": 0,
+    "ForceColPaintIndependent": 1,
+    "ForceColPaintYPlus": 2
+  },
+  "spl::GndMaterialDummy": {
+    "Stone00": 0,
+    "Stone01": 1,
+    "Grass00": 2,
+    "Soil00": 3,
+    "Glass00": 4,
+    "Wood00": 5,
+    "Plastic00": 6,
+    "Mesh00": 7,
+    "Metal00": 8,
+    "Metal00_SuperShotThrough": 9,
+    "Rubber00": 10,
+    "None": 11,
+    "ExFallWater": 12,
+    "Cloth00": 13,
+    "ExKeepOutP": 14,
+    "ExKeepOutE": 15,
+    "ExKeepOutR": 16,
+    "Mesh01": 17,
+    "EnemyShield00": 18,
+    "EnemyShield01": 19,
+    "ExKeepOutC": 20,
+    "ExFillUpP": 21,
+    "ExFallEnemyInk": 22,
+    "Vinyl00": 23,
+    "ExKeepOutN": 24,
+    "Dirt00": 25,
+    "ExKeepOutP_C": 26,
+    "ExKeepOutC_WallClimbThrough": 27,
+    "Carpet00": 28,
+    "EnemyInkShower": 29,
+    "ExFillUpE": 30,
+    "Metal01": 31,
+    "ExPaint": 32,
+    "ExKeepOutE2": 33,
+    "ExKeepOutP_JetPackThrough": 34
+  },
+  "spl::GrammaticalGender": {
+    "None": 0,
+    "Masculine": 1,
+    "Feminine": 2,
+    "Neuter": 3,
+    "Common": 4
+  },
+  "spl::GrindRailState": {
+    "Wait": 0,
+    "Emit": 1,
+    "Open": 2
+  },
+  "spl::GuideControllerButtonId": {
+    "LStick": 0,
+    "RStick": 1,
+    "ZRButton": 2,
+    "ZLButton": 3,
+    "BButton": 4,
+    "YButton": 5,
+    "RButton": 6,
+    "All": 7
+  },
+  "spl::GuideControllerType": {
+    "Handheld": 0,
+    "Dual": 1,
+    "FullKey": 2
+  },
+  "spl::HairType": {
+    "SQD000": 0,
+    "SQD001": 1,
+    "SQD002": 2,
+    "SQD003": 3,
+    "SQD004": 4,
+    "SQD005": 5,
+    "SQD006": 6,
+    "SQD007": 7,
+    "SQD008": 8,
+    "SQD009": 9,
+    "SQD010": 10,
+    "SQD011": 11,
+    "SQD012": 12,
+    "SQD013": 13,
+    "SQD014": 14,
+    "SQD015": 15,
+    "OCT000": 16,
+    "OCT001": 17,
+    "OCT002": 18,
+    "OCT003": 19,
+    "OCT004": 20,
+    "OCT005": 21,
+    "OCT006": 22,
+    "OCT007": 23
+  },
+  "spl::HarnessType": {
+    "S": 0,
+    "M": 1,
+    "L": 2
+  },
+  "spl::HideEarType": {
+    "Visible": 0,
+    "HideAll": 1,
+    "HideLong": 2,
+    "HideRight": 3,
+    "HideLeft": 4
+  },
+  "spl::HideMode": {
+    "NotHide": 0,
+    "HideGnd": 1,
+    "HideWall": 2
+  },
+  "spl::HitEffectorType": {
+    "Default": 0,
+    "Shooter": 1,
+    "Shooter_CriticalHit": 2,
+    "Roller": 3,
+    "Roller_NoDamage": 4,
+    "Charger": 5,
+    "Charger_FullCharge": 6,
+    "Charger_PaintSplash": 7,
+    "Slosher": 8,
+    "Slosher_Big": 9,
+    "Slosher_Bathtub": 10,
+    "Slosher_WashtubBombCore": 11,
+    "Slosher_LauncherLeader": 12,
+    "Slosher_LauncherFollower": 13,
+    "Slosher_BearLeader": 14,
+    "Spinner": 15,
+    "Blaster": 16,
+    "Blaster_ExtraBombCore": 17,
+    "Blaster_ExtraBombCoreWeak": 18,
+    "Maneuver": 19,
+    "Shelter": 20,
+    "Shelter_Canopy": 21,
+    "Saber": 22,
+    "Saber_Shot": 23,
+    "Saber_ChargeShot": 24,
+    "Saber_Slash": 25,
+    "Saber_ChargeSlash": 26,
+    "Bomb": 27,
+    "Bomb_Fizzy": 28,
+    "Bomb_Torpedo": 29,
+    "Bomb_Curling": 30,
+    "LineMarker": 31,
+    "Sprinkler": 32,
+    "Sprinkler_Ink": 33,
+    "PaintSplash": 34,
+    "PaintSplashExplosion": 35,
+    "UltraShot": 36,
+    "InkStorm": 37,
+    "NiceBall": 38,
+    "Blower_Inhale": 39,
+    "ShockSonar_Wave": 40,
+    "MultiMissile_Bullet": 41,
+    "MultiMissile_BombCore": 42,
+    "Jetpack_Launcher": 43,
+    "UltraStamp": 44,
+    "Skewer_BombCore": 45,
+    "SuperLanding": 46,
+    "SalmonBuddy": 47,
+    "GoldenIkuraAttack": 48,
+    "CannonMissile": 49,
+    "Castle": 50,
+    "Castle_Attack": 51,
+    "Firework": 52,
+    "Gachihoko": 53,
+    "Sprinkler_Ink_Weak": 54,
+    "Chimney": 55,
+    "Saber_Cancel_Ground": 56,
+    "Tenjin": 57
+  },
+  "spl::HitEffectType": {
+    "Default": 0,
+    "DamagePlayer": 1,
+    "DamageEnemy": 2,
+    "NoDamage": 3,
+    "Shield": 4,
+    "OutOfField": 5,
+    "Dead": 6,
+    "Water": 7,
+    "DamageBoss": 8
+  },
+  "spl::HowToGet": {
+    "Shop": 0,
+    "Catalog": 1,
+    "Uroko": 2,
+    "Other": 3,
+    "Impossible": 4
+  },
+  "spl::ImpactType": {
+    "Default": 0,
+    "DashPanel": 1,
+    "JumpPanel": 2,
+    "RollerBody": 3,
+    "ShelterCanopy": 4,
+    "Geyser": 5,
+    "Enemy": 6
+  },
+  "spl::InkBarBaseModelDisplayType": {
+    "Frame": 0,
+    "All": 1,
+    "None": 2
+  },
+  "spl::InterruptType": {
+    "MainMenu": 0,
+    "ControllerSupport": 1,
+    "NoMemoryError": 2,
+    "SlowLoadingError": 3,
+    "DayChange": 4,
+    "MatchFix": 5,
+    "NetworkError": 6,
+    "DebugReset": 7,
+    "DebugResetOnSite": 8,
+    "DevMissionCapture": 9
+  },
+  "spl::InventoryItemType": {
+    "Other": 0,
+    "Ikura": 1,
+    "IkuraLarge": 2,
+    "Key": 3,
+    "StunBombSdodr": 4,
+    "DroneBatterySdodr": 5
+  },
+  "spl::ItemGetWindowIconKind": {
+    "Invalid": -1,
+    "Weapon": 0,
+    "Gear_Head": 1,
+    "Gear_Clothes": 2,
+    "Gear_Shoes": 3,
+    "LockerFigure": 4,
+    "LockerSticker": 5,
+    "FoodTicket": 6,
+    "DrinkTicket": 7,
+    "NamePlateBg": 8,
+    "Byname": 9,
+    "CardPack": 10,
+    "CardPackFresh": 11,
+    "CardSleeve": 12,
+    "Emote": 13,
+    "Shell_Fes": 14,
+    "Shell_RankUp": 15,
+    "MsnWeaponBufDocument": 16,
+    "MsnGoldDisk": 17,
+    "MsnExStageChallengeRight": 18,
+    "MngCharaUnlock": 19,
+    "MngCharaLevelUnlock": 20,
+    "MngStageUnlock": 21,
+    "GearSkillChip": 22,
+    "Money": 23,
+    "RandomNamePlateBg": 24,
+    "RandomByname": 25,
+    "StarterDeck": 26,
+    "Catalog1st": 27,
+    "Catalog": 28,
+    "GoldWeaponLicense": 29,
+    "BankaraMatchUnlock": 30,
+    "XMatchUnlock": 31,
+    "LockerPhotoFrame": 32,
+    "LeagueMatchUnlock": 33,
+    "MngCardPiece": 34,
+    "WeaponLicense": 35,
+    "CoopThanksUroko": 36
+  },
+  "spl::JerryMidiMobAnim": {
+    "Wait00": 0,
+    "Woo00": 1,
+    "Jump01": 7,
+    "Jump02": 8,
+    "Jump00": 2,
+    "Dance01": 3,
+    "Dance01Slow00": 9,
+    "Dance00": 4,
+    "JumpLoop1Beat": 5,
+    "JumpLoop2Beat": 6,
+    "Trigger_Jump00": 100
+  },
+  "spl::JerryMidiPerformanceLevel": {
+    "Aggressive": 0,
+    "Normal": 1,
+    "Stop": 2
+  },
+  "spl::JumpPanelJumper": {
+    "None": 0,
+    "Player": 1,
+    "Enemy": 2,
+    "Bullet": 3,
+    "MapObj": 4
+  },
+  "spl::KillTargetTypeSdodr": {
+    "ExplodeSpawner": 0,
+    "EnemyEscape": 1
+  },
+  "spl::LeagueInGameModifier": {
+    "SpecialFill": 0,
+    "FastRespawn": 1,
+    "SpecialGaugeSave": 2,
+    "HumanSpeedUp": 3,
+    "SquidSpeedUp": 4,
+    "DeepFog": 5,
+    "HumanSpeedDown": 6,
+    "HighJump": 7,
+    "DieBlastLarge": 8,
+    "SpawnArmorUp": 9,
+    "FastRespawnForPair": 10,
+    "ModifiedPowerClam": 11,
+    "SuperSubWeapon": 12,
+    "ModifiedRainmaker": 13,
+    "RainmakerDrop": 14,
+    "FullMemberAvoidNogame": 15,
+    "ModifiedTowerControl": 16,
+    "RollerBrushSpeedUp": 17,
+    "SuperSpecialWeapon": 18,
+    "JumpTimeSave": 19
+  },
+  "spl::LeagueMatchmakeType": {
+    "Normal": 0,
+    "Tournament": 1,
+    "IgnoreWeaponType": 2,
+    "Pair": 3
+  },
+  "spl::LeagueUserSettingModifier": {
+    "None": 0,
+    "RandomWeapon": 1,
+    "DisableAdditionalGearSkill": 2,
+    "DisableAdditionalGearSkillIfTurfWar": 3,
+    "RandomAmiiboGear": 4,
+    "RandomWeaponAndGearPower": 5
+  },
+  "spl::LiftDecorationAnimPlayType": {
+    "Link": 0,
+    "AwayFromInitPos": 1,
+    "Moving": 2,
+    "MovingUpOnly": 3
+  },
+  "spl::LobbyCoopEventType": {
+    "DoneTutorial00": 0,
+    "DoneTutorial01": 1,
+    "DoneBigRunTutorial": 2
+  },
+  "spl::LobbyCoopMode": {
+    "Normal": 0,
+    "FromCoop": 1,
+    "FromTutorial00": 2,
+    "FromTutorial01": 3
+  },
+  "spl::LobbyLocalMode": {
+    "Normal": 0,
+    "FromVersus": 1,
+    "FromCoop": 2
+  },
+  "spl::LobbyMainState": {
+    "Result": 0,
+    "Wait": 1,
+    "Progress": 2,
+    "MatchMenu": 3,
+    "MatchMenuOption": 4,
+    "Customize": 5,
+    "Interval": 6,
+    "Kiosk": 7,
+    "Lot": 8,
+    "JukeBox": 9,
+    "CoopSkinChanger": 10,
+    "CoopWeaponChanger": 11,
+    "MiniGameConfirm": 12,
+    "MiniGameSitting": 13,
+    "MiniGameInGame": 14,
+    "MiniGameSpectate": 15,
+    "MiniGameDeckEdit": 16,
+    "Manual": 17,
+    "Locker": 18,
+    "NotificationNpc": 19
+  },
+  "spl::LobbyVersusEventType": {
+    "FirstEnter": 0,
+    "AfterFirstBattle": 1,
+    "IntroduceWeaponShop": 2,
+    "IntroduceShop": 3,
+    "UnlockBankaraMatch": 4,
+    "UnlockXMatch": 5,
+    "IntroduceNamePlate": 6,
+    "FirstLocker": 7,
+    "LockerLevelUp2": 8,
+    "LockerLevelUp3": 9,
+    "FirstPlayerNameAlias": 10,
+    "FestMikoshi100": 11,
+    "FestMikoshi333": 12,
+    "XRankingReward": 13,
+    "FirstReplayNotification": 14,
+    "FestMikoshiScramble10": 15,
+    "FestMikoshiScramble33": 16,
+    "BigRunRecovery": 17,
+    "FestMikoshiForever": 18
+  },
+  "spl::LobbyVersusMode": {
+    "Normal": 0,
+    "FromVersus": 1,
+    "FromReplay": 2
+  },
+  "spl::LobbyVersusPlayerDeviceMode": {
+    "Normal": 0,
+    "Replay": 1,
+    "Record": 2
+  },
+  "spl::LocatorChangeSceneAndKeepWalkAreaSdodrSpecialType": {
+    "None": 0,
+    "EntranceToElevator": 1
+  },
+  "spl::LocatorCheckerTargetType": {
+    "Self": 0,
+    "Player": 1
+  },
+  "spl::LockerLevel": {
+    "Level1": 0,
+    "Level2": 1,
+    "Level3": 2
+  },
+  "spl::LockerMainPartMaterial": {
+    "Normal": 0,
+    "Old": 1,
+    "Painted": 2,
+    "Wooden": 3
+  },
+  "spl::LockerObjCategory": {
+    "SubPart": 0,
+    "Weapon": 1,
+    "SubWeapon": 2,
+    "Head": 3,
+    "Clothes": 4,
+    "Shoes": 5,
+    "Figure": 6
+  },
+  "spl::LockerOwnerType": {
+    "Played": 0,
+    "Friend": 1,
+    "Stranger": 2,
+    "Popular": 3
+  },
+  "spl::LockerSubPartType": {
+    "Normal": 0,
+    "Shelf": 1,
+    "PoleShelf": 2,
+    "PhotoStand": 3
+  },
+  "spl::LotRewardSubType": {
+    "None": -1,
+    "Limited": 0,
+    "Food50": 1,
+    "Food100": 2,
+    "FoodParty": 3
+  },
+  "spl::MapObjSleepType": {
+    "Damage": 0,
+    "Timer": 1
+  },
+  "spl::MatchMode": {
+    "Invalid": -1,
+    "None": 0,
+    "Regular": 1,
+    "Bankara": 2,
+    "XMatch": 3,
+    "League": 4,
+    "Private": 5,
+    "FestRegular": 6,
+    "FestChallenge": 7,
+    "FestTriColor": 8,
+    "Coop": 9,
+    "CoopPrivate": 10,
+    "CoopBigRun": 11,
+    "CoopTeamContest": 12,
+    "CoopPair": 13,
+    "CoopUnderground": 14,
+    "MiniGame": 50,
+    "BankaraOpen": 51,
+    "Dummy": 100,
+    "DummyCoop": 101,
+    "DummyAging": 102
+  },
+  "spl::MetaSpawnerSdodrSelectPolicyType": {
+    "Nearest": 0,
+    "Farthest": 1,
+    "Random": 2,
+    "Lot": 3,
+    "InOrder": 4,
+    "RandomNoNearest": 5
+  },
+  "spl::MiniGameAIType": {
+    "Balance": 0,
+    "Aggressive": 1,
+    "AccumulateSpecial": 2
+  },
+  "spl::MiniGameCardCategory": {
+    "WeaponMain": 0,
+    "WeaponMain_ManeuverSdodr": 1,
+    "WeaponSub": 2,
+    "WeaponSpecial": 3,
+    "Npc_Bukichi": 4,
+    "Npc_Omura": 5,
+    "Npc_Hanagasa": 6,
+    "Npc_Yashiganisan": 7,
+    "Npc_Paruko": 8,
+    "Npc_Spiky": 9,
+    "Npc_Kumasan": 10,
+    "Npc_Mother": 11,
+    "Npc_MametsubuBukichi": 12,
+    "Npc_Anemo": 13,
+    "Npc_Echizen": 14,
+    "Npc_Ajio": 15,
+    "Npc_Daunii": 16,
+    "Npc_Miura": 17,
+    "Npc_Bizen": 18,
+    "Npc_Shiganii": 19,
+    "Npc_Mizuta": 20,
+    "Npc_Yumeebi": 21,
+    "Npc_Robu": 22,
+    "Npc_Kojake": 23,
+    "Npc_Atarime": 24,
+    "Npc_Shirei": 25,
+    "Npc_Aori": 26,
+    "Npc_Hotaru": 27,
+    "Npc_Fuka": 28,
+    "Npc_Utsuho": 29,
+    "Npc_Mantaro": 30,
+    "Npc_Judgekun": 31,
+    "Npc_KoJudgekun": 32,
+    "Npc_HimeDrone": 33,
+    "Npc_Hime": 34,
+    "Npc_Iida": 35,
+    "Brand_B00": 36,
+    "Brand_B01": 37,
+    "Brand_B02": 38,
+    "Brand_B03": 39,
+    "Brand_B04": 40,
+    "Brand_B05": 41,
+    "Brand_B06": 42,
+    "Brand_B07": 43,
+    "Brand_B08": 44,
+    "Brand_B09": 45,
+    "Brand_B10": 46,
+    "Brand_B11": 47,
+    "Brand_B12": 48,
+    "Brand_B13": 49,
+    "Brand_B14": 50,
+    "Brand_B15": 51,
+    "Brand_B16": 52,
+    "Brand_B17": 53,
+    "Brand_B19": 54,
+    "Brand_B20": 55,
+    "Brand_B18": 56,
+    "MissionEnemy": 57,
+    "Npc_Utsuho1": 58,
+    "Npc_Fuka1": 59,
+    "Npc_Mantaro1": 60,
+    "Npc_Kumasango": 61,
+    "CoopEnemy": 62,
+    "Sdodr_Odako": 63,
+    "Object": 64,
+    "None": 65
+  },
+  "spl::MiniGameCardDecoration": {
+    "Normal": 0,
+    "Silver": 1,
+    "Gold": 2
+  },
+  "spl::MiniGameCardRarity": {
+    "Common": 0,
+    "Rare": 1,
+    "Fresh": 2
+  },
+  "spl::MiniGameCardRot": {
+    "Deg0": 0,
+    "Deg90": 1,
+    "Deg180": 2,
+    "Deg270": 3
+  },
+  "spl::MiniGameCardSquare": {
+    "Empty": 0,
+    "Fill": 1,
+    "Special": 2
+  },
+  "spl::MiniGameGiveUp": {
+    "GiveUp": 0,
+    "Cancel": 1
+  },
+  "spl::MiniGameMapName": {
+    "None": -1,
+    "Rectangle": 0,
+    "Zigzag": 1,
+    "Cross": 2,
+    "Square": 3,
+    "CenterHole": 4,
+    "WDiamond": 5,
+    "SShape": 6,
+    "SmallSquare": 7,
+    "IShape": 8,
+    "Face": 9,
+    "ManyHole": 10,
+    "Stairs": 11,
+    "Divide": 12,
+    "ManySp": 13,
+    "Painted": 14
+  },
+  "spl::MiniGameOpponentType": {
+    "NetPlayer": 0,
+    "GameNpc": 1,
+    "PlayerNpc": 2,
+    "Debug": 3
+  },
+  "spl::MiniGameRetryMenu": {
+    "Retry": 0,
+    "Quit": 1
+  },
+  "spl::MiniGameSequence": {
+    "None": 0,
+    "WaitOpponent": 1,
+    "RequestBattle": 2,
+    "Battle": 3,
+    "Spectator": 4
+  },
+  "spl::MiniGameWinLose": {
+    "None": -1,
+    "Win": 0,
+    "Lose": 1,
+    "Draw": 2
+  },
+  "spl::MissionBigWorldBossType": {
+    "A": 0,
+    "B": 1,
+    "C": 2
+  },
+  "spl::MissionChallengeFailureType": {
+    "None": 0,
+    "BreakCounter": 1,
+    "SuddenDeathDamage": 2,
+    "SuddenDeathSink": 3,
+    "InkLimit": 4,
+    "OneShotMissDie": 5,
+    "TimeLimit": 6,
+    "Katanuki": 7,
+    "BreakNGTarget": 8,
+    "TimeOutTarget": 9,
+    "EnemyBreakTarget": 10
+  },
+  "spl::MissionChallengeState": {
+    "None": 0,
+    "Normal": 1,
+    "ChanceSmall": 2,
+    "ChanceBig": 3,
+    "PinchSmall": 4,
+    "PinchBig": 5,
+    "Failure": 6,
+    "Clear": 7
+  },
+  "spl::MissionChallengeType": {
+    "Normal": 0,
+    "TimeLimit": 1,
+    "TimeLimitClear": 2,
+    "OneShotMissDie": 3,
+    "InkLimit": 4,
+    "DamageSuddenDeath": 5,
+    "BreakCounter": 6,
+    "BreakCounterMiss": 7
+  },
+  "spl::MissionConversationSelectType": {
+    "Uza": 0,
+    "Easygoing": 1
+  },
+  "spl::MissionDemoSkipCondition": {
+    "StageClear": 0,
+    "SmallWorldClear": 1,
+    "BigWorldEnterd": 2,
+    "LastBossFailed": 3,
+    "StoryClear": 4,
+    "Always": 5
+  },
+  "spl::MissionEventFlag": {
+    "cSmallWorldFirstDemo": 0,
+    "cIntroduceKebaInkDemo": 1,
+    "cIkuraShootTutorial": 2,
+    "cDefeatSmallWorldBoss": 3,
+    "cBigWorldFirstDemo": 4,
+    "cBigWorldStageFirstDemo": 5,
+    "cIntroduceComradeDemo": 6,
+    "cIntroduceTrinityDemo": 7,
+    "cDestroyLaunchPadKebaInk": 8,
+    "cJoinTrinityDemo": 9,
+    "cPrevLastBossDemo": 10,
+    "cLastBossFailedDemo": 11,
+    "cDefeatLastBoss": 12,
+    "cStoryClear": 13,
+    "cBigWorldFirstAfterClearDemo": 14,
+    "cAllStageClear": 15
+  },
+  "spl::MissionEventFlagState": {
+    "Unfinish": 0,
+    "Finish": 1
+  },
+  "spl::MissionMapState": {
+    "cLocked": 0,
+    "cShowed": 1,
+    "cCheatClear": 2,
+    "cClear": 3
+  },
+  "spl::MissionMapType": {
+    "NormalStage": 0,
+    "SmallWorldStage": 1,
+    "ChallengeStage": 2,
+    "SmallWorldBossStage": 3,
+    "BigWorldBossStage": 4,
+    "LaunchPadStage": 5,
+    "LastBoss": 6,
+    "ExStage": 7,
+    "SmallWorld": 8,
+    "BigWorld": 9,
+    "LaunchPadWorld": 10
+  },
+  "spl::MissionMenuNewFlag": {
+    "UnlockableSkillArea": 0,
+    "GettableSkill": 1,
+    "StageClearCompleteArea1": 2,
+    "StageClearCompleteArea2": 3,
+    "StageClearCompleteArea3": 4,
+    "StageClearCompleteArea4": 5,
+    "StageClearCompleteArea5": 6,
+    "StageClearCompleteArea6": 7,
+    "StageClearCompleteExtra": 8,
+    "StageClearArea1ForAlternaLog": 9,
+    "StageClearArea2ForAlternaLog": 10,
+    "StageClearArea3ForAlternaLog": 11,
+    "StageClearArea4ForAlternaLog": 12,
+    "StageClearArea5ForAlternaLog": 13,
+    "StageClearArea6ForAlternaLog": 14,
+    "StageClearExtraForAlternaLog": 15
+  },
+  "spl::MissionOctaSupplyWeaponType": {
+    "Normal": 0,
+    "Hero": 1,
+    "Special": 2,
+    "MainAndSpecial": 3
+  },
+  "spl::MissionProgressLevel": {
+    "SmallWorld": 0,
+    "BigWorldEntry": 1,
+    "AfterIntroduceTrinity": 2,
+    "DefeatBigWorldBoss1": 3,
+    "DefeatBigWorldBoss2": 4,
+    "DefeatBigWorldBoss3": 5,
+    "AllClear": 6
+  },
+  "spl::MissionRewardSaveDataType": {
+    "AncientDocument": 0,
+    "LockerTreasure": 1,
+    "BoostTicket": 2,
+    "CardPack": 3,
+    "AlternaMap": 4,
+    "StoryClear": 5,
+    "AllStageClear": 6,
+    "ExStageClear": 7
+  },
+  "spl::MissionSalmonBuddyAttractorType": {
+    "None": 0,
+    "LeadPlayerArea": 1,
+    "AttractLocator": 2,
+    "Object": 3,
+    "KebaInkCore": 4,
+    "DigUpPoint": 5
+  },
+  "spl::MissionSalmonBuddyIdleActionType": {
+    "None": 0,
+    "Move": 1,
+    "Nap": 2,
+    "LookPlayer": 3,
+    "ZoneOut": 4,
+    "Yawn": 5,
+    "LookAround": 6,
+    "Bounce": 7,
+    "Sing": 8
+  },
+  "spl::MissionSalmonBuddyModeType": {
+    "Stage": 0,
+    "WaitInTicketGate": 1,
+    "World": 2,
+    "Tutorial": 3
+  },
+  "spl::MissionTalkWindowPriorityType": {
+    "Low": 0,
+    "Middle": 1,
+    "High": 2,
+    "Highest": 3
+  },
+  "spl::MissionTicketGateActionType": {
+    "Dash": 0,
+    "Jump": 1
+  },
+  "spl::MovePainterType": {
+    "FixedDirection": 0,
+    "FreeDirection": 1
+  },
+  "spl::NavigateAirBallMoveType": {
+    "Time": 0,
+    "Speed": 1
+  },
+  "spl::NewsCameraType": {
+    "Normal": 0,
+    "IdolA": 1,
+    "IdolB": 2,
+    "IdolC": 3,
+    "Monitor": 4,
+    "Namazu": 5,
+    "ADJerry": 6,
+    "ADJerryZoom": 7
+  },
+  "spl::NewsCoopThanksType": {
+    "Norma": 0,
+    "Secret": 1,
+    "Result": 2
+  },
+  "spl::NewsEmotion": {
+    "Normal": 0,
+    "Angry": 1,
+    "DisappointedA": 2,
+    "DisappointedB": 5,
+    "SurprisedA": 4,
+    "SurprisedB": 6,
+    "Happy": 3,
+    "Fighting": 7,
+    "Greeting": 8,
+    "Point": 9,
+    "SpecialA": 10,
+    "Talk_Smirk": 11,
+    "GoodGriefA": 12,
+    "GoodGriefB": 13,
+    "Attention": 14,
+    "Talk_Action": 15
+  },
+  "spl::NewsGrandFestIdol": {
+    "DispIdol1": 0,
+    "DispIdol2": 1,
+    "Both": 2
+  },
+  "spl::NewsHeaderType": {
+    "Info": 0,
+    "VS": 1,
+    "Coop": 2,
+    "Fest": 3,
+    "MissionFirst": 4,
+    "MissionClear": 5,
+    "FestAnnounce": 6,
+    "InFest": 7,
+    "InterimFestResult": 8,
+    "FestHalfResult": 9,
+    "FestFinish": 10,
+    "FestFinalResult": 11,
+    "BigRunWarning": 12,
+    "InBigRun": 13,
+    "BigRunEnd": 14,
+    "BigRunResult": 15,
+    "CoopTeamContest": 16,
+    "SeasonEndInfo": 17,
+    "LeagueMatchInfo": 18,
+    "SdodrEnding": 19
+  },
+  "spl::NewsMonitorState": {
+    "Opening": 0,
+    "VSStage": 1,
+    "CoopStage": 2,
+    "CoopInfo": 3,
+    "UpdateInfo": 4,
+    "SeasonInfo": 5,
+    "FesAnnounce": 6,
+    "InFes": 7,
+    "InterimFes": 8,
+    "BeforeFes": 9,
+    "AfterFes": 10,
+    "BigRunInfo": 11,
+    "InBigRun": 12,
+    "BigRunResult": 13,
+    "MsnCatfishMissing": 14,
+    "MsnCatfishReturn": 15,
+    "StageUpdateInfo": 16,
+    "WeaponUpdateInfo": 17,
+    "EveFestResult": 18,
+    "FestVSStage": 19,
+    "TricolorVSStage": 20,
+    "ModeUpdateInfo": 21,
+    "CoopTeamContest": 22,
+    "InCoopTeamContest": 23,
+    "FsodrInfo": 24,
+    "SeasonEnd": 25,
+    "CoopUpdateInfo": 26,
+    "LeagueMatchInfo": 27,
+    "SdodrInfo": 28,
+    "SdodrEnding": 29,
+    "BigRunThankInfo": 30,
+    "InBigRunThank": 31,
+    "BigRunThankResult": 32,
+    "GrandFestInfo": 33
+  },
+  "spl::NewsSmallUIMatchType": {
+    "Regular": 0,
+    "BankaraOpen": 1,
+    "BankaraChallenge": 2
+  },
+  "spl::NewsSmallUIStageMode": {
+    "Regular": 0,
+    "Bankara": 1,
+    "League": 2,
+    "XMatch": 3,
+    "Coop": 4,
+    "BankaraOpen": 5,
+    "CoopPrivate": 6,
+    "CoopBigRun": 7,
+    "CoopTeamContest": 8
+  },
+  "spl::NewsTrophyType": {
+    "Bronze": 0,
+    "Silver": 1,
+    "Gold": 2,
+    "None": -1
+  },
+  "spl::NewsVSModeUpdateInfo": {
+    "XMatch": 0,
+    "LeagueMatch": 1
+  },
+  "spl::NotificationAnnounceType": {
+    "Ikasu": 0,
+    "LotWin": 1,
+    "LotBigWin": 2,
+    "Recruit": 3,
+    "ChannelRevival": 4,
+    "JoinableTrigger": 5,
+    "JoinableHammer": 6,
+    "JoinableHammerCoop": 7
+  },
+  "spl::NotificationCategory": {
+    "None": 0,
+    "Normal": 1,
+    "Matchmake": 2,
+    "Recruit": 3,
+    "Hammer": 4,
+    "RemoteRoom": 5
+  },
+  "spl::NotificationFilterType": {
+    "LobbyVersus": 0,
+    "LobbyCoop": 1
+  },
+  "spl::NotificationType": {
+    "Invalid": -1,
+    "RankUp": 0,
+    "UdemaeUp": 1,
+    "MaxXPowerUp": 2,
+    "FestRankUp": 3,
+    "WonFestSpecialMatch10": 4,
+    "WonFestSpecialMatch100": 5,
+    "WonFestSpecialMatch333": 6,
+    "CoopGradeUp": 7,
+    "MiniGameRankUp": 8,
+    "StartSolo": 9,
+    "CreateRoom": 10,
+    "JoinRoom": 11,
+    "Recruit": 12,
+    "MaxLeaguePowerUp": 13,
+    "CoopBigRunHighScore": 14,
+    "CoopTeamContestHighScore": 15,
+    "HammerRoomCreated": 16,
+    "HammerRoomDeleted": 17,
+    "HammerAccept": 18,
+    "HammerCancel": 19,
+    "HammerRoomAutoDeleted": 20,
+    "UploadReplay": 21,
+    "LotBigWin": 22,
+    "LotWin": 23,
+    "JoinableHammer": 24,
+    "JoinableTrigger": 25,
+    "JoinableHammerCoop": 26
+  },
+  "spl::NpcJerryBandSandPart": {
+    "Guitar": 0,
+    "Bass": 1,
+    "Drum": 2,
+    "Keyboard": 3
+  },
+  "spl::NpcLobbyJudgeState": {
+    "Wait": 0,
+    "Talk": 1
+  },
+  "spl::NpcPlayerMotionType": {
+    "SpecifiedAS": 0,
+    "Move": 1
+  },
+  "spl::ObjRailingOffsetType": {
+    "Rail": 0,
+    "World": 1
+  },
+  "spl::ObjRailingType": {
+    "Order": 0,
+    "Flat": 1
+  },
+  "spl::OpponentReactionToEnemyShellSdodr": {
+    "None": 0,
+    "Brush": 1,
+    "Damage": 2,
+    "DamageBrush": 3
+  },
+  "spl::OpponentTypeToEnemyShellSdodr": {
+    "None": 0,
+    "Player": 1,
+    "Ground": 2,
+    "MapObj_Default": 3,
+    "Enemy_Default": 4,
+    "VictoryBallStatic": 5,
+    "VictoryBallNeutral": 6,
+    "VictoryBallPlayer": 7,
+    "WoodenBox": 8,
+    "BombFlower": 9,
+    "ExplodeSpawner": 10,
+    "SnakeBlock": 11,
+    "Sponge": 12,
+    "BarrierKing": 13,
+    "ShelterCanopy": 14,
+    "Rival": 15,
+    "TowerKing": 16,
+    "TowerKingLayer": 17,
+    "ShelterCanopyEnemy": 18
+  },
+  "spl::PaintingLiftSizeType": {
+    "Size6M": 0,
+    "Size12M": 1
+  },
+  "spl::PaintTargetAreaOccupationState": {
+    "Alpha": 0,
+    "AlphaNoFree": 1,
+    "AlphaToFree_Keep": 2,
+    "AlphaToFree": 3,
+    "AlphaToOccupy": 4,
+    "AlphaToOccupy_Keep": 5,
+    "AlphaNoOccupy": 6,
+    "Neutral": 7,
+    "BravoNoOccupy": 8,
+    "BravoToOccupy_Keep": 9,
+    "BravoToOccupy": 10,
+    "BravoToFree": 11,
+    "BravoToFree_Keep": 12,
+    "BravoNoFree": 13,
+    "Bravo": 14
+  },
+  "spl::paint::InkHeightRangeType": {
+    "MinEdge": 0,
+    "MaxEdge": 1,
+    "Static": 2,
+    "None": 3
+  },
+  "spl::paint::InkTexType": {
+    "Shot00": 0,
+    "Shot01": 1,
+    "Shot02": 2,
+    "Shot03": 3,
+    "Shot04": 4,
+    "RlrSplash00": 5,
+    "RlrSplash01": 6,
+    "RlrSplash02": 7,
+    "ChgrSplash00": 8,
+    "ChgrSplash01": 9,
+    "Bomb00": 10,
+    "WallDrip00": 11,
+    "WallDrip01": 12,
+    "Roller00": 13,
+    "PaintLift00": 14,
+    "PaintLift01": 15,
+    "Disk": 16,
+    "Rectangle": 17,
+    "InkRutStart": 18,
+    "InkRutMove": 19,
+    "QuadDonut": 20,
+    "Rain00_0": 21,
+    "Rain00_1": 22,
+    "Rain00_2": 23,
+    "SprBall00": 24,
+    "StampKingFace": 25,
+    "Common": 26,
+    "WallDrip00_0": 27,
+    "WallDrip00_1": 28,
+    "WallDrip00_2": 29,
+    "WallDrip00_3": 30,
+    "WallDrip00_4": 31,
+    "WallDrip01_0": 32,
+    "WallDrip01_1": 33,
+    "WallDrip01_2": 34,
+    "WallDrip01_3": 35,
+    "WallDrip01_4": 36,
+    "SpStamp00": 37,
+    "Death00": 38,
+    "SprLanding00": 39,
+    "Manta": 40,
+    "GachihokoCross00": 41,
+    "BombLineMarker": 42,
+    "Slosher00": 43,
+    "Chgr00": 44,
+    "Bomb00Height3pnt4": 45,
+    "Bomb00ForBombFlower": 46,
+    "TripleTornado": 47,
+    "TripleTornadoInfinityHeight": 48,
+    "DiskHD": 49,
+    "AllPaint": 50,
+    "Bomb00GachihokoBarrier": 51,
+    "Bomb00ForEnemySakeRope": 52,
+    "SprBall01": 53,
+    "SprBall00S": 54,
+    "Bomb00Tenjin": 55
+  },
+  "spl::paint::PaintAllType": {
+    "Invalid": -1
+  },
+  "spl::paint::PaintCommandType": {
+    "Player": 0,
+    "PlayerNoSpecialUp": 1,
+    "TeamSpecialUp": 2,
+    "Independ": 3,
+    "Erase": 4
+  },
+  "spl::paint::PaintMultiTargetType": {
+    "Invalid": -1,
+    "FloorAll": 0,
+    "ColAll": 1,
+    "ColAllFloor": 2,
+    "ColWithTableIndex": 3,
+    "ObjAll": 4
+  },
+  "spl::PhotographerState": {
+    "Invalid": -1,
+    "Invisible": 0,
+    "Idle": 1,
+    "Control": 2,
+    "SelfTimer": 3,
+    "SelfTimerToVertical": 4,
+    "Capture": 5,
+    "AmiiboSelectPos": 6
+  },
+  "spl::PlacedObjSaveTargetType": {
+    "None": 0,
+    "SceneSetting": 1,
+    "SaveData": 2
+  },
+  "spl::PlacementAdjustedTarget": {
+    "Gachihoko": 0
+  },
+  "spl::PlacementForbiddenTarget": {
+    "Trap": 0
+  },
+  "spl::PlacementType": {
+    "Ground": 0,
+    "Wall": 1
+  },
+  "spl::PlayerAnimEventId": {
+    "None": 0,
+    "ThrowMiss": 1,
+    "Fire": 2,
+    "Fire_Shelter_Automatic": 3,
+    "Fire_Jetpack": 4,
+    "Fire_Blower_Exhale": 5,
+    "Hit": 6,
+    "SquidDrop": 7,
+    "HumanRepelled": 8,
+    "ThrowMiss_CoopIkura": 9,
+    "Fire_Chrg_Pencil": 10
+  },
+  "spl::PlayerContolLimitCondition": {
+    "None": 0,
+    "Always": 1,
+    "InSpecial": 2,
+    "InEffectiveEnergyStand": 3,
+    "InSpecialOrInEffectiveEnergyStand": 4
+  },
+  "spl::PlayerCustomPartKind": {
+    "Hair": 0,
+    "Weapon_Main": 1,
+    "Weapon_Sub": 2,
+    "Weapon_Special": 3,
+    "Gear_Head": 4,
+    "Gear_Clothes": 5,
+    "Gear_Shoes": 6,
+    "Tank": 7,
+    "Bottom": 8,
+    "Spawner": 9,
+    "LandingIndicator": 10,
+    "CoopFloat": 11,
+    "Robe": 12,
+    "Bag": 13,
+    "KebaInkPlayer": 14,
+    "KebaInk": 15,
+    "SuperHookScarf": 16,
+    "Eyebrow": 17,
+    "TricolNoroshi": 18,
+    "HandCard": 19,
+    "SaberCase": 20
+  },
+  "spl::PlayerCustomPartStandAloneType": {
+    "None": 0,
+    "Die": 1,
+    "DieInWater": 2,
+    "DieInKebaInk": 3,
+    "Throw": 4
+  },
+  "spl::PlayerDeadReason": {
+    "Unknown": 0,
+    "Die": 1,
+    "AirFall": 2,
+    "WaterFall": 3,
+    "KebaInkFall": 4,
+    "Vanish": 5
+  },
+  "spl::PlayerFormType": {
+    "Human": 0,
+    "Squid": 1,
+    "Half": 2,
+    "Half_SuperHook": 3,
+    "InkRail": 4,
+    "Squid_Castle": 5
+  },
+  "spl::PlayerMakeMode": {
+    "FirstMake": 0,
+    "Remake": 1,
+    "FreeTest": 2
+  },
+  "spl::PlayerMissionSkillLevel": {
+    "Lv1": 0,
+    "Lv2": 1,
+    "Lv3": 2
+  },
+  "spl::PlayerMissionSkillType": {
+    "Shooter": 0,
+    "SpecialIncreaseUp": 1,
+    "Marker": 2,
+    "ArmorRecoeverTime_Save": 3,
+    "InkTankCapacity": 4,
+    "OpInkEffect_Reduction": 5,
+    "SquidMoveSpatter_Reduction": 6,
+    "SalmonHPUp": 7,
+    "SalmonRespawnTimeSave": 8,
+    "SalmonInkSave": 9,
+    "SalmonAttackUp": 10,
+    "SubWeapon1": 11,
+    "SubWeapon2": 12,
+    "SubWeapon3": 13
+  },
+  "spl::PlayerModelType": {
+    "SquidF": 0,
+    "SquidM": 1,
+    "OctopusF": 2,
+    "OctopusM": 3,
+    "Rival": 4,
+    "RSF": 5,
+    "RSM": 6
+  },
+  "spl::PlayerRemoteType": {
+    "None": 0,
+    "Rival": 1,
+    "RivalStrong": 2
+  },
+  "spl::PlayerRestartType": {
+    "cRespawn": 0,
+    "cFirst": 1,
+    "cWarp_CameraReset": 2,
+    "cWarp_CameraNoReset": 3,
+    "cVanish": 4,
+    "cCoopZombie": 5,
+    "cPlayGamePadRecorder": 6
+  },
+  "spl::PlayerSex": {
+    "Female": 0,
+    "Male": 1
+  },
+  "spl::PlayerSexMask": {
+    "None": 0,
+    "Female": 1,
+    "Male": 2,
+    "Both": 3
+  },
+  "spl::PlayerSpecies": {
+    "Squid": 0,
+    "Octopus": 1
+  },
+  "spl::PlayerStepPaintType": {
+    "OnFriendGnd": 0,
+    "OnFriendAir": 1,
+    "OnEnemyGnd": 2,
+    "OnEnemyAir": 3,
+    "OnNeutralGnd": 4,
+    "OnNeutralAir": 5
+  },
+  "spl::PlazaDoorState": {
+    "Close": 0,
+    "Open": 1
+  },
+  "spl::PlazaHomeIndex": {
+    "Default": 0,
+    "Fsodr": 1,
+    "Sdodr": 2
+  },
+  "spl::PlazaMode": {
+    "FirstBoot": 0,
+    "Title": 1,
+    "Normal": 2,
+    "ImportantNews": 3,
+    "FromWalkSingle": 4,
+    "MissionEnding": 5,
+    "Error": 6
+  },
+  "spl::PlazaNpcSourceType": {
+    "Normal": 0,
+    "Versus": 1,
+    "Coop": 2
+  },
+  "spl::PlazaVendorFirstMsg": {
+    "Shell": 0,
+    "ReceiveGeso": 1,
+    "Skill": 2,
+    "RandSkill": 3,
+    "RareUp": 4,
+    "Clean": 5
+  },
+  "spl::PrivateMatchSeqStep": {
+    "None": -1,
+    "VsBeforeFix": 0,
+    "VsTeamSetting": 1,
+    "VsCustomize": 2
+  },
+  "spl::PrivateMatchState": {
+    "None": 0,
+    "InGame": 1,
+    "AdditionalTime": 2,
+    "GameEnded": 3,
+    "WalkMulti": 4
+  },
+  "spl::PropellerOnlineState": {
+    "Wait": 0,
+    "StartPoint": 1,
+    "Move": 2,
+    "MoveReturn": 3,
+    "EndPoint": 4
+  },
+  "spl::RegionLanguageId": {
+    "JPja": 0,
+    "USen": 1,
+    "USes": 2,
+    "USfr": 3,
+    "USpt": 4,
+    "EUen": 5,
+    "EUes": 6,
+    "EUfr": 7,
+    "EUde": 8,
+    "EUit": 9,
+    "EUpt": 10,
+    "EUnl": 11,
+    "EUru": 12,
+    "KRko": 13,
+    "CNzh": 14,
+    "TWzh": 15
+  },
+  "spl::RegularMidiColor": {
+    "Red": 0,
+    "Yellow": 1,
+    "Green": 2,
+    "Blue": 3,
+    "Purple": 4,
+    "White": 5
+  },
+  "spl::RegularMidiFocus": {
+    "Vocal": 0,
+    "Drum": 1,
+    "Other": 2
+  },
+  "spl::RegularMidiStructure": {
+    "Prepare": 0,
+    "Intro": 1,
+    "Verse": 2,
+    "MiddleEight": 3,
+    "Chorus": 4,
+    "Bridge": 5,
+    "Solo": 6,
+    "LastChorus": 7,
+    "Outro": 8,
+    "Exit": 9
+  },
+  "spl::ReportCategory": {
+    "Invalid": 0,
+    "InappropriateNsaNickname": 1,
+    "InappropriateNickname": 2,
+    "PlayingInactivity": 3,
+    "PlayingIntentionalDisconnection": 4,
+    "PlayingFrequentDeliberatelySelfKill": 5,
+    "PlayingDisturbAllies": 6,
+    "PlayingIntentionallyNotContributing": 7,
+    "PlayingNetworkManipulation": 8,
+    "MaliciousUseOfGlitches": 9,
+    "Cheating": 10,
+    "PlayingGriefing": 11,
+    "Personal": 12,
+    "Criminal": 13,
+    "Immoral": 14,
+    "Harassment": 15,
+    "Commercial": 16,
+    "SexuallyExplicit": 17,
+    "Other": 18
+  },
+  "spl::ResetType": {
+    "DebugReset": 0,
+    "DebugResetOnSite": 1,
+    "MissionRespawn": 2
+  },
+  "spl::RewardType": {
+    "Invalid": 0,
+    "Weapon": 1,
+    "Gear_Head": 2,
+    "Gear_Clothes": 3,
+    "Gear_Shoes": 4,
+    "CoopSkin": 5,
+    "Emote": 6,
+    "LockerFigure": 7,
+    "LockerMainPart": 8,
+    "LockerSubPart": 9,
+    "LockerSticker": 10,
+    "MiniGameCard": 11,
+    "MiniGameCardPack": 12,
+    "MiniGameCardPackFresh": 13,
+    "MiniGameCardPiece": 14,
+    "MiniGameSleeve": 15,
+    "NamePlateBg": 16,
+    "RandomNamePlateBg": 17,
+    "Byname": 18,
+    "RandomByname": 19,
+    "Money": 20,
+    "WeaponLicense": 21,
+    "FoodTicket": 22,
+    "RandomFoodTicket": 23,
+    "AllFoodTicket": 24,
+    "DrinkTicket": 25,
+    "RandomDrinkTicket": 26,
+    "AllDrinkTicket": 27,
+    "GearSkillChip": 28,
+    "AllGearSkillChip": 29,
+    "MysteryBoxA": 30,
+    "MysteryBoxB": 31,
+    "GearPack": 32,
+    "CoopUroko": 33
+  },
+  "spl::RivalMainType": {
+    "Shooter": 0,
+    "Roller": 1,
+    "Brush": 2,
+    "Maneuver": 3,
+    "Shelter": 4,
+    "Slosher": 5,
+    "Blaster": 6
+  },
+  "spl::RivalPlanType": {
+    "Standby": 0,
+    "Offense": 1,
+    "AttackTarget": 2,
+    "Outwit": 3,
+    "Paint": 4,
+    "Search": 5,
+    "Escape": 6,
+    "Hidden": 7,
+    "NoAct": 8,
+    "Dodge": 9
+  },
+  "spl::RivalSpawnType": {
+    "Random": 0,
+    "Near": 1,
+    "Far": 2,
+    "Index": 3
+  },
+  "spl::RivalSpecialType": {
+    "None": 0,
+    "MultiMissile": 1,
+    "InkStorm": 2,
+    "JetPack": 3,
+    "SuperLanding": 4,
+    "ShockSonar": 5,
+    "GreatBarrier": 6
+  },
+  "spl::RivalSubType": {
+    "Default": 0,
+    "SplashBomb": 1,
+    "QuickBomb": 2,
+    "CurlingBomb": 3,
+    "RoboBomb": 4,
+    "None": 5
+  },
+  "spl::RivalSwitchType": {
+    "Standby": 0,
+    "Search": 1,
+    "Offense": 2
+  },
+  "spl::RollerPaintType": {
+    "Paint": 0,
+    "NoPaint": 1,
+    "NoPaintHitWallOnly": 2
+  },
+  "spl::RollerSwingType": {
+    "Horizontal": 0,
+    "Vertical": 1
+  },
+  "spl::RomTypeBase": {
+    "Normal": 0,
+    "Eve": 1
+  },
+  "spl::SaveTiming": {
+    "ManualCall": 0,
+    "NextFrame": 1,
+    "NextSceneTransition": 2,
+    "NextEventEnd": 3
+  },
+  "spl::ScheduleLoadMode": {
+    "Content": 0,
+    "SDCard": 1,
+    "Inet": 2
+  },
+  "spl::SdodrAbilityCustom::AppearanceLevel": {
+    "Level0": 0,
+    "Level1": 1,
+    "Level2": 2
+  },
+  "spl::SdodrAbilityCustom::AppearancePartType": {
+    "Head": 0,
+    "Tank": 1,
+    "TankCharm": 2,
+    "Shoes": 3,
+    "Drone": 4,
+    "WeaponA": 5,
+    "WeaponB": 6,
+    "WeaponC": 7
+  },
+  "spl::SdodrAbilityCustom::ColorGroupType": {
+    "Default": 0,
+    "Fire": 1,
+    "Continuity": 2,
+    "Range": 3,
+    "Move": 4,
+    "Luck": 5,
+    "Auto": 6
+  },
+  "spl::SdodrAbilityCustom::ColorType": {
+    "Default": 0,
+    "Fire_A": 1,
+    "Fire_B": 2,
+    "Fire_C": 3,
+    "Continuity_A": 4,
+    "Continuity_B": 5,
+    "Continuity_C": 6,
+    "Range_A": 7,
+    "Range_B": 8,
+    "Range_C": 9,
+    "Move_A": 10,
+    "Move_B": 11,
+    "Move_C": 12,
+    "Luck_A": 13,
+    "Luck_B": 14,
+    "Luck_C": 15,
+    "Auto_A": 16,
+    "Auto_B": 17,
+    "Auto_C": 18
+  },
+  "spl::SdodrAbilityCustom::TipDisplayValueUnit": {
+    "None": 0,
+    "Point": 1,
+    "Percent": 2,
+    "PercentOff": 3,
+    "Second": 4,
+    "Bool": 5,
+    "Rate": 6
+  },
+  "spl::SdodrAbilityCustom::TipType": {
+    "None": 0,
+    "ShotDamageUp": 1,
+    "BlastDamageUp": 2,
+    "WaveDamageUp": 3,
+    "MainShotRateUp": 4,
+    "WeakSwingRateUp": 5,
+    "LoadingBulletUp": 6,
+    "NearDamageRatioUp": 7,
+    "FarDamageRatioUp": 8,
+    "ShotBiasRatio": 9,
+    "DisableCanopyShot": 10,
+    "ShelterNakedTimeSave": 11,
+    "HomingShot": 12,
+    "PoisonInk": 13,
+    "Recharge": 14,
+    "MainInkSave": 15,
+    "SubInkSave": 16,
+    "KnockBackUp": 17,
+    "BlastBrushAwayUp": 18,
+    "ChargeTimeSave": 19,
+    "SpecialIncreaseUp": 20,
+    "InkRecoveryUp": 21,
+    "MainShotRangeUp": 22,
+    "MainPaintUp": 23,
+    "BulletCorePaintUp": 24,
+    "BlastSizeUp": 25,
+    "PenetrateNumUp": 26,
+    "BulletSizeUp": 27,
+    "WeakenEnemyDamageRateUp": 28,
+    "SquidMoveUp": 29,
+    "HumanMoveUp": 30,
+    "ChargeKeepTimeUp": 31,
+    "EnemySinkUp": 32,
+    "SquidSomersaultAttack": 33,
+    "ManeuverSlideAttack": 34,
+    "SaberStepAttack": 35,
+    "DirectAttackUp": 36,
+    "DirectAttackBrushAwayUp": 37,
+    "RollerDashUp": 38,
+    "ManeuverSlideUp": 39,
+    "MoveSpecialIncreaseUp": 40,
+    "MoveInkRecoverUp": 41,
+    "DroneCadenceMoveUp": 42,
+    "ComboGraceTimeUp": 43,
+    "DefeatEnemyBlastFreqUp": 44,
+    "DefeatEnemyItemDropSpecialUp": 45,
+    "DefeatEnemyItemDropInkUp": 46,
+    "DefeatEnemyItemDropDroneActiveUp": 47,
+    "DefeatEnemyItemDropArmor": 48,
+    "DefeatEnemyItemStunBomb": 49,
+    "DefeatEnemyInkRecover": 50,
+    "ComboItemDropUp": 51,
+    "PaintCombo": 52,
+    "DroneCadenceTimeUp": 53,
+    "DroneCadencePaintUp": 54,
+    "DroneCadenceDefeatEnemyUp": 55,
+    "DroneActionBombSplash": 56,
+    "DroneActionBombQuick": 57,
+    "DroneActionTrap": 58,
+    "DroneActionSprinkler": 59,
+    "DroneActionItemDrop": 60,
+    "DroneActionSuperLaser": 61,
+    "DroneActionTornado": 62
+  },
+  "spl::SdodrAbilityCustom::TipUnlockType": {
+    "Normal": 0,
+    "Palette": 1,
+    "Hackiing": 2,
+    "None": 3
+  },
+  "spl::SdodrBossDetailType": {
+    "None": 0,
+    "TowerKingEasy": 1,
+    "TowerKingHard": 2,
+    "BallKingEasy": 3,
+    "BallKingHard": 4,
+    "RivalKingEasy": 5,
+    "RivalKingHard": 6,
+    "BarrierKing": 7,
+    "BarrierKingOdako": 8,
+    "BarrierKingOdakoEx": 9
+  },
+  "spl::SdodrBrushAwayExtraFlagType": {
+    "Bumper": 0,
+    "EnemyBodyAttack": 1
+  },
+  "spl::SdodrChallengeFailureType": {
+    "None": 0
+  },
+  "spl::SdodrChallengeState": {
+    "None": 0,
+    "Normal": 1,
+    "ChanceSmall": 2,
+    "ChanceBig": 3,
+    "PinchSmall": 4,
+    "PinchBig": 5,
+    "Failure": 6,
+    "Clear": 7,
+    "BeforeClear": 8,
+    "BeforeClearBoss": 9
+  },
+  "spl::SdodrChallengeType": {
+    "None": 0,
+    "KillAllSpawners": 1,
+    "KillAllTargetEnemies": 2,
+    "VictoryArea": 3,
+    "VictoryLift": 4,
+    "VictoryBall": 5,
+    "Boss": 6,
+    "Shop": 7
+  },
+  "spl::SdodrChooseStageDifficultyCriterionType": {
+    "None": 0,
+    "Easy": 1,
+    "UnderNormal": 2,
+    "Normal": 3,
+    "OverNormal": 4,
+    "UnderHard": 5,
+    "Hard": 6,
+    "OverHard": 7,
+    "VeryHard": 8
+  },
+  "spl::SdodrCoinLockerRewardType": {
+    "PaletteRandom": 0,
+    "PaletteFirst": 1,
+    "PaletteLast": 2,
+    "RewardDocument": 3,
+    "Jem": 4,
+    "NamePlate": 5
+  },
+  "spl::SdodrDamageUIType": {
+    "Normal": 0,
+    "Large": 1,
+    "Poison": 2,
+    "Shield": 3
+  },
+  "spl::SdodrEnemyKind": {
+    "Other": 0,
+    "ZakoSmall": 1,
+    "ZakoStandard": 2,
+    "ZakoLarge": 3,
+    "Escape": 4,
+    "Tree": 5,
+    "TreeMissile": 6,
+    "Hopper": 7,
+    "BombBlow": 8,
+    "ChargerTower": 9,
+    "Shell": 10,
+    "Sprinkler": 11,
+    "ExplodeSpawner": 12,
+    "RivalKing": 13,
+    "TowerKing": 14,
+    "BallKing": 15,
+    "BarrierKingIida": 16,
+    "BarrierKingOdako": 17
+  },
+  "spl::SdodrEnemySpawnType": {
+    "Default": 0,
+    "BarrierKingOdako": 1
+  },
+  "spl::SdodrEvilEvent::EventSetType": {
+    "None": 0,
+    "Painted": 1,
+    "NoItemDrop": 2,
+    "NoDroneBuddy": 3,
+    "ReinforceEnemy": 4,
+    "InfiniteTreeMissile": 5,
+    "Fog": 6,
+    "Painted_Fog": 7,
+    "ReinforceEnemy_InfiniteTreeMissile": 8,
+    "NoItemDrop_NoDroneBuddy": 9
+  },
+  "spl::SdodrEvilEvent::EventType": {
+    "Painted": 0,
+    "NoItemDrop": 1,
+    "NoDroneBuddy": 2,
+    "ReinforceEnemy": 3,
+    "InfiniteTreeMissile": 4,
+    "Fog": 5
+  },
+  "spl::SdodrExtraCoherentTalkType": {
+    "None": 0,
+    "NotClearPalette": 1,
+    "ClearPalette": 2,
+    "FullComplete": 3
+  },
+  "spl::SdodrFaderWipeType": {
+    "Elevator": 0,
+    "Fade": 1,
+    "Octopus": 2,
+    "White": 3,
+    "Noise": 4,
+    "NoiseBlack": 5,
+    "Restart": 6,
+    "NoiseNoSE": 7
+  },
+  "spl::SdodrFloorEventType": {
+    "None": 0,
+    "SubChallenge": 1,
+    "TipFever": 2
+  },
+  "spl::SdodrFloorShopItemType": {
+    "Life": 0,
+    "Tip0": 1,
+    "Tip1": 2,
+    "Jem": 3,
+    "SubWeapon": 4,
+    "SpecialWeapon": 5
+  },
+  "spl::SdodrHackingHeaderType": {
+    "Player": 0,
+    "Random": 1,
+    "DroneBuddy": 2,
+    "Boss": 3,
+    "Shop": 4,
+    "Ikura": 5,
+    "Jem": 6
+  },
+  "spl::SdodrHackingType": {
+    "RechooseStage": 0,
+    "DoubleTip": 1,
+    "Reveal1stBoss": 2,
+    "Reveal2ndBoss": 3,
+    "RetryNumMax": 4,
+    "PlayerDamageRate": 5,
+    "PlayerArmorMax": 6,
+    "PlayerArmorRecover": 7,
+    "PlayerArmorPoisonedReduce": 8,
+    "PlayerArmorDieJump": 9,
+    "RetryAdmission": 10,
+    "WeakenEnemy": 11,
+    "AttackDamageUp": 12,
+    "TipFreqBias": 13,
+    "DroneCadencePaintTip": 14,
+    "DroneCadenceDefeatEnemyTip": 15,
+    "DroneActionTrapTip": 16,
+    "DroneActionSprinklerTip": 17,
+    "DroneActionBombQuickTip": 18,
+    "DroneActionTornadoTip": 19,
+    "DroneActionItemDropTip": 20,
+    "DroneActionSlot": 21,
+    "FloorShopDiscount": 22,
+    "RechooseFloorShop": 23,
+    "ForceFloorShopMiddle": 24,
+    "ForceFloorShopHigh": 25,
+    "IkuraRewardRate": 26,
+    "JemHardMode": 27
+  },
+  "spl::SdodrHackingUnlockType": {
+    "Normal": 0,
+    "GameOver": 1,
+    "Clear9F": 2,
+    "Clear19F": 3,
+    "ClearPhase2": 4,
+    "UnlockPoint": 5
+  },
+  "spl::SdodrIntermediateBossType": {
+    "A": 0,
+    "B": 1,
+    "C": 2
+  },
+  "spl::SdodrItemGetWindowIconKind": {
+    "Invalid": -1,
+    "Palette": 0,
+    "Jem": 1,
+    "DevelopLog": 2,
+    "Weapon": 3,
+    "SingleGear": 4,
+    "GearSet": 5,
+    "LockerFigure": 6,
+    "LockerSticker": 7,
+    "Emote": 8,
+    "Byname": 9,
+    "NameplateBg": 10,
+    "LockerKey": 11,
+    "ExtraLog": 12,
+    "JemByFindNewTip": 13
+  },
+  "spl::SdodrItemType": {
+    "Armor": 0,
+    "InkBottle": 1,
+    "SpecialCharge": 2,
+    "DroneBattery": 3,
+    "StunBombA": 4,
+    "StunBombB": 5,
+    "StunBombC": 6
+  },
+  "spl::SdodrMicroLameDensityTexType": {
+    "Type00": 0,
+    "Type01": 1,
+    "Type02": 2,
+    "Type03": 3,
+    "Type04": 4,
+    "Type05": 5,
+    "Type06": 6
+  },
+  "spl::SdodrPhase": {
+    "Phase1": 0,
+    "Phase2": 1,
+    "Phase3": 2
+  },
+  "spl::SdodrPhaseEventFlag": {
+    "CityFirstDemo": 0,
+    "EntranceFirstDemo": 1,
+    "TowerBossFirstDemo": 2
+  },
+  "spl::SdodrPlayerDeadReasonMainType": {
+    "None": 0,
+    "Fall": 1,
+    "Enemy": 2
+  },
+  "spl::SdodrRemindObjType": {
+    "Phase1": 0,
+    "Phase2": 1
+  },
+  "spl::SdodrRigidMoveRotateType": {
+    "FreeRotate": 0,
+    "FixRotate": 1,
+    "FollowRotate": 2,
+    "FollowRotateFixAxisY": 3,
+    "FollowInitRotateFixAxisY": 4,
+    "ToUprightRotate": 5
+  },
+  "spl::SdodrSceneType": {
+    "None": 0,
+    "Other": 1,
+    "City": 2,
+    "Entrance": 3,
+    "StaffRoll": 4
+  },
+  "spl::SdodrStageDifficultyLevel": {
+    "Undefined": 0,
+    "Easy": 1,
+    "Normal": 2,
+    "Hard": 3,
+    "VeryHard": 4
+  },
+  "spl::SdodrStageEnterPerformanceActionType": {
+    "Finish": 0,
+    "StartElevatorWipe": 1,
+    "EndElevatorWipe": 2,
+    "PlayerPrepareEnterAnim": 3,
+    "PlayerEnterAnim": 4,
+    "EnterHUD": 5,
+    "StartFieldAppearance": 6,
+    "InStageTitle": 7,
+    "OutStageTitle": 8,
+    "EnterRespawnNumUI": 9,
+    "DroneEnterAnim": 10,
+    "InMainChallengeUI": 11,
+    "InSubChallengeUI": 12,
+    "OutChallengeUI": 13
+  },
+  "spl::SdodrStagePreProgressEventConditionType": {
+    "Always": 0,
+    "UnlessDefeatRivalKing": 1
+  },
+  "spl::SdodrStageProgressStateType": {
+    "None": 0,
+    "Standby": 1,
+    "EntryLift": 2,
+    "Playing": 3
+  },
+  "spl::SdodrStageType": {
+    "None": 0,
+    "Normal": 1,
+    "Shop": 2,
+    "IntermediateBoss": 3,
+    "TowerBoss": 4,
+    "StoryBoss": 5
+  },
+  "spl::SdodrSubChallengeType": {
+    "None": 0,
+    "SaveDamage": 1,
+    "SaveSquidMove": 2,
+    "SaveHumanMove": 3,
+    "SaveKiteMove": 4,
+    "SaveMainWeapon": 5,
+    "SaveSubWeapon": 6,
+    "SaveSpecial": 7,
+    "SaveJump": 8
+  },
+  "spl::SdodrSuspendMenuType": {
+    "Pause": 0,
+    "GameOver": 1
+  },
+  "spl::SdodrTalkASCommandType": {
+    "None": 0,
+    "TalkElvWait": 1,
+    "TalkElvNml": 2,
+    "TalkElvStnd": 3,
+    "TalkElvGood": 4,
+    "TalkElvPoint": 5,
+    "TalkElvToAgent8": 6,
+    "TalkElvToAgent8Plsr": 7,
+    "TalkElvPlsr": 8,
+    "TalkElvSdns": 9,
+    "TalkElvSprs": 10,
+    "TalkElvAngr": 11,
+    "TalkElvHappy": 12,
+    "TalkElvThink": 13,
+    "TalkElvWaitP1": 14,
+    "TalkElvNmlP1": 15,
+    "TalkElvStndP1": 16,
+    "TalkElvPointP1": 17,
+    "TalkElvToAgent8P1": 18,
+    "TalkElvToAgent8PlsrP1": 19,
+    "TalkElvPlsrP1": 20,
+    "TalkElvSdnsP1": 21,
+    "TalkElvSprsP1": 22,
+    "TalkElvAngrP1": 23,
+    "TalkElvThinkP1": 24
+  },
+  "spl::SdodrTalkWindowPriorityType": {
+    "Low": 0,
+    "Middle": 1,
+    "High": 2,
+    "Highest": 3
+  },
+  "spl::SdodrTalkWindowSlotType": {
+    "Game": 0,
+    "UI": 1
+  },
+  "spl::SdodrTowerLayerType": {
+    "None": 0,
+    "Beginning": 1,
+    "Low": 2,
+    "Middle": 3,
+    "High": 4
+  },
+  "spl::SdodrTowerTryResultFrom": {
+    "InGame": 0,
+    "XMenu": 1,
+    "Hacking": 2
+  },
+  "spl::SdodrTowerTryResultType": {
+    "None": 0,
+    "Clear": 1,
+    "GameOver": 2,
+    "Retire": 3
+  },
+  "spl::SdodrTowerTryType": {
+    "Normal": 0,
+    "HackingRestart": 1,
+    "Remind": 2
+  },
+  "spl::SdodrTowerType": {
+    "Beginning": 0,
+    "Order": 1,
+    "Extra": 2
+  },
+  "spl::SdodrUIDemoScreenType": {
+    "Demo_00": 0,
+    "Demo_01": 1,
+    "Demo_02": 2,
+    "Demo_03": 3,
+    "Demo_04": 4,
+    "Demo_05": 5,
+    "Demo_06": 6,
+    "Demo_07": 7,
+    "Demo_08": 8,
+    "Demo_09": 9,
+    "Demo_10": 10,
+    "Demo_11": 11,
+    "Demo_12": 12,
+    "Demo_13": 13,
+    "Demo_14": 14,
+    "Demo_15": 15
+  },
+  "spl::SdodrWholeEventFlag": {
+    "FinishFirstSequence": 0,
+    "WorldTowerSoundDemo": 1,
+    "FinishBattleTutorial": 2,
+    "GameOverNoHackingFirst": 3,
+    "GameOverWithHackingFirst": 4,
+    "ToElevatorFirstDemo": 5,
+    "HackingIntroduceDemo": 6,
+    "HackingRestartExplain": 7,
+    "HackingJemHardModeExplain": 8,
+    "FirstFleaMarket": 9,
+    "FirstFloorShopStartTalk": 10,
+    "FirstFloorShopEndTalk": 11,
+    "PrevTryRewardTalk": 12,
+    "FirstFloorShopChosenDemo": 13,
+    "FirstFloorEventChosenDemo": 14,
+    "FirstEvilEventChosenDemo": 15
+  },
+  "spl::SdodrWorldStartPosType": {
+    "Default": 0,
+    "FromEntrance": 1,
+    "FromGameOver": 2,
+    "FromRetire": 3
+  },
+  "spl::SeasonalTurn": {
+    "Spring": 0,
+    "Summer": 1,
+    "Autumn": 2,
+    "Winter": 3
+  },
+  "spl::SeasonSelectionMode": {
+    "Schedule": 0,
+    "Version": 1,
+    "Fix": 2
+  },
+  "spl::SeqMainStateCoop": {
+    "Invalid": 0,
+    "StageViewDemo": 1,
+    "DropDemo": 2,
+    "RoundPrepare": 3,
+    "RoundReady": 4,
+    "RoundPlay": 5,
+    "RoundClear": 6,
+    "GameClearFake": 7,
+    "BossAppearDemo": 8,
+    "GameClear": 9,
+    "GameOver": 10,
+    "Result": 11
+  },
+  "spl::SeqMainStateMission": {
+    "Invalid": 0,
+    "CourseInDemo": 1,
+    "SupplyWeapon": 2,
+    "TicketGateAction": 3,
+    "Progress": 4,
+    "GoalDemo": 5,
+    "PlayerDie": 6,
+    "Event": 7,
+    "GameOver": 8
+  },
+  "spl::SeqMainStateVersus": {
+    "Invalid": 0,
+    "BeforeGame": 1,
+    "Game": 2,
+    "GameEnd": 3,
+    "Result": 4
+  },
+  "spl::ShopEventType": {
+    "FirstWeapon": 0,
+    "FirstHead": 1,
+    "FirstClothes": 2,
+    "FirstShoes": 3,
+    "FirstGoods": 4,
+    "FirstWeaponLicense": 5,
+    "FirstGoldWeaponLicense": 6,
+    "FirstGearRarityUpAndReplace": 7,
+    "WeaponPersonelChange": 8
+  },
+  "spl::ShopMode": {
+    "Weapon": 0,
+    "Head": 1,
+    "Clothes": 2,
+    "Shoes": 3,
+    "Goods": 4
+  },
+  "spl::ShotGuideSign": {
+    "NoHit": 0,
+    "HitConstant": 1,
+    "HitEffective": 2,
+    "HitBombDead": 3,
+    "HitKebaInkCore": 4,
+    "ChargeKeep": 5
+  },
+  "spl::SoundEnvSpecialType": {
+    "None": 0,
+    "BeforeBoss": 1,
+    "AfterBoss": 2,
+    "JukeboxBgm": 3
+  },
+  "spl::SpecMode": {
+    "Versus": 0,
+    "Mission": 1,
+    "Coop": 2,
+    "Other": 3,
+    "Sdodr": 4
+  },
+  "spl::SpectacleManagerState": {
+    "StartDemo": 0,
+    "CoreBattle": 1,
+    "BattleInterval": 2,
+    "LastBattle": 3,
+    "KumasanDead": 4,
+    "FinishDemo": 5,
+    "GameOver": 6
+  },
+  "spl::SpectatorCameraType": {
+    "None": 0,
+    "Player": 1,
+    "Bird": 2,
+    "Rule": 3,
+    "Free": 4
+  },
+  "spl::SpongeModelType": {
+    "Normal": 0,
+    "Tall": 1,
+    "Rectangle": 2,
+    "VSRectangle": 3
+  },
+  "spl::SpongeType": {
+    "A": 0,
+    "B": 1,
+    "C": 2,
+    "D": 3,
+    "E": 4,
+    "F": 5,
+    "G": 6
+  },
+  "spl::SprinklerGimmickSpawnType": {
+    "Default": 0,
+    "Switch": 1
+  },
+  "spl::SprinklerGimmickSprinkleType": {
+    "Activate": 0,
+    "Switch": 1,
+    "NearPlayer": 2
+  },
+  "spl::StepTeamType": {
+    "cNone": 0,
+    "cFriend": 1,
+    "cEnemy": 2
+  },
+  "spl::SubjectiveType": {
+    "Focused": 0,
+    "Friend": 1,
+    "Enemy": 2
+  },
+  "spl::SwitchPaintSize": {
+    "Small": 0,
+    "Medium": 1,
+    "Large": 2
+  },
+  "spl::SwitchPaintType": {
+    "Normal": 0,
+    "Toggle": 1,
+    "Timer": 2
+  },
+  "spl::SwitchRespawnResetType": {
+    "Keep": 0,
+    "InitialValue": 1,
+    "SavedOnCheckPoint": 2
+  },
+  "spl::TagTeamLeaderboardCategory": {
+    "Solo": 0,
+    "Pair": 1,
+    "Team": 2
+  },
+  "spl::TagTeamTrophyType": {
+    "None": 0,
+    "Bronze": 1,
+    "Silver": 2,
+    "Gold": 3
+  },
+  "spl::TargetingRecognizeCheckTeamType": {
+    "Any": 0,
+    "Friend": 1,
+    "Enemy": 2
+  },
+  "spl::TargetingRecognizeRepresentativeChangeType": {
+    "cKeep": 0,
+    "cDistance": 1
+  },
+  "spl::Team": {
+    "None": -1,
+    "Alpha": 0,
+    "Bravo": 1,
+    "Charlie": 2,
+    "Neutral": 3
+  },
+  "spl::TeamPreference": {
+    "None": -1,
+    "Alpha": 0,
+    "Bravo": 1,
+    "Charlie": 2,
+    "Spectator": 3,
+    "Auto": 4
+  },
+  "spl::TestPrimDrawerPrimType": {
+    "Sphere": 0,
+    "Box": 1,
+    "Cone": 2,
+    "Cylinder": 3,
+    "Capsule": 4,
+    "GradientCylinder": 5
+  },
+  "spl::TipsTrialJudgeType": {
+    "BreakOneSighterTarget": 0,
+    "BreakAllSighterTarget": 1,
+    "UseSubWeapon3Times": 2,
+    "UseSpecialWeapon3Times": 3,
+    "UseTeamSignal3Times": 4
+  },
+  "spl::TipsTrialSpecialState": {
+    "AlwaysEmpty": 0,
+    "AlwaysFull": 1
+  },
+  "spl::TricolUnion": {
+    "Attacker": 0,
+    "Defencer": 1
+  },
+  "spl::Udemae": {
+    "Invalid": -1,
+    "Cminus": 0,
+    "C": 1,
+    "Cplus": 2,
+    "Bminus": 3,
+    "B": 4,
+    "Bplus": 5,
+    "Aminus": 6,
+    "A": 7,
+    "Aplus": 8,
+    "S": 9,
+    "SplusBase": 10
+  },
+  "spl::UIAnnounceMsgType": {
+    "None": -1,
+    "LeadGachiCountPlayer": 0,
+    "LeadGachiCountOpposite": 1,
+    "OccupyGachiAreaPlayer": 2,
+    "OccupyGachiAreaOpposite": 3,
+    "StopGachiCountPlayer": 4,
+    "StopGachiCountOpposite": 5,
+    "OccupyGachiLiftPlayer": 6,
+    "OccupyGachiLiftOpposite": 7,
+    "RecaptureGachiLiftPlayer": 8,
+    "RecaptureGachiLiftOpposite": 9,
+    "ArriveGachiLiftCheckPointPlayer": 10,
+    "ArriveGachiLiftCheckPointOpposite": 11,
+    "BreakGachiLiftCheckPointPlayer": 12,
+    "BreakGachiLiftCheckPointOpposite": 13,
+    "OccupyGachihokoPlayer": 14,
+    "OccupyGachihokoOpposite": 15,
+    "DefeatGachihokoPlayer": 16,
+    "DefeatGachihokoOpposite": 17,
+    "ReturnGachihoko": 18,
+    "BreakGachiAsariShieldPlayer": 19,
+    "BreakGachiAsariShieldOpposite": 20,
+    "RestoreGachiAsariShieldPlayer": 21,
+    "RestoreGachiAsariShieldOpposite": 22,
+    "BreakGachihokoCheckPointPlayer": 23,
+    "BreakGachihokoCheckPointOpposite": 24,
+    "DownWaterSurface": 25,
+    "DownWaterSurfaceSign": 26,
+    "AppearNoroshi": 27,
+    "TryNoroshiPlayer": 28,
+    "TryNoroshiOpposite": 29,
+    "TriedNoroshi": 30,
+    "OccupyNoroshiPlayer": 31,
+    "OccupyNoroshiOpposite": 32,
+    "OccupiedNoroshi": 33,
+    "DefeatNoroshi": 34,
+    "DefeatedNoroshiPlayer": 35,
+    "DefeatedNoroshiOpposite": 36,
+    "TenjinNumUp": 37
+  },
+  "spl::UICatalogViewerPageType": {
+    "SinglePicture": 0,
+    "Item1": 1,
+    "Item2": 2,
+    "Item3": 3,
+    "Item3WithByname": 4,
+    "Item4": 5,
+    "Item5": 6,
+    "Item6": 7
+  },
+  "spl::UICmnGuideType": {
+    "None": 0,
+    "EnterManhole": 1,
+    "BackToPlaza": 2,
+    "GetBackCatfish": 3,
+    "PlayerDevice": 4,
+    "WoodenFigureOn": 5,
+    "WoodenFigureOff": 6,
+    "Amiibo": 7,
+    "TalkToNpc": 8,
+    "CanolaPost": 9,
+    "EatFood": 10,
+    "JudgeTips": 11,
+    "MiniGame": 12,
+    "FestVote": 13,
+    "WalkSingle": 14,
+    "Locker": 15,
+    "KumasanRadio": 16,
+    "Manual": 17,
+    "Shiftboard": 18,
+    "CashExchange": 19,
+    "Lot": 20,
+    "Jukebox": 21,
+    "MiniGame_Play": 22,
+    "MiniGame_WaitForOpponent": 23,
+    "MiniGame_RequestBattle": 24,
+    "MiniGame_Spectate": 25,
+    "MiniGame_StandUp": 26,
+    "CoopSkinChanger": 27,
+    "CoopWeaponChanger": 28,
+    "StatsDevice": 29,
+    "TakeMissionTreasure": 30,
+    "LockerDoor": 31,
+    "CoopStatsDevice": 32,
+    "Remember": 33,
+    "Dresser": 34,
+    "ActivateDrone": 35,
+    "ChangeCommander": 36,
+    "PlazaMove": 37,
+    "Goods": 38,
+    "FieldScope": 39,
+    "OpenMainMenu": 40
+  },
+  "spl::UICustomizeSortType": {
+    "Date": 0,
+    "Skill": 1,
+    "Brand": 2,
+    "Main": 3,
+    "Sub": 4,
+    "Special": 5,
+    "Emote": 6,
+    "WeaponShop": 7
+  },
+  "spl::uidef::Talker": {
+    "None": 0,
+    "Unknown": 1,
+    "IdolA": 2,
+    "IdolB": 3,
+    "IdolC": 4,
+    "Atarime": 5,
+    "Aori": 6,
+    "Hotaru": 7,
+    "Commander": 8,
+    "Hime": 9,
+    "Iida": 10,
+    "Takowasa": 11,
+    "Kumasan": 12,
+    "RealKumasan": 13,
+    "WeaponShop": 14,
+    "Judge": 15,
+    "JudgeJr": 16,
+    "GearShopHead": 17,
+    "GearShopClothes": 18,
+    "GearShopShoes": 19,
+    "GoodsShop": 20,
+    "MotherFoodShop": 21,
+    "Vendor": 22,
+    "UnknownIdolB": 23,
+    "Dolphin": 24,
+    "UnknownTalker": 25,
+    "Ichigou": 26,
+    "Nigou": 27,
+    "KumasanOnlyName": 28,
+    "AtarimeHimono": 29,
+    "MotherWalk": 30,
+    "MotherMiniGame": 31,
+    "MiniGameKurage0": 32,
+    "MiniGameKurage1": 33,
+    "MiniGameKurage2": 34,
+    "MiniGameKurage3": 35,
+    "Mystery": 36,
+    "GearShopHead_Sub": 37,
+    "SquidGirl": 38,
+    "SquidBoy": 39,
+    "OctGirl": 40,
+    "OctBoy": 41,
+    "Squid": 42,
+    "Oct": 43,
+    "SalmonBuddy": 44,
+    "WeaponShopFsodr": 45,
+    "WeaponShopFsodr_Sub": 46,
+    "GearShopHeadFsodr": 47,
+    "GearShopHeadFsodr_Sub": 48,
+    "GearShopClothesFsodr": 49,
+    "GearShopShoesFsodr": 50,
+    "VendorFsodr": 51,
+    "GearShopHeadSdodr": 52,
+    "GearShopHeadSdodr_Sub": 53,
+    "GearShopClothesSdodr": 54,
+    "GearShopShoesSdodr": 55,
+    "HimeDroneSdodr": 56,
+    "IidaCaughtSdodr": 57,
+    "IidaSdodr": 58,
+    "MizutaSdodr": 59,
+    "PhaseBoss00Sdodr": 60,
+    "PhaseBoss01Sdodr": 61,
+    "PhaseBoss02Sdodr": 62,
+    "HimeSdodr": 63,
+    "FleaMarketSdodr": 64,
+    "Mizuta": 65
+  },
+  "spl::UIFaderColor": {
+    "Black": 0,
+    "White": 1
+  },
+  "spl::UIFaderType": {
+    "Fade": 0,
+    "Circle": 1,
+    "Squid": 2,
+    "SquidShort": 3,
+    "Wipe10": 4
+  },
+  "spl::UIItemGetType": {
+    "Weapon": 0,
+    "Gear": 1,
+    "Shell": 2
+  },
+  "spl::UIManualLayoutType": {
+    "AllText": 0,
+    "TextAndImageS": 1,
+    "TextAndImageM": 2,
+    "HeadingAndImageM": 3,
+    "HeadingAndImageL": 4,
+    "CoopSpecial00": 5,
+    "FestSpecial00": 6,
+    "MiniGame": 7,
+    "EventSpecial00": 8
+  },
+  "spl::UIManualSalmonCategory": {
+    "Zako": 0,
+    "Big": 1,
+    "Event": 2
+  },
+  "spl::UIManualType": {
+    "PlzAmiiboMySet": 0,
+    "PlzAmiiboPhoto": 1,
+    "PlzMiiverse": 2,
+    "RegularMatch": 3,
+    "BankaraMatch": 4,
+    "Festival": 5,
+    "Coop": 6,
+    "Vendor": 7,
+    "MiniGame": 8,
+    "XMatch": 9,
+    "EventMatch": 10,
+    "BigRun": 11,
+    "CoopTeamContest": 12,
+    "PlzMiiverse_NS": 13
+  },
+  "spl::UISdodrAnnounceMsgType": {
+    "None": -1,
+    "OccupyGachiAreaPlayer": 0,
+    "OccupyGachiAreaOpposite": 1,
+    "StopGachiCountPlayer": 2,
+    "StopGachiCountOpposite": 3,
+    "AreaLeftCount": 4,
+    "ArriveGachiLiftCheckPointPlayer": 5,
+    "BreakGachiLiftCheckPointPlayer": 6,
+    "ArriveGachiLiftGoalPlayer": 7,
+    "ObjLeftCount": 8,
+    "EnemyLeftCount": 9,
+    "AreaCheckPoint": 10
+  },
+  "spl::UISdodrDroneActionIconType": {
+    "None": -1,
+    "BombSplash": 0,
+    "BombQuick": 1,
+    "Tornade": 2,
+    "SuperRazer": 3,
+    "Trap": 4,
+    "Sprinkler": 5,
+    "ItemDrop": 6
+  },
+  "spl::UISdodrEnemyHabitat": {
+    "None": 0,
+    "ZakoSmall": 1,
+    "ZakoStandard": 2,
+    "ZakoLarge": 3,
+    "Escape": 4,
+    "Tree": 5,
+    "TreeMissile": 6,
+    "Hopper": 7,
+    "BombBlow": 8,
+    "ChargerTower": 9,
+    "Shell": 10,
+    "Sprinkler": 11,
+    "ExplodeSpawner": 12,
+    "RivalKing": 13,
+    "TowerKing": 14,
+    "BallKing": 15,
+    "BarrierKingIida": 16,
+    "BarrierKingOdako": 17
+  },
+  "spl::UISdodrGuidePosType": {
+    "Default": 0,
+    "AboveWinTalk": 1
+  },
+  "spl::UISdodrGuideType": {
+    "None": -1,
+    "RideLift": 0,
+    "ReturnToElevator": 1,
+    "GoToNextFloor": 2,
+    "Talk": 3,
+    "RideElevator": 4,
+    "FloorShop": 5,
+    "AccessLocker": 6,
+    "Remember": 7,
+    "AccessLockerNoKey": 8,
+    "RideElevatorFirst": 9
+  },
+  "spl::UISdodrHoldGuideType": {
+    "None": 0,
+    "Accel": 1
+  },
+  "spl::UISdodrStaffCredit00ScreenType": {
+    "ThankYouForPlaying": 0,
+    "ExpansionPass": 1
+  },
+  "spl::UISdodrWinTalkEffect": {
+    "None": 0,
+    "HimeShout": 1,
+    "BossNoise": 2
+  },
+  "spl::UserNameSource": {
+    "CloudSave": 0,
+    "Default": 1,
+    "AccountNickname": 2,
+    "AmiiboNickname": 3,
+    "PrivateMatchAlias": 4
+  },
+  "spl::VehicleSpectacleSightType": {
+    "NoHit": 0,
+    "HitKumasanCore": 1,
+    "BeamMode": 2
+  },
+  "spl::VersusAwardGoldType": {
+    "Battle": 82424555,
+    "GachiareaPaint": 1295862524,
+    "GachiareaFrontHold": 417555231,
+    "GachiyaguraInvasion": 914143412,
+    "GachiyaguraBest": -2110088808,
+    "GachihokoInvasion": -119399103,
+    "GachihokoBest": 561446970,
+    "GachiasariInvasion": 1131411966,
+    "GachiasariHold": -498672426,
+    "Paint": 1450280247,
+    "Standout": -1947496276,
+    "NawabariPaintMyTeamArea": 340574658,
+    "NawabariPaintOpTeamArea": 139277526,
+    "SuperJumpTarget": 843450715,
+    "Kill": 595184896,
+    "KillAssist": -843930044
+  },
+  "spl::VersusAwardSilverType": {
+    "GachiareaStay": 1883082315,
+    "GachiyaguraCheckPointPass": -726557383,
+    "GachiyaguraStop": -710207949,
+    "GachihokoCheckPointPass": 449990209,
+    "GachihokoHold": 759419731,
+    "GachihokoStop": 1342994880,
+    "GachiasariStop": 811583795,
+    "NawabariDefenseMyTeamArea": 904305614,
+    "MoveDistance": -984449087,
+    "DamageRecovery": 1846815647,
+    "InkConsumption": 558366796,
+    "FirstSplat": 1519343151,
+    "UltraShot": 1282156877,
+    "GreatBarrier": -1407506173,
+    "MicroLaser": 100181145,
+    "MultiMissile": 688356648,
+    "InkStorm": 1531521091,
+    "NiceBall": -1233060871,
+    "UltraStamp": -1871588309,
+    "Jetpack": 1845797866,
+    "SuperHook": 1640799964,
+    "ShockSonar": 381452474,
+    "Blower": -926417245,
+    "Chariot": 725156217,
+    "Skewer": -2080377791,
+    "TripleTornado": -1597205295,
+    "EnergyStand": 408081468,
+    "Castle": 1335063633,
+    "Firework": -1350151380,
+    "Pogo": -1587761295,
+    "Chimney": 1725055830,
+    "Battle2": -847141136,
+    "GachiareaPaint2": -216556441,
+    "GachiareaFrontHold2": -1439932090,
+    "GachiyaguraInvasion2": -642260420,
+    "GachihokoInvasion2": -824697803,
+    "GachiasariInvasion2": -1506524789,
+    "GachiasariHold2": 49738432,
+    "Paint2": -1172744212,
+    "Standout2": 1409230802,
+    "NawabariPaintMyTeamArea2": 883111711,
+    "NawabariPaintOpTeamArea2": -1419078150,
+    "SuperJumpTarget2": 1968742423,
+    "Kill2": -403805849,
+    "KillAssist2": -775002512
+  },
+  "spl::VersusLobbyBgmJingleType": {
+    "Gambit": 0,
+    "Blitz": 1
+  },
+  "spl::VersusMode": {
+    "FreeTest": 0,
+    "Versus": 1,
+    "WalkSingle": 2,
+    "WalkMulti": 3,
+    "Replay": 4
+  },
+  "spl::VersusRecordState": {
+    "Invalid": -1,
+    "Win": 0,
+    "Lose": 1,
+    "ForceLose": 2,
+    "Exempted": 3,
+    "Nogame": 4
+  },
+  "spl::VersusRule": {
+    "Pnt": 0,
+    "Var": 1,
+    "Vlf": 2,
+    "Vgl": 3,
+    "Vcl": 4,
+    "Tcl": 5
+  },
+  "spl::VoiceEmotion": {
+    "None": 0,
+    "Normal": 1,
+    "Angry": 2,
+    "Disappointed": 3,
+    "Happy": 4,
+    "Surprised": 5,
+    "GoodGrief": 6
+  },
+  "spl::WeaponInfoType": {
+    "Versus": 0,
+    "Mission": 1,
+    "Coop": 2,
+    "Rival": 3,
+    "Other": 4
+  },
+  "spl::WeaponKind": {
+    "None": -1,
+    "Main": 0,
+    "Sub": 1,
+    "Special": 2
+  },
+  "spl::WeaponParamType": {
+    "Range": 0,
+    "Blaze": 1,
+    "Power": 2,
+    "Explosion": 3,
+    "PaintSpeed": 4,
+    "Weight": 5,
+    "Charge": 6,
+    "Mobility": 7,
+    "Defence": 8
+  },
+  "spl::WeaponSpeedMain": {
+    "Slow": 0,
+    "Mid": 1,
+    "Fast": 2
+  },
+  "spl::WeaponTypeMain": {
+    "Invalid": -1,
+    "Shooter": 0,
+    "Roller": 1,
+    "Charger": 2,
+    "Slosher": 3,
+    "Spinner": 4,
+    "Maneuver": 5,
+    "Shelter": 6,
+    "Blaster": 7,
+    "Brush": 8,
+    "Stringer": 9,
+    "Saber": 10
+  },
+  "spl::WeaponUniqActionId": {
+    "FireImpact": 0,
+    "FireOn": 1,
+    "FireOff": 2,
+    "FireFailed": 3,
+    "PaintOn": 4,
+    "PaintOff": 5,
+    "PaintNoInk": 6,
+    "FireCanopy": 7,
+    "RecoverCanopy": 8,
+    "SideStep": 9,
+    "StepSaber": 10,
+    "ChargeSpinner": 11,
+    "ChargeSaber": 12,
+    "BlowerInhaleOff": 13,
+    "BlowerInhaleOn": 14,
+    "Unknown": 15
+  },
+  "spl::WorldAreaType": {
+    "None": 0,
+    "SmallWorld": 1,
+    "BigWorld1": 2,
+    "BigWorld2": 3,
+    "BigWorld3": 4,
+    "BigWorld4": 5,
+    "BigWorld5": 6,
+    "BigWorld6": 7,
+    "BigWorldEx": 8,
+    "LaunchPadWorld": 9
+  },
+  "spl::WorldDigUpPointType": {
+    "Buried": 0,
+    "HalfExposed": 1,
+    "Exposed": 2
+  },
+  "spl::WorldRemindObjectType": {
+    "SmallWorld": 0,
+    "LaunchPadWorld": 1
+  },
+  "spl::XRankingRegion": {
+    "Invalid": 0,
+    "Pacific": 1,
+    "Atlantic": 2
+  }
+}

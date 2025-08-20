@@ -1,0 +1,250 @@
+import typing
+
+from ainb.common import AINBReader
+from ainb.param_common import ParamType, ParamFlag
+from ainb.utils import JSONType, ParseError, ValueType
+
+class ParamSource(typing.NamedTuple):
+    """
+    Input parameter source information
+    """
+
+    src_node_index: int = -1
+    src_output_index: int = -1
+    flags: ParamFlag = ParamFlag()
+
+    @classmethod
+    def _read(cls, reader: AINBReader) -> "ParamSource":
+        return ParamSource(reader.read_s16(), reader.read_s16(), ParamFlag(reader.read_u32()))
+
+    @property
+    def is_multi(self) -> bool:
+        return self.src_node_index <= -100
+    
+    @property
+    def multi_index(self) -> int:
+        return -100 - self.src_node_index
+    
+    @property
+    def multi_count(self) -> int:
+        return self.src_output_index
+    
+    def _as_dict(self) -> JSONType:
+        return {
+            "Node Index" : self.src_node_index,
+            "Output Index" : self.src_output_index,
+        } | self.flags._as_dict()
+
+INPUT_PARAM_SIZES: typing.Final[typing.Dict[ParamType, int]] = {
+    ParamType.Int : 0x10,
+    ParamType.Bool : 0x10,
+    ParamType.Float : 0x10,
+    ParamType.String : 0x10,
+    ParamType.Vector3F : 0x18,
+    ParamType.Pointer : 0x14,
+}
+
+class InputParam:
+    """
+    A single input parameter of a node
+    """
+
+    __slots__ = ["name", "classname", "type", "default_value", "source"]
+
+    def __init__(self, param_type: ParamType) -> None:
+        self.name: str = ""
+        self.classname: str = ""
+        self.type: ParamType = param_type
+        self.default_value: ValueType = None
+
+        self.source: ParamSource | typing.List[ParamSource] = ParamSource()
+
+    @classmethod
+    def _read(cls, reader: AINBReader, param_type: ParamType, multi_params: typing.List[ParamSource]) -> "InputParam":
+        input: InputParam = InputParam(param_type)
+        input.name = reader.read_string_offset()
+        if param_type == ParamType.Pointer:
+            input.classname = reader.read_string_offset()
+        input.source = ParamSource._read(reader)
+        input.default_value = cls._read_value(reader, param_type)
+
+        if input.source.is_multi:
+            input.source = multi_params[input.source.multi_index:input.source.multi_index+input.source.multi_count]
+
+        return input
+
+    @staticmethod
+    def _read_value(reader: AINBReader, param_type: ParamType) -> ValueType:
+        match (param_type):
+            case ParamType.Int:
+                return reader.read_s32()
+            case ParamType.Bool:
+                return reader.read_u32() != 0
+            case ParamType.Float:
+                return reader.read_f32()
+            case ParamType.String:
+                return reader.read_string_offset()
+            case ParamType.Vector3F:
+                return reader.read_vec3()
+            case ParamType.Pointer:
+                val: int = reader.read_u32()
+                if val == 0:
+                    return None
+                raise ParseError(reader, f"Non-zero default value for a pointer input parameter: {val}")
+    
+    @staticmethod
+    def _get_binary_size(param_type: ParamType) -> int:
+        return INPUT_PARAM_SIZES[param_type]
+    
+    def _as_dict(self) -> JSONType:
+        output: JSONType = {
+            "Name" : self.name,
+        }
+        if self.type == ParamType.Pointer:
+            output["Classname"] = self.classname
+        output["Default Value"] = self.default_value
+        if isinstance(self.source, ParamSource):
+            output |= self.source._as_dict()
+        else:
+            output["Sources"] = [ src._as_dict() for src in self.source ]
+        return output
+
+class OutputParam:
+    """
+    A single output parameter of a node
+    """
+
+    __slots__ = ["name", "classname", "type", "is_output"]
+
+    def __init__(self, param_type: ParamType) -> None:
+        self.name: str = ""
+        self.classname: str = ""
+        self.type: ParamType = param_type
+        self.is_output: bool = False # whether or not this param is output to another node
+
+    @classmethod
+    def _read(cls, reader: AINBReader, param_type: ParamType) -> "OutputParam":
+        output: OutputParam = OutputParam(param_type)
+        flags: int = reader.read_u32()
+        output.name = reader.get_string(flags & 0x3fffffff)
+        if param_type == ParamType.Pointer:
+            output.classname = reader.read_string_offset()
+        output.is_output = (flags >> 0x1f & 1) != 0
+        return output
+    
+    def _as_dict(self) -> JSONType:
+        if self.type == ParamType.Pointer:
+            return {
+                "Name" : self.name,
+                "Classname" : self.classname,
+                "Is Output" : self.is_output,
+            }
+        else:
+            return {
+                "Name" : self.name,
+                "Is Output" : self.is_output,
+            }
+
+class OffsetInfo(typing.NamedTuple):
+    input_offset: int
+    output_offset: int
+
+class ParamSet:
+    """
+    A set of node input and output parameters
+    """
+
+    __slots__ = ["_inputs", "_outputs"]
+
+    def __init__(self) -> None:
+        self._inputs: typing.List[typing.List[InputParam]] = [
+            [], [], [], [], [], []
+        ]
+        self._outputs: typing.List[typing.List[OutputParam]] = [
+            [], [], [], [], [], []
+        ]
+
+    @property
+    def int_inputs(self) -> typing.List[InputParam]:
+        return self._inputs[ParamType.Int]
+    @property
+    def bool_inputs(self) -> typing.List[InputParam]:
+        return self._inputs[ParamType.Bool]
+    @property
+    def float_inputs(self) -> typing.List[InputParam]:
+        return self._inputs[ParamType.Float]
+    @property
+    def string_inputs(self) -> typing.List[InputParam]:
+        return self._inputs[ParamType.String]
+    @property
+    def vec3f_inputs(self) -> typing.List[InputParam]:
+        return self._inputs[ParamType.Vector3F]
+    @property
+    def ptr_inputs(self) -> typing.List[InputParam]:
+        return self._inputs[ParamType.Pointer]
+
+    @property
+    def int_outputs(self) -> typing.List[OutputParam]:
+        return self._outputs[ParamType.Int]
+    @property
+    def bool_outputs(self) -> typing.List[OutputParam]:
+        return self._outputs[ParamType.Bool]
+    @property
+    def float_outputs(self) -> typing.List[OutputParam]:
+        return self._outputs[ParamType.Float]
+    @property
+    def string_outputs(self) -> typing.List[OutputParam]:
+        return self._outputs[ParamType.String]
+    @property
+    def vec3f_outputs(self) -> typing.List[OutputParam]:
+        return self._outputs[ParamType.Vector3F]
+    @property
+    def ptr_outputs(self) -> typing.List[OutputParam]:
+        return self._outputs[ParamType.Pointer]
+    
+    def get_inputs(self, param_type: ParamType) -> typing.List[InputParam]:
+        return self._inputs[param_type]
+    
+    def get_outputs(self, param_type: ParamType) -> typing.List[OutputParam]:
+        return self._outputs[param_type]
+    
+    @classmethod
+    def _read(cls, reader: AINBReader, end_offset: int, multi_params: typing.List[ParamSource]) -> "ParamSet":
+        pset: ParamSet = ParamSet()
+        offsets: typing.List[OffsetInfo] = [
+            cls._read_io_header(reader) for i in range(len(ParamType))
+        ]
+        output_end_offsets: typing.List[int] = [
+            offsets[i + 1].input_offset if i < 5 else end_offset for i in range(len(ParamType))
+        ]
+
+        for p_type in ParamType:
+            with reader.temp_seek(offsets[p_type].input_offset):
+                pset._inputs[p_type] = [
+                    InputParam._read(reader, p_type, multi_params) for i in range(int(
+                        (offsets[p_type].output_offset - offsets[p_type].input_offset) / InputParam._get_binary_size(p_type)
+                    ))
+                ]
+
+            with reader.temp_seek(offsets[p_type].output_offset):
+                pset._outputs[p_type] = [
+                    OutputParam._read(reader, p_type) for i in range(int(
+                        (output_end_offsets[p_type] - offsets[p_type].output_offset) / (8 if p_type == ParamType.Pointer else 4)
+                    ))
+                ]
+
+        return pset
+
+    @staticmethod
+    def _read_io_header(reader: AINBReader) -> OffsetInfo:
+        return OffsetInfo(*reader.unpack("<2I"))
+    
+    def _as_dict(self) -> JSONType:
+        return {
+            "Inputs" : {
+                p_type.name : [ param._as_dict() for param in self.get_inputs(p_type) ] for p_type in ParamType if self.get_inputs(p_type)
+            },
+            "Outputs" : {
+                p_type.name : [ param._as_dict() for param in self.get_outputs(p_type) ] for p_type in ParamType if self.get_outputs(p_type)
+            },
+        }

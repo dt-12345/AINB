@@ -30,3 +30,19 @@ class ReplacementEntry(typing.NamedTuple):
         else:
             output["Attachment Index"] = self.replace_index
         return output
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "ReplacementEntry":
+        t: ReplacementType = ReplacementType[data["Type"]]
+        if t == ReplacementType.RemoveAttachment:
+            return cls(
+                t, data["Node Index"], data["Attachment Index"]
+            )
+        elif t == ReplacementType.RemoveChild:
+            return cls(
+                t, data["Node Index"], data["Child Plug Index"]
+            )
+        else:
+            return cls(
+                t, data["Node Index"], data["Child Plug Index"], data["Replacement Node Index"]
+            )

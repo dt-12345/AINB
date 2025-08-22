@@ -1,7 +1,7 @@
 import typing
 
 from ainb.common import AINBReader
-from ainb.utils import IntEnumEx, JSONType, ValueType
+from ainb.utils import DictDecodeError, IntEnumEx, JSONType, ValueType
 
 class BBParamType(IntEnumEx):
     """
@@ -50,6 +50,31 @@ class BBParam:
                 "Flags" : self.flags,
                 "Default Value" : self.default_value,
             }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType, param_type: BBParamType) -> "BBParam":
+        param: BBParam = cls(param_type)
+        param.name = data["Name"]
+        param.notes = data["Notes"]
+        if "Source File" in data:
+            param.file_ref = data["Source File"]
+        param.flags = data["Flags"]
+        match (param_type):
+            case BBParamType.String:
+                param.default_value = str(data["Default Value"])
+            case BBParamType.S32:
+                param.default_value = int(data["Default Value"])
+            case BBParamType.F32:
+                param.default_value = float(data["Default Value"])
+            case BBParamType.Bool:
+                param.default_value = bool(data["Default Value"])
+            case BBParamType.Vec3f:
+                param.default_value = tuple(data["Default Value"])
+            case BBParamType.VoidPtr:
+                param.default_value = data["Default Value"]
+                if param.default_value is not None:
+                    raise DictDecodeError("Pointer params must have a default value of null")
+        return param
 
 class BBParamHeader(typing.NamedTuple):
     param_count: int
@@ -193,3 +218,14 @@ class Blackboard:
         return {
             p_type.name : [ param._as_dict(i) for i, param in enumerate(self.get_params(p_type)) ] for p_type in BBParamType if self.get_params(p_type)
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "Blackboard":
+        bb: Blackboard = cls()
+        for p_type in BBParamType:
+            if p_type.name not in data:
+                continue
+            bb._params[p_type] = [
+                BBParam._from_dict(param, p_type) for param in data[p_type.name]
+            ]
+        return bb

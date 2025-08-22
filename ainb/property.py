@@ -2,7 +2,7 @@ import typing
 
 from ainb.common import AINBReader
 from ainb.param_common import ParamType, ParamFlag
-from ainb.utils import JSONType, ValueType
+from ainb.utils import DictDecodeError, JSONType, ValueType
 
 PROPERTY_SIZES: typing.Final[typing.Dict[ParamType, int]] = {
     ParamType.Int : 0xc,
@@ -29,7 +29,7 @@ class Property:
 
     @classmethod
     def _read(cls, reader: AINBReader, param_type: ParamType) -> "Property":
-        property: Property = Property(param_type)
+        property: Property = cls(param_type)
         property.name = reader.read_string_offset()
         if param_type == ParamType.Pointer:
             property.classname = reader.read_string_offset()
@@ -69,6 +69,30 @@ class Property:
                 "Name" : self.name,
                 "Default Value" : self.default_value,
             } | self.flags._as_dict()
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType, param_type: ParamType) -> "Property":
+        prop: Property = cls(param_type)
+        prop.name = data["Name"]
+        if param_type == ParamType.Pointer:
+            prop.classname = data["Classname"]
+        match (param_type):
+            case ParamType.Int:
+                prop.default_value = int(data["Default Value"])
+            case ParamType.Bool:
+                prop.default_value = bool(data["Default Value"])
+            case ParamType.Float:
+                prop.default_value = float(data["Default Value"])
+            case ParamType.String:
+                prop.default_value = str(data["Default Value"])
+            case ParamType.Vector3F:
+                prop.default_value = tuple(data["Default Value"])
+            case ParamType.Pointer:
+                prop.default_value = data["Default Value"]
+                if prop.default_value is not None:
+                    raise DictDecodeError("Pointer properties must have a default value of null")
+        prop.flags = ParamFlag._from_dict(data)
+        return prop
 
 class PropertySet:
     """
@@ -111,7 +135,7 @@ class PropertySet:
 
     @classmethod
     def _read(cls, reader: AINBReader, end_offset: int) -> "PropertySet":
-        pset: PropertySet = PropertySet()
+        pset: PropertySet = cls()
         offsets: typing.Tuple[int, ...] = reader.unpack("<6I")
         end_offsets: typing.Tuple[int, ...] = (*offsets[1:], end_offset)
         for p_type in ParamType:
@@ -125,3 +149,14 @@ class PropertySet:
         return {
             p_type.name : [ prop._as_dict() for prop in self.get_properties(p_type) ] for p_type in ParamType if self.get_properties(p_type)
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "PropertySet":
+        pset: PropertySet = cls()
+        for p_type in ParamType:
+            if p_type.name not in data:
+                continue
+            pset._properties[p_type] = [
+                Property._from_dict(prop, p_type) for prop in data[p_type.name]
+            ]
+        return pset

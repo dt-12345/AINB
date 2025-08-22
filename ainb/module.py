@@ -18,3 +18,11 @@ class Module:
             "Category" : self.category,
             "Instance Count" : self.instance_count,
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "Module":
+        return cls(
+            data["Path"],
+            data["Category"],
+            data["Instance Count"],
+        )

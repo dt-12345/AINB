@@ -10,7 +10,7 @@ from ainb.param import ParamSet
 from ainb.param_common import ParamType
 from ainb.property import PropertySet
 from ainb.state import StateInfo
-from ainb.utils import IntEnumEx, JSONType, ParseError, ParseWarning
+from ainb.utils import DictDecodeError, IntEnumEx, JSONType, ParseError, ParseWarning
 
 NULL_INDEX: int = 0x7fff
 
@@ -108,6 +108,11 @@ class Plug(metaclass=abc.ABCMeta):
     def _as_dict(self) -> JSONType:
         pass
 
+    @classmethod
+    @abc.abstractmethod
+    def _from_dict(cls, data: JSONType) -> "Plug":
+        pass
+
 class GenericPlug(Plug):
     __slots__ = ["name"]
 
@@ -132,6 +137,13 @@ class GenericPlug(Plug):
             "Name" : self.name,
         }
     
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "GenericPlug":
+        plug: GenericPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        return plug
+    
 class ChildPlug(Plug):
     __slots__ = ["name"]
 
@@ -155,6 +167,13 @@ class ChildPlug(Plug):
             "Node Index" : self.node_index,
             "Name" : self.name,
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "ChildPlug":
+        plug: ChildPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        return plug
 
 class S32SelectorPlug(ChildPlug):
     __slots__ = ["condition", "is_default", "blackboard_index"]
@@ -195,6 +214,17 @@ class S32SelectorPlug(ChildPlug):
                 "Name" : self.name,
                 "Condition" : self.condition,
             }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "S32SelectorPlug":
+        plug: S32SelectorPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        if "Condition" in data:
+            plug.condition = data["Condition"]
+        else:
+            plug.is_default = data["Is Default"]
+        return plug
 
 class F32SelectorPlug(ChildPlug):
     __slots__ = ["condition_min", "blackboard_index_min", "condition_max", "blackboard_index_max", "is_default"]
@@ -259,6 +289,24 @@ class F32SelectorPlug(ChildPlug):
                 "Name" : self.name,
             } | self._format_condition(self.condition_min, self.blackboard_index_min, True) | self._format_condition(self.condition_max, self.blackboard_index_max, False)
 
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "F32SelectorPlug":
+        plug: F32SelectorPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        if "Is Default" in data:
+            plug.is_default = data["Is Default"]
+        else:
+            if "Condition Min" in data:
+                plug.condition_min = data["Condition Min"]
+            else:
+                plug.blackboard_index_min = data["Condition Min Blackboard Index"]
+            if "Condition Max" in data:
+                plug.condition_max = data["Condition Max"]
+            else:
+                plug.blackboard_index_max = data["Condition Max Blackboard Index"]
+        return plug
+
 class StringSelectorPlug(ChildPlug):
     __slots__ = ["condition", "is_default", "blackboard_index"]
 
@@ -298,6 +346,17 @@ class StringSelectorPlug(ChildPlug):
                 "Name" : self.name,
                 "Condition" : self.condition,
             }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "StringSelectorPlug":
+        plug: StringSelectorPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        if "Condition" in data:
+            plug.condition = data["Condition"]
+        else:
+            plug.is_default = data["Is Default"]
+        return plug
 
 class RandomSelectorPlug(ChildPlug):
     __slots__ = ["weight"]
@@ -320,6 +379,14 @@ class RandomSelectorPlug(ChildPlug):
             "Name" : self.name,
             "Weight" : self.weight,
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "RandomSelectorPlug":
+        plug: RandomSelectorPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        plug.weight = data["Weight"]
+        return plug
 
 class BSASelectorUpdaterPlug(ChildPlug):
     __slots__ = ["unk0", "unk1"]
@@ -345,6 +412,15 @@ class BSASelectorUpdaterPlug(ChildPlug):
             "Unknown0" : self.unk0,
             "Unknown1" : self.unk1,
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "BSASelectorUpdaterPlug":
+        plug: BSASelectorUpdaterPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        plug.unk0 = data["Unknown0"]
+        plug.unk1 = data["Unknown1"]
+        return plug
 
 class TransitionPlug(Plug):
     __slots__ = ["transition"]
@@ -366,8 +442,8 @@ class TransitionPlug(Plug):
         index: int = reader.read_u32()
         try:
             plug.transition = info_list[index]
-        except IndexError:
-            raise ParseError(reader, f"TransitionPlug has out-of-bounds entry index: {index}")
+        except IndexError as e:
+            raise ParseError(reader, f"TransitionPlug has out-of-bounds entry index: {index}") from e
         return plug
     
     def _as_dict(self) -> JSONType:
@@ -384,6 +460,23 @@ class TransitionPlug(Plug):
                 "Transition Type" : self.transition.transition_type,
                 "Update Post Calc" : self.transition.update_post_calc,
             }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "TransitionPlug":
+        plug: TransitionPlug = cls()
+        plug.node_index = data["Node Index"]
+        if "Transition Name" in data:
+            plug.transition = Transition(
+                data["Transition Type"],
+                data["Update Post Calc"],
+                data["Transition Name"],
+            )
+        else:
+            plug.transition = Transition(
+                data["Transition Type"],
+                data["Update Post Calc"],
+            )
+        return plug
 
 class StringInputPlug(Plug):
     __slots__ = ["name", "unknown", "default_value", "_version"]
@@ -423,6 +516,17 @@ class StringInputPlug(Plug):
                 "Node Index" : self.node_index,
                 "Name" : self.name,
             }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "StringInputPlug":
+        plug: StringInputPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        if "Unknown" in data:
+            plug.unknown = data["Unknown"]
+            plug.default_value = data["Default Value"]
+            plug._version = 0x407
+        return plug
 
 class IntInputPlug(Plug):
     __slots__ = ["name", "unknown", "default_value", "_version"]
@@ -462,6 +566,17 @@ class IntInputPlug(Plug):
                 "Node Index" : self.node_index,
                 "Name" : self.name,
             }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "IntInputPlug":
+        plug: IntInputPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        if "Unknown" in data:
+            plug.unknown = data["Unknown"]
+            plug.default_value = data["Default Value"]
+            plug._version = 0x407
+        return plug
 
 class NodeFlag(int):
     """
@@ -480,17 +595,17 @@ class NodeFlag(int):
     def is_multi_param_type2(self) -> bool:
         return self & 8 != 0
     
-    def set_query(self, b: bool) -> None:
-        self = NodeFlag(self & 0xfe | int(b))
+    def set_query(self, b: bool = True) -> "NodeFlag":
+        return NodeFlag(self & 0xfe | int(b))
     
-    def set_module(self, b: bool) -> None:
-        self = NodeFlag(self & 0xfd | int(b) << 1)
+    def set_module(self, b: bool = True) -> "NodeFlag":
+        return NodeFlag(self & 0xfd | int(b) << 1)
 
-    def set_root_node(self, b: bool) -> None:
-        self = NodeFlag(self & 0xfb | int(b) << 2)
+    def set_root_node(self, b: bool = True) -> "NodeFlag":
+        return NodeFlag(self & 0xfb | int(b) << 2)
 
-    def set_multi_param_type2(self, b: bool) -> None:
-        self = NodeFlag(self & 0xf7 | int(b) << 3)
+    def set_multi_param_type2(self, b: bool = True) -> "NodeFlag":
+        return NodeFlag(self & 0xf7 | int(b) << 3)
 
     def _get_flag_list(self) -> typing.List[str]:
         out: typing.List[str] = []
@@ -503,6 +618,19 @@ class NodeFlag(int):
         if self.is_multi_param_type2():
             out.append("Use MultiParam Type 2")
         return out
+    
+    @classmethod
+    def _from_flag_list(cls, data: JSONType) -> "NodeFlag":
+        flag: NodeFlag = cls()
+        if "Is Query" in data:
+            flag = flag.set_query()
+        if "Is Module" in data:
+            flag = flag.set_module()
+        if "Is Root Node" in data:
+            flag = flag.set_root_node()
+        if "Use MultiParam Type 2" in data:
+            flag = flag.set_multi_param_type2()
+        return flag
 
 class Node:
     """
@@ -518,7 +646,7 @@ class Node:
         self.type: NodeType = node_type
         self.index: int = -1
         self.flags: NodeFlag = NodeFlag()
-        self.queries: typing.List[int] = [] # stored as an index into an array of all query nodes
+        self.queries: typing.List[int] = []
         self.attachments: typing.List[Attachment] = []
         self.properties: PropertySet = PropertySet()
         self.params: ParamSet = ParamSet()
@@ -600,7 +728,7 @@ class Node:
         modules: typing.List[Module], # not needed for parsing, just to raise a warning if there is a missing module,
         index: int # not needed for parsing, just to raise a warning if a node's index doesn't match its actual index
     ) -> "Node":
-        node: Node = Node(NodeType(reader.read_u16()))
+        node: Node = cls(NodeType(reader.read_u16()))
         node.index = reader.read_s16()
         if node.index != index:
             ParseWarning(reader, f"Node claims it is index {node.index} when it is index {index}")
@@ -638,7 +766,7 @@ class Node:
             ParseWarning(reader, f"Non-zero state info offset in file version that does not support node state info: {state_info_offset}")
         node.guid = reader.read_guid()
 
-        node.queries = queries[base_query_index:base_query_index+query_count]
+        node.queries = queries[base_query_index:base_query_index+query_count] # stored as an index into an array of all query nodes, converted later
         node.attachments = [attachments[i] for i in attachment_indices[base_attachment_index:base_attachment_index+attachment_count]]
 
         # node parameters + plugs
@@ -701,7 +829,7 @@ class Node:
         else:
             raise ParseError(reader, f"Unsupported plug type: {plug_type}")
     
-    def _as_dict(self, query_indices: typing.List[int]) -> JSONType:
+    def _as_dict(self) -> JSONType:
         if self.state_info is not None:
             return {
                 "Node Type" : self.type.name,
@@ -709,7 +837,7 @@ class Node:
                 "Name" : self.name,
                 "GUID" : self.guid,
                 "Flags" : self.flags._get_flag_list(),
-                "Queries" : [query_indices[i] for i in self.queries],
+                "Queries" : self.queries,
                 "Attachments" : [ attachment._as_dict() for attachment in self.attachments ],
                 "Properties" : self.properties._as_dict(),
                 "Parameters" : self.params._as_dict(),
@@ -726,7 +854,7 @@ class Node:
                 "Name" : self.name,
                 "GUID" : self.guid,
                 "Flags" : self.flags._get_flag_list(),
-                "Queries" : [query_indices[i] for i in self.queries],
+                "Queries" : self.queries,
                 "Attachments" : [ attachment._as_dict() for attachment in self.attachments ],
                 "Properties" : self.properties._as_dict(),
                 "Parameters" : self.params._as_dict(),
@@ -735,3 +863,56 @@ class Node:
                     plug_type.name : [ plug._as_dict() for plug in self.get_plugs(plug_type) ] for plug_type in PlugType if self.get_plugs(plug_type)
                 },
             }
+
+    def _read_plug_from_dict(self, data: JSONType, plug_type: PlugType) -> Plug:
+        if plug_type == PlugType.Generic:
+            return GenericPlug._from_dict(data)
+        elif plug_type == PlugType.Child:
+            if self.type == NodeType.Element_S32Selector:
+                return S32SelectorPlug._from_dict(data)
+            elif self.type == NodeType.Element_F32Selector:
+                return F32SelectorPlug._from_dict(data)
+            elif self.type == NodeType.Element_StringSelector:
+                return StringSelectorPlug._from_dict(data)
+            elif self.type == NodeType.Element_RandomSelector:
+                return RandomSelectorPlug._from_dict(data)
+            elif self.name == "SelectorBSABrainVerbUpdater" or self.name == "SelectorBSAFormChangeUpdater":
+                return BSASelectorUpdaterPlug._from_dict(data)
+            else:
+                return ChildPlug._from_dict(data)
+        elif plug_type == PlugType.Transition:
+            return TransitionPlug._from_dict(data)
+        elif plug_type == PlugType.String:
+            return StringInputPlug._from_dict(data)
+        elif plug_type == PlugType.Int:
+            return IntInputPlug._from_dict(data)
+        else:
+            raise DictDecodeError(f"Unsupported plug type: {plug_type}")
+
+    @classmethod
+    def _from_dict(cls, data: JSONType, index: int) -> "Node":
+        node: Node = cls(NodeType[data["Node Type"]])
+        node.index = data["Node Index"]
+        if node.index != index:
+            raise DictDecodeError(f"Node index {index} claims it has index {node.index}")
+        node.name = data["Name"]
+        node.guid = data["GUID"]
+        node.flags = NodeFlag._from_flag_list(data["Flags"])
+        node.queries = data["Queries"]
+        node.attachments = [
+            Attachment._from_dict(attachment) for attachment in data["Attachments"]
+        ]
+        node.properties = PropertySet._from_dict(data["Properties"])
+        node.params = ParamSet._from_dict(data["Parameters"])
+        node.actions = [
+            Action._from_dict(action) for action in data["XLink Actions"]
+        ]
+        for plug_type in PlugType:
+            if plug_type.name not in data["Plugs"]:
+                continue
+            node._plugs[plug_type] = [
+                node._read_plug_from_dict(plug, plug_type) for plug in data["Plugs"][plug_type.name]
+            ]
+        if "State Info" in data:
+            node.state_info = StateInfo._from_dict(data["State Info"])
+        return node

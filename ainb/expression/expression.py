@@ -4,6 +4,7 @@ import typing
 from ainb.expression.common import ExpressionReader
 from ainb.expression.disassemble import disassemble
 from ainb.expression.instruction import InstDataType, InstructionBase
+from ainb.expression.parser import parse_instruction
 from ainb.utils import JSONType, ParseError
 
 # TODO: proper version 1 support => no setup expressions
@@ -36,7 +37,7 @@ class Expression:
     
     @classmethod
     def _read(cls, reader: ExpressionReader, instructions: typing.List[InstructionBase]) -> "Expression":
-        expr: Expression = Expression()
+        expr: Expression = cls()
         setup_base_index: int = reader.read_s32()
         setup_inst_count: int = reader.read_u32()
         if setup_base_index != -1:
@@ -75,14 +76,32 @@ class Expression:
         if self.setup_command:
             return {
                 "Expression Index" : index,
+                "Input Type" : self.input_datatype.name,
+                "Output Type" : self.output_datatype.name,
                 "Setup" : [self._format_instruction(inst, i * 8) for i, inst in enumerate(self.setup_command)],
                 "Main" : [self._format_instruction(inst, i * 8) for i, inst in enumerate(self.main_command)],
             }
         else:
             return {
                 "Expression Index" : index,
+                "Input Type" : self.input_datatype.name,
+                "Output Type" : self.output_datatype.name,
                 "Main" : [self._format_instruction(inst, i * 8) for i, inst in enumerate(self.main_command)],
             }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "Expression":
+        expr: Expression = cls()
+        expr.input_datatype = InstDataType[data["Input Type"]]
+        expr.output_datatype = InstDataType[data["Output Type"]]
+        if "Setup" in data:
+            expr.setup_command = [
+                parse_instruction(inst) for inst in data["Setup"]
+            ]
+        expr.main_command = [
+            parse_instruction(inst) for inst in data["Main"]
+        ]
+        return expr
 
 class ExpressionModule:
     """
@@ -107,7 +126,7 @@ class ExpressionModule:
         """
         Load an ExpressionModule from the provided binary reader
         """
-        self: ExpressionModule = ExpressionModule()
+        self: ExpressionModule = cls()
         
         magic: str = reader.read(4).decode()
         if magic != "EXB ":
@@ -175,9 +194,25 @@ class ExpressionModule:
         return f".version {self.version}\n\n{self._format_expressions()}"
     
     def as_dict(self) -> JSONType:
+        """
+        Returns the expression module in dictionary form
+        """
         return {
             "Version" : self.version,
             "Expressions" : [
                 expr._as_dict(i) for i, expr in enumerate(self.expressions)
             ],
         }
+    
+    @classmethod
+    def from_dict(cls, data: JSONType) -> "ExpressionModule":
+        """
+        Load an expression module from a dictionary
+        """
+        # TODO: instance count
+        self: ExpressionModule = cls()
+        self.version = data["Version"]
+        self.expressions = [
+            Expression._from_dict(expr) for expr in data["Expressions"]
+        ]
+        return self

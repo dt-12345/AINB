@@ -23,3 +23,13 @@ class StateInfo(typing.NamedTuple):
             "Unknown0C" : self.unk0c,
             "Unknown10" : self.unk10,
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "StateInfo":
+        return cls(
+            data["Desired State"],
+            data["Unknown04"],
+            data["Unknown08"],
+            data["Unknown0C"],
+            data["Unknown10"],
+        )

@@ -74,43 +74,43 @@ class ParamFlag(int):
         """
         return self & 0xffff
     
-    def set_pulse_tls(self, b: bool) -> None:
+    def set_pulse_tls(self, b: bool = True) -> "ParamFlag":
         """
         Set pulse TLS flag
         """
-        self = ParamFlag(self & 0xff7fffff | int(b) << 0x17)
+        return ParamFlag(self & 0xff7fffff | int(b) << 0x17)
     
-    def set_output(self, b: bool) -> None:
+    def set_output(self, b: bool = True) -> "ParamFlag":
         """
         Returns whether or not this parameter has bit 0 of its pointer set
 
         Note this method name is definitely wrong
         """
-        self = ParamFlag(self & 0xfeffffff | int(b) << 0x18)
+        return ParamFlag(self & 0xfeffffff | int(b) << 0x18)
     
-    def set_expression(self, b: bool) -> None:
+    def set_expression(self, b: bool = True) -> "ParamFlag":
         """
         Set expression flag
         """
-        self = ParamFlag(self & 0x3dffffff | (0xc2000000 if b else 0))
+        return ParamFlag(self & 0x3dffffff | (0xc2000000 if b else 0))
     
-    def set_blackboard(self, b: bool) -> None:
+    def set_blackboard(self, b: bool = True) -> "ParamFlag":
         """
         Set blackboard flag
         """
-        self = ParamFlag(self & 0x3dffffff | (0x80000000 if b else 0))
+        return ParamFlag(self & 0x3dffffff | (0x80000000 if b else 0))
     
-    def set_vector_component(self, comp: VectorComponent) -> None:
+    def set_vector_component(self, comp: VectorComponent) -> "ParamFlag":
         """
         Set vector component flag
         """
-        self = ParamFlag(self & 0xf3ffffff | comp.value << 0x1a)
+        return ParamFlag(self & 0xf3ffffff | comp.value << 0x1a)
 
-    def set_index(self, index: int) -> None:
+    def set_index(self, index: int) -> "ParamFlag":
         """
         Set index flag
         """
-        self = ParamFlag(self & 0xffff0000 | index)
+        return ParamFlag(self & 0xffff0000 | index)
 
     def _as_dict(self) -> JSONType:
         output: JSONType = {
@@ -128,3 +128,20 @@ class ParamFlag(int):
             if comp != VectorComponent.NONE:
                 output["Vector Component"] = comp.name
         return output
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "ParamFlag":
+        flag: ParamFlag = cls()
+        if "Pulse TLS" in data["Flags"]:
+            flag = flag.set_pulse_tls()
+        if "Is Output" in data["Flags"]:
+            flag = flag.set_output()
+        if "Expression Index" in data:
+            flag = flag.set_expression()
+            flag = flag.set_index(data["Expression Index"])
+        elif "Blackboard Index" in data:
+            flag = flag.set_blackboard()
+            flag = flag.set_index(data["Blackboard Index"])
+            if "Vector Component" in data:
+                flag = flag.set_vector_component(VectorComponent[data["Vector Component"]])
+        return flag

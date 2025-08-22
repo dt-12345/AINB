@@ -1,8 +1,15 @@
 import abc
+import re
 import typing
 
-from ainb.expression.common import ExpressionReader
+from ainb.expression.common import ExpressionParseError, ExpressionReader
 from ainb.utils import EnumEx, ParseError, ParseWarning, ValueType
+
+OPERAND: re.Pattern[str] = re.compile(r"(?P<datatype>\w+?)\s+?(?P<argument>.+?)(,|$)")
+MEMORY_OFFSET: re.Pattern[str] = re.compile(r"(?P<source>\w+)\[(?P<offset>(0x)?[0-9a-fA-F]+)\](\.(?P<component>[xyzXYZ]))?$")
+STRING_LITERAL: re.Pattern[str] = re.compile(r"\"(?P<value>.+?)\"$")
+VECTOR_LITERAL: re.Pattern[str] = re.compile(r"\((\s*(?P<x>(\d|\.)+)\s*,\s*(?P<y>(\d|\.)+)\s*,\s*(?P<z>(\d|\.)+)\s*)\)")
+CALL_ARGS: re.Pattern[str] = re.compile(r"(?P<signature>(((\(\s*(?P<arg1>[^\s]+?)\s*\))|(\w+))\.)?(?P<name>\w+)\(\s*(?P<return>[^\s]+?)\s*(,\s*(?P<args>.+?))?\s*\)),\s*GMem\[(?P<offset>(0x)?[0-9a-fA-F]+?)\]$")
 
 class InstType(EnumEx):
     """
@@ -87,6 +94,14 @@ DT_PREFIX: typing.Final[typing.Dict[InstDataType, str]] = {
     InstDataType.VECTOR3F : "vec3f ",
 }
 
+REVERSE_DT_PREFIX: typing.Final[typing.Dict[str, InstDataType]] = {
+    "bool" : InstDataType.BOOL,
+    "int" : InstDataType.INT,
+    "float" : InstDataType.FLOAT,
+    "str" : InstDataType.STRING,
+    "vec3f" : InstDataType.VECTOR3F,
+}
+
 OP_PREFIX: typing.Final[typing.Dict[InstOpType, str]] = {
     InstOpType.GlobalMemory : "GMem",
     InstOpType.ExpressionInput : "In",
@@ -95,6 +110,22 @@ OP_PREFIX: typing.Final[typing.Dict[InstOpType, str]] = {
     InstOpType.LocalMemory64 : "LMem64",
     InstOpType.Input : "UserIn",
     InstOpType.Output : "UserOut",
+}
+
+REVERSE_OP_PREFIX: typing.Final[typing.Dict[str, InstOpType]] = {
+    "GMem" : InstOpType.GlobalMemory,
+    "In" : InstOpType.ExpressionInput,
+    "Out" : InstOpType.ExpressionOutput,
+    "LMem32" : InstOpType.LocalMemory32,
+    "LMem64" : InstOpType.LocalMemory64,
+    "UserIn" : InstOpType.Input,
+    "UserOut" : InstOpType.Output,
+}
+
+VEC_OFFSET_MAP: typing.Final[typing.Dict[str, int]] = {
+    "x" : 0,
+    "y" : 4,
+    "z" : 8,
 }
 
 def _get_dt_prefix(datatype: InstDataType) -> str:
@@ -227,6 +258,58 @@ class Operand:
     
     def _is_value(self) -> bool:
         return self.type.is_immediate_value()
+    
+    @classmethod
+    def _parse_generic(cls, text: str) -> "Operand":
+        op: Operand = cls()
+        op_match: re.Match[str] | None = re.match(OPERAND, text.strip())
+        if op_match is None:
+            raise ExpressionParseError(f"Could not decode operand: {text}")
+        datatype: str = op_match.group("datatype")
+        argument: str = op_match.group("argument")
+        op.datatype = REVERSE_DT_PREFIX[datatype.lower()]
+        arg_match: re.Match[str] | None = re.match(MEMORY_OFFSET, argument)
+        if arg_match is not None:
+            op.type = REVERSE_OP_PREFIX[arg_match.group("source")]
+            offset: str = arg_match.group("offset")
+            if offset.startswith("0x"):
+                op.value = int(offset, 16)
+            else:
+                op.value = int(offset)
+            if op.type in [InstOpType.Input, InstOpType.Output]:
+                comp: str | None = arg_match.group("component")
+                if comp is not None:
+                    op.vec_offset = VEC_OFFSET_MAP[comp.lower()]
+        else:
+            op.type = InstOpType.Immediate # guess first, we'll fix this when serializing
+            match (op.datatype):
+                case InstDataType.BOOL:
+                    op.value = argument.lower() == "true"
+                case InstDataType.INT:
+                    if argument.startswith("0x"):
+                        op.value = int(argument, 16)
+                    elif argument.startswith("0b"):
+                        op.value = int(argument, 2)
+                    else:
+                        op.value = int(argument)
+                case InstDataType.FLOAT:
+                    op.value = float(argument)
+                case InstDataType.STRING:
+                    # maybe regex is overkill for this but whatever
+                    str_match: re.Match[str] | None = re.match(STRING_LITERAL, argument)
+                    if str_match is None:
+                        raise ExpressionParseError(f"Could not decode string literal: {argument}")
+                    op.value = str_match.group("value")
+                case InstDataType.VECTOR3F:
+                    vec_match: re.Match[str] | None = re.match(VECTOR_LITERAL, argument)
+                    if vec_match is None:
+                        raise ExpressionParseError(f"Could not decode vector literal: {argument}")
+                    op.value = (
+                        float(vec_match.group("x")), float(vec_match.group("y")), float(vec_match.group("z"))
+                    )
+                case _:
+                    raise ExpressionParseError(f"Invalid operand datatype: {op.datatype}")
+        return op
 
 class InstructionBase(metaclass=abc.ABCMeta):
     """
@@ -266,6 +349,11 @@ class InstructionBase(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def format(self) -> str:
         pass
+
+    @classmethod
+    @abc.abstractmethod
+    def _parse(cls, matches: re.Match[str]) -> "InstructionBase":
+        pass
     
 class SingleOpInstruction(InstructionBase):
     __slots__ = ["op"]
@@ -284,6 +372,12 @@ class SingleOpInstruction(InstructionBase):
     
     def format(self) -> str:
         return f"{self._type} {self.op.format()}"
+    
+    @classmethod
+    def _parse(cls, matches: re.Match[str]) -> "SingleOpInstruction":
+        inst: SingleOpInstruction = cls() # type: ignore
+        inst.op = Operand._parse_generic(matches.group("op1"))
+        return inst
 
 class DualOpInstruction(InstructionBase):
     __slots__ = ["op1", "op2"]
@@ -302,6 +396,13 @@ class DualOpInstruction(InstructionBase):
     
     def format(self) -> str:
         return f"{self._type} {self.op1.format()}, {self.op2.format()}"
+    
+    @classmethod
+    def _parse(cls, matches: re.Match[str]) -> "DualOpInstruction":
+        inst: DualOpInstruction = cls() # type: ignore
+        inst.op1 = Operand._parse_generic(matches.group("op1"))
+        inst.op2 = Operand._parse_generic(matches.group("op2"))
+        return inst
 
 class JumpInstructionBase(InstructionBase):
     __slots__ = ["jump_address"]
@@ -329,6 +430,10 @@ class EndInstruction(InstructionBase):
     
     def format(self) -> str:
         return "END"
+    
+    @classmethod
+    def _parse(cls, matches: re.Match[str]) -> "EndInstruction":
+        return cls()
 
 class StoreInstruction(DualOpInstruction):
     """
@@ -1172,6 +1277,21 @@ class CallFunctionInstruction(InstructionBase):
     
     def format(self) -> str:
         return f"CFN {self.func_signature}, GMem[{self.args_offset:#x}]"
+    
+    @classmethod
+    def _parse(cls, matches: re.Match[str]) -> "CallFunctionInstruction":
+        inst: CallFunctionInstruction = cls()
+        args_match: re.Match[str] | None = re.match(CALL_ARGS, matches.group("arguments"))
+        if args_match is None:
+            raise ExpressionParseError(f"Failed to decode {matches.group("arguments")}")
+        inst.datatype = InstDataType[args_match.group("return").upper()]
+        inst.func_signature = args_match.group("signature")
+        offset: str = args_match.group("offset")
+        if offset.startswith("0x"):
+            inst.args_offset = int(offset, 16)
+        else:
+            inst.args_offset = int(offset)
+        return inst
 
 class JumpIfZeroInstruction(JumpInstructionBase):
     """
@@ -1208,6 +1328,26 @@ class JumpIfZeroInstruction(JumpInstructionBase):
     
     def format(self) -> str:
         return f"JZE {self.condition.format()}, {self.jump_address:#x}"
+    
+    @classmethod
+    def _parse(cls, matches: re.Match[str]) -> "JumpIfZeroInstruction":
+        inst: JumpIfZeroInstruction = cls()
+        arg_match: re.Match[str] | None = re.match(MEMORY_OFFSET, matches.group("op1"))
+        if arg_match is None:
+            raise ExpressionParseError(f"Failed to parse operand: {matches.group('op1')}")
+        inst.condition.type = InstOpType.GlobalMemory
+        inst.condition.datatype = InstDataType.NONE
+        offset: str = arg_match.group("offset")
+        if offset.startswith("0x"):
+            inst.condition.value = int(offset, 16)
+        else:
+            inst.condition.value = int(offset)
+        offset = matches.group("op2")
+        if offset.startswith("0x"):
+            inst.jump_address = int(offset, 16)
+        else:
+            inst.jump_address = int(offset)
+        return inst
 
 class JumpInstruction(JumpInstructionBase):
     """
@@ -1231,3 +1371,45 @@ class JumpInstruction(JumpInstructionBase):
     
     def format(self) -> str:
         return f"JMP {self.jump_address:#x}"
+    
+    @classmethod
+    def _parse(cls, matches: re.Match[str]) -> "JumpInstruction":
+        inst: JumpInstruction = cls()
+        offset: str = matches.group("op1")
+        if offset.startswith("0x"):
+            inst.jump_address = int(offset, 16)
+        else:
+            inst.jump_address = int(offset)
+        return inst
+    
+INSTRUCTION_TABLE: typing.Final[typing.Dict[InstType, typing.Type[InstructionBase]]] = {
+    InstType.END : EndInstruction,
+    InstType.STR : StoreInstruction,
+    InstType.NEG : NegateInstruction,
+    InstType.NOT : LogicalNotInstruction,
+    InstType.ADD : AdditionInstruction,
+    InstType.SUB : SubtractionInstruction,
+    InstType.MUL : MultiplicationInstruction,
+    InstType.DIV : DivisionInstruction,
+    InstType.MOD : ModulusInstruction,
+    InstType.INC : IncrementInstruction,
+    InstType.DEC : DecrementInstruction,
+    InstType.VMS : ScalarMultiplicationInstruction,
+    InstType.VDS : ScalarDivisionInstruction,
+    InstType.LSH : LeftShiftInstruction,
+    InstType.RSH : RightShiftInstruction,
+    InstType.LST : LessThanInstruction,
+    InstType.LTE : LessThanEqualInstruction,
+    InstType.GRT : GreaterThanInstruction,
+    InstType.GTE : GreaterThanEqualInstruction,
+    InstType.EQL : EqualityInstruction,
+    InstType.NEQ : InequalityInstruction,
+    InstType.AND : ANDInstruction,
+    InstType.XOR : XORInstruction,
+    InstType.ORR : ORInstruction,
+    InstType.LAN : LogicalANDInstruction,
+    InstType.LOR : LogicalORInstruction,
+    InstType.CFN : CallFunctionInstruction,
+    InstType.JZE : JumpIfZeroInstruction,
+    InstType.JMP : JumpInstruction,
+}

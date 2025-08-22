@@ -21,7 +21,7 @@ class Attachment:
 
     @classmethod
     def _read(cls, reader: AINBReader, properties: PropertySet) -> "Attachment":
-        attachment: Attachment = Attachment()
+        attachment: Attachment = cls()
         attachment.name = reader.read_string_offset()
         offset: int = reader.read_u32()
         attachment._expression_count = reader.read_u16()
@@ -44,3 +44,10 @@ class Attachment:
             "Name" : self.name,
             "Properties" : self.properties._as_dict(),
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "Attachment":
+        attachment: Attachment = cls()
+        attachment.name = data["Name"]
+        attachment.properties = PropertySet._from_dict(data["Properties"])
+        return attachment

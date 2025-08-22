@@ -18,7 +18,7 @@ from ainb.node import Node, Transition
 from ainb.param import ParamSet, ParamSource
 from ainb.property import PropertySet
 from ainb.replacement import ReplacementEntry, ReplacementType
-from ainb.utils import JSONType, ParseError, ParseWarning
+from ainb.utils import DictDecodeError, JSONType, ParseError, ParseWarning
 
 # TODO: version 0x408 support if it's not too hard
 SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (0x404, 0x407)
@@ -33,8 +33,8 @@ class FileCategory(enum.Enum):
     AI                  = 0
     Logic               = 1
     Sequence            = 2
-    UniqueSequence      = 0 # splatoon 3 only
-    UniqueSequenceSPL   = 0 # splatoon 3 only
+    UniqueSequence      = enum.auto() # splatoon 3 only
+    UniqueSequenceSPL   = enum.auto() # splatoon 3 only
 
 class UnknownSection0x58(typing.NamedTuple):
     description: str = ""
@@ -49,6 +49,15 @@ class UnknownSection0x58(typing.NamedTuple):
             "Unknown08" : self.unk08,
             "Unknown0C" : self.unk0c,
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "UnknownSection0x58":
+        return cls(
+            data["Description"],
+            data["Unknown04"],
+            data["Unknown08"],
+            data["Unknown0C"],
+        )
 
 class AINB:
     """
@@ -212,6 +221,13 @@ class AINB:
             Node._read(reader, attachments, attachment_indices, properties, io_params, transitions, queries, actions, self.modules, i) for i in range(node_count)
         ]
 
+        # convert query indices to canonical node indices
+        query_indices: typing.List[int] = [
+            i for i, node in enumerate(self.nodes) if node.flags.is_query()
+        ]
+        for node in self.nodes:
+            self._fix_query_indices(node, query_indices)
+
         # TODO: unknown sections
 
         if _x50 != transition_offset:
@@ -353,6 +369,9 @@ class AINB:
             reader.read_s16()
         )
     
+    def _fix_query_indices(self, node: Node, query_indices: typing.List[int]) -> None:
+        node.queries = [query_indices[i] for i in node.queries]
+
     @staticmethod
     def _verify_enum_db(db: typing.Dict[str, typing.Dict[str, int]]) -> bool:
         if not isinstance(db, dict):
@@ -395,10 +414,6 @@ class AINB:
         """
         Returns an AINB object in dictionary form
         """
-        query_indices: typing.List[int] = [
-            i for i, node in enumerate(self.nodes) if node.flags.is_query()
-        ]
-
         if self.version < 0x407:
             return {
                 "Version" : self.version,
@@ -407,7 +422,7 @@ class AINB:
                 "Blackboard ID" : self.blackboard_id,
                 "Parent Blackboard ID" : self.parent_blackboard_id,
                 "Commands" : [ cmd._as_dict() for cmd in self.commands ],
-                "Nodes" : [ node._as_dict(query_indices) for node in self.nodes ],
+                "Nodes" : [ node._as_dict() for node in self.nodes ],
                 "Blackboard" : self.blackboard._as_dict() if self.blackboard is not None else {},
                 "Expressions" : self.expressions.as_dict() if self.expressions is not None else {},
                 "Modules" : [ module._as_dict() for module in self.modules ],
@@ -421,7 +436,7 @@ class AINB:
                 "Blackboard ID" : self.blackboard_id,
                 "Parent Blackboard ID" : self.parent_blackboard_id,
                 "Commands" : [ cmd._as_dict() for cmd in self.commands ],
-                "Nodes" : [ node._as_dict(query_indices) for node in self.nodes ],
+                "Nodes" : [ node._as_dict() for node in self.nodes ],
                 "Blackboard" : self.blackboard._as_dict() if self.blackboard is not None else {},
                 "Expressions" : self.expressions.as_dict() if self.expressions is not None else {},
                 "Replacement Table" : [ entry._as_dict() for entry in self.replacement_table ],
@@ -430,11 +445,87 @@ class AINB:
             }
     
     def save_json(self, output_path: str = "", override_filename: str = "") -> None:
+        """
+        Save AINB to JSON file
+        """
         if output_path:
             os.makedirs(output_path, exist_ok=True)
         output_filename: str = override_filename if override_filename else f"{self.filename}.json"
         with open(os.path.join(output_path, output_filename), "w", encoding="utf-8") as f:
             json.dump(self.as_dict(), f, indent=2, ensure_ascii=False)
+
+    def to_json(self) -> str:
+        """
+        Convert AINB to JSON string
+        """
+        return json.dumps(self.as_dict(), indent=2, ensure_ascii=False)
+
+    @classmethod
+    def from_dict(cls, data: JSONType, override_filename: str = "") -> "AINB":
+        """
+        Deserialize a dictionary into an AINB object
+        """
+        self: AINB = cls()
+
+        self.version = data["Version"]
+        if self.version not in SUPPORTED_VERSIONS:
+            raise DictDecodeError(f"Unsupported AINB version: {self.version}")
+
+        if override_filename != "":
+            self.filename = override_filename
+        else:
+            self.filename = data["Filename"]
+
+        self.category = data["Category"]
+        if self.version > 0x404:
+            if self.category not in FileCategory.__members__:
+                raise DictDecodeError(f"Unknown file category: {self.category}")
+        
+        self.blackboard_id = data["Blackboard ID"]
+        self.parent_blackboard_id = data["Parent Blackboard ID"]
+
+        self.commands = [
+            Command._from_dict(cmd) for cmd in data["Commands"]
+        ]
+
+        self.nodes = [
+            Node._from_dict(node, i) for i, node in enumerate(data["Nodes"])
+        ]
+
+        if (bb := data["Blackboard"]) != {}:
+            self.blackboard = Blackboard._from_dict(bb)
+        
+        if (expr := data["Expressions"]) != {}:
+            self.expressions = ExpressionModule.from_dict(expr)
+
+        if self.version >= 0x407:
+            self.replacement_table = [
+                ReplacementEntry._from_dict(entry) for entry in data["Replacement Table"]
+            ]
+        
+        self.modules = [
+            Module._from_dict(module) for module in data["Modules"]
+        ]
+
+        if (unk_section := data["Unknown Section 0x58"]) != {}:
+            self.unk_section0x58 = UnknownSection0x58._from_dict(unk_section)
+
+        return self
+    
+    @classmethod
+    def from_json(cls, filepath: str, override_filename: str = "") -> "AINB":
+        """
+        Deserialize a JSON file into an AINB object
+        """
+        with open(filepath, "r", encoding="utf-8") as f:
+            return cls.from_dict(json.load(f), override_filename)
+        
+    @classmethod
+    def from_json_text(cls, text: str, override_filename: str = "") -> "AINB":
+        """
+        Deserialize a JSON string into an AINB object
+        """
+        return cls.from_dict(json.loads(text), override_filename)
 
 def set_game(game: str) -> None:
     """
@@ -462,3 +553,17 @@ def set_splatoon3() -> None:
     Set the current game to Splatoon 3
     """
     set_game("s3")
+
+def set_tears_of_the_kingdom() -> None:
+    """
+    Set the current game to The Legend of Zelda: Tears of the Kingdom
+    """
+    # no enum db needed
+    return
+
+def set_super_mario_bros_wonder() -> None:
+    """
+    Set the current game to Super Mario Bros. Wonder
+    """
+    # no enum db needed
+    return

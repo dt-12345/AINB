@@ -6,3 +6,8 @@ ainb.AINB.from_file("tests/data/Main.module.ainb").save_json("tests/output")
 ainb.AINB.from_file("tests/data/Bird.action.fleetothesky.module.ainb").save_json("tests/output")
 ainb.AINB.from_file("tests/data/DungeonBossRito.action.SpreadShootAttack.module.ainb").save_json("tests/output")
 ainb.AINB.from_file("tests/data/Drake.sp.action.root.ainb").save_json("tests/output")
+
+orig: ainb.AINB = ainb.AINB.from_file("tests/data/Drake.sp.action.root.ainb")
+new: ainb.AINB = ainb.AINB.from_json_text(orig.to_json())
+
+assert orig.as_dict() == new.as_dict(), "oops they don't match"

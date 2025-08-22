@@ -2,7 +2,7 @@ import typing
 
 from ainb.common import AINBReader
 from ainb.param_common import ParamType, ParamFlag
-from ainb.utils import JSONType, ParseError, ValueType
+from ainb.utils import DictDecodeError, JSONType, ParseError, ValueType
 
 class ParamSource(typing.NamedTuple):
     """
@@ -15,7 +15,7 @@ class ParamSource(typing.NamedTuple):
 
     @classmethod
     def _read(cls, reader: AINBReader) -> "ParamSource":
-        return ParamSource(reader.read_s16(), reader.read_s16(), ParamFlag(reader.read_u32()))
+        return cls(reader.read_s16(), reader.read_s16(), ParamFlag(reader.read_u32()))
 
     @property
     def is_multi(self) -> bool:
@@ -34,6 +34,12 @@ class ParamSource(typing.NamedTuple):
             "Node Index" : self.src_node_index,
             "Output Index" : self.src_output_index,
         } | self.flags._as_dict()
+
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "ParamSource":
+        return cls(
+            data["Node Index"], data["Output Index"], ParamFlag._from_dict(data)
+        )
 
 INPUT_PARAM_SIZES: typing.Final[typing.Dict[ParamType, int]] = {
     ParamType.Int : 0x10,
@@ -61,17 +67,16 @@ class InputParam:
 
     @classmethod
     def _read(cls, reader: AINBReader, param_type: ParamType, multi_params: typing.List[ParamSource]) -> "InputParam":
-        input: InputParam = InputParam(param_type)
-        input.name = reader.read_string_offset()
+        _input: InputParam = cls(param_type)
+        _input.name = reader.read_string_offset()
         if param_type == ParamType.Pointer:
-            input.classname = reader.read_string_offset()
-        input.source = ParamSource._read(reader)
-        input.default_value = cls._read_value(reader, param_type)
+            _input.classname = reader.read_string_offset()
+        _input.source = ParamSource._read(reader)
+        _input.default_value = cls._read_value(reader, param_type)
 
-        if input.source.is_multi:
-            input.source = multi_params[input.source.multi_index:input.source.multi_index+input.source.multi_count]
-
-        return input
+        if _input.source.is_multi:
+            _input.source = multi_params[_input.source.multi_index:_input.source.multi_index+_input.source.multi_count]
+        return _input
 
     @staticmethod
     def _read_value(reader: AINBReader, param_type: ParamType) -> ValueType:
@@ -108,6 +113,35 @@ class InputParam:
         else:
             output["Sources"] = [ src._as_dict() for src in self.source ]
         return output
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType, param_type: ParamType) -> "InputParam":
+        _input: InputParam = cls(param_type)
+        _input.name = data["Name"]
+        if param_type == ParamType.Pointer:
+            _input.classname = data["Classname"]
+        match (param_type):
+            case ParamType.Int:
+                _input.default_value = int(data["Default Value"])
+            case ParamType.Bool:
+                _input.default_value = bool(data["Default Value"])
+            case ParamType.Float:
+                _input.default_value = float(data["Default Value"])
+            case ParamType.String:
+                _input.default_value = str(data["Default Value"])
+            case ParamType.Vector3F:
+                _input.default_value = tuple(data["Default Value"])
+            case ParamType.Pointer:
+                _input.default_value = data["Default Value"]
+                if _input.default_value is not None:
+                    raise DictDecodeError("Pointer inputs must have a default value of null")
+        if "Sources" in data:
+            _input.source = [
+                ParamSource._from_dict(src) for src in data["Sources"]
+            ]
+        else:
+            _input.source = ParamSource._from_dict(data)
+        return _input
 
 class OutputParam:
     """
@@ -124,7 +158,7 @@ class OutputParam:
 
     @classmethod
     def _read(cls, reader: AINBReader, param_type: ParamType) -> "OutputParam":
-        output: OutputParam = OutputParam(param_type)
+        output: OutputParam = cls(param_type)
         flags: int = reader.read_u32()
         output.name = reader.get_string(flags & 0x3fffffff)
         if param_type == ParamType.Pointer:
@@ -144,6 +178,15 @@ class OutputParam:
                 "Name" : self.name,
                 "Is Output" : self.is_output,
             }
+        
+    @classmethod
+    def _from_dict(cls, data: JSONType, param_type: ParamType) -> "OutputParam":
+        output: OutputParam = cls(param_type)
+        output.name = data["Name"]
+        if param_type == ParamType.Pointer:
+            output.classname = data["Classname"]
+        output.is_output = data["Is Output"]
+        return output
 
 class OffsetInfo(typing.NamedTuple):
     input_offset: int
@@ -210,7 +253,7 @@ class ParamSet:
     
     @classmethod
     def _read(cls, reader: AINBReader, end_offset: int, multi_params: typing.List[ParamSource]) -> "ParamSet":
-        pset: ParamSet = ParamSet()
+        pset: ParamSet = cls()
         offsets: typing.List[OffsetInfo] = [
             cls._read_io_header(reader) for i in range(len(ParamType))
         ]
@@ -248,3 +291,17 @@ class ParamSet:
                 p_type.name : [ param._as_dict() for param in self.get_outputs(p_type) ] for p_type in ParamType if self.get_outputs(p_type)
             },
         }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "ParamSet":
+        pset: ParamSet = cls()
+        for p_type in ParamType:
+            if p_type.name in data["Inputs"]:
+                pset._inputs[p_type] = [
+                    InputParam._from_dict(param, p_type) for param in data["Inputs"][p_type.name]
+                ]
+            if p_type.name in data["Outputs"]:
+                pset._outputs[p_type] = [
+                    OutputParam._from_dict(param, p_type) for param in data["Outputs"][p_type.name]
+                ]
+        return pset

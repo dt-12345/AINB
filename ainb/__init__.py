@@ -2,9 +2,10 @@ from ainb.action import Action as Action
 from ainb.ainb import (
     get_supported_versions as get_supported_versions,
     AINB as AINB,
-    set_game as set_game,
     set_nintendo_switch_sports as set_nintendo_switch_sports,
     set_splatoon3 as set_splatoon3,
+    set_tears_of_the_kingdom as set_tears_of_the_kingdom,
+    set_super_mario_bros_wonder as set_super_mario_bros_wonder,
 )
 from ainb.attachment import Attachment as Attachment
 from ainb.blackboard import (
@@ -66,3 +67,5 @@ from ainb.utils import (
 )
 
 from ainb import expression as expression
+
+# TODO: optional graphing module

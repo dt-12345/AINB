@@ -14,8 +14,4 @@ from ainb.expression.instruction import (
     InstDataType as InstDataType,
     InstOpType as InstOpType
 )
-from ainb.expression.parser import (
-    parse_instruction as parse_instruction,
-    parse_expression as parse_expression,
-    parse_module as parse_module,
-)
+from ainb.expression.parser import parse_instruction as parse_instruction

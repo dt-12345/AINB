@@ -441,6 +441,9 @@ class WarningBase(UserWarning):
     """
     Warning base class
     """
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)
+        self._warn()
     
     def _warn(self) -> None:
         warnings.warn(self)
@@ -460,7 +463,22 @@ class ParseWarning(WarningBase):
 
     def __init__(self, reader: Reader, msg: str) -> None:
         super().__init__(f"Parsing warning at offset {reader.tell():#x} in reader ({reader.name}): {msg}")
-        self._warn()
+
+class DictDecodeError(Exception):
+    """
+    Dictionary decoding error
+    """
+
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"Dictionary decoding error: {msg}")
+
+class DictDecodeWarning(WarningBase):
+    """
+    Dictionary decoding warning
+    """
+
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"Dictionary decoding warning: {msg}")
 
 class SerializeError(Exception):
     """
@@ -477,7 +495,6 @@ class SerializeWarning(WarningBase):
 
     def __init__(self, writer: Writer, msg: str) -> None:
         super().__init__(f"Serialization warning at offset {writer.tell():#x} in writer ({writer.name}): {msg}")
-        self._warn()
 
 class StringPool:
     """
@@ -497,7 +514,7 @@ class StringPool:
         """
         Creates a string pool from the provided bytes
         """
-        str_pool: StringPool = StringPool(format)
+        str_pool: StringPool = cls(format)
         raw: typing.List[bytes] = data.split(b"\x00")
         if raw[-1] == b"":
             raw.pop(-1)
@@ -515,7 +532,7 @@ class StringPool:
         """
         Creates a string pool from an interable of strings
         """
-        str_pool: StringPool = StringPool(format)
+        str_pool: StringPool = cls(format)
         for string in strings:
             if string in str_pool._string_set:
                 continue
@@ -585,7 +602,7 @@ class ReaderWithStrPool(Reader):
         try:
             return self._string_pool.get_string(offset)
         except KeyError as e:
-            raise ParseError(self, f"KeyError when accessing string from StringPool: {e.args}")
+            raise ParseError(self, f"KeyError when accessing string from StringPool: {e.args}") from e
     
     def read_string_offset(self) -> str:
         """

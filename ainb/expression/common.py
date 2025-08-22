@@ -3,6 +3,10 @@ import typing
 
 from ainb.utils import Endian, ReaderWithStrPool, Vector3f, WriterWithStrPool
 
+class ExpressionParseError(Exception):
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"An error occurred while parsing the expression: {msg}")
+
 class ExpressionReader(ReaderWithStrPool):
     """
     Expression reader

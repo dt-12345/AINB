@@ -37,3 +37,12 @@ class Command:
                 "Root Node Index" : self.root_node_index,
                 "Secondary Root Node Index" : self.secondary_root_node_index,
             }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "Command":
+        cmd: Command = cls()
+        cmd.name = data["Name"]
+        cmd.guid = data["GUID"]
+        cmd.root_node_index = data["Root Node Index"]
+        cmd.secondary_root_node_index = data.get("Secondary Root Node Index", -1)
+        return cmd

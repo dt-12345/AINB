@@ -226,30 +226,45 @@ class Graph:
         return self._format_bb_param(id, param)
 
     def _format_blackboard(self) -> str:
+        if self.ainb.blackboard is None:
+            return ""
         return f"""
                 <tr>
                     <td><b>Properties</b></td>
                 </tr>
                 {'\n'.join(self._add_bb_param(i, param) for p_type in BBParamType for i, param in enumerate(self.ainb.blackboard.get_params(p_type)))}"""
 
-    def _add_blackboard(self, dot: graphviz.Digraph) -> None:
+    def _add_blackboard(self, dot: graphviz.Digraph, split_bb: bool = False) -> None:
         if self.ainb.blackboard is None:
             return
         if len(self.bb_edges) == 0:
             return
         self.blackboard_id = get_id()
-        dot.node(
-            name=self.blackboard_id,
-            label=f"""<
-                    <table border="0" cellborder="1" cellspacing="0">
-                        <tr>
-                            <td><b>Blackboard</b></td>
-                        </tr>
-                        {self._format_blackboard()}
-                    </table>
-                >""",
-            style="bold"
-        )
+        if not split_bb:
+            dot.node(
+                name=self.blackboard_id,
+                label=f"""<
+                        <table border="0" cellborder="1" cellspacing="0">
+                            <tr>
+                                <td><b>Blackboard</b></td>
+                            </tr>
+                            {self._format_blackboard()}
+                        </table>
+                    >""",
+                style="bold"
+            )
+        else:
+            for edge in self.bb_edges:
+                if edge.src_param in self.bb_param_ids:
+                    continue
+                param: BBParam = self.ainb.blackboard.get_params(edge.src_param.param_type)[edge.src_param.param_index]
+                id: str = get_id()
+                self.bb_param_ids[edge.src_param] = id
+                dot.node(
+                    name=id,
+                    label=f"[BB {param.type.name}] {param.name}\n(source = {param.file_ref})" if param.file_ref else f"[BB {param.type.name}] {param.name}\n(default = {param.default_value})",
+                    style="bold"
+                )
 
     def _add_input_edges(self, dot: graphviz.Digraph) -> None:
         for edge in self.input_edges:
@@ -258,7 +273,7 @@ class Graph:
                 dst_node: GraphNode = self.nodes[edge.dst_node_index]
                 src_id: str = f"{src_node.id}:{src_node.output_map[edge.src_param]}"
                 dst_id: str = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
-                dot.edge(src_id, dst_id, edge.param_name, minlen="1", color="limegreen")
+                dot.edge(src_id, dst_id, edge.param_name, minlen="1", color="limegreen", fontcolor="limegreen")
             except Exception as e:
                 raise GraphError(f"Could not resolve edge: {edge}") from e
     
@@ -266,35 +281,45 @@ class Graph:
         for edge in self.generic_edges:
             node0: GraphNode = self.nodes[edge.node_index0]
             node1: GraphNode = self.nodes[edge.node_index1]
-            dot.edge(node0.id, node1.id, edge.edge_name, minlen="1", color="crimson")
+            dot.edge(node0.id, node1.id, edge.edge_name, minlen="1", color="crimson", fontcolor="crimson")
     
     def _add_transition_edges(self, dot: graphviz.Digraph) -> None:
         for edge in self.transition_edges:
             src_node: GraphNode = self.nodes[edge.src_node_index]
             dst_node: GraphNode = self.nodes[edge.dst_node_index]
             if edge.edge_name != "":
-                dot.edge(src_node.id, dst_node.id, edge.edge_name, minlen="1", color="midnightblue")
+                dot.edge(src_node.id, dst_node.id, edge.edge_name, minlen="1", color="midnightblue", fontcolor="midnightblue")
             else:
-                dot.edge(src_node.id, dst_node.id, "Transition", minlen="1", color="midnightblue")
+                dot.edge(src_node.id, dst_node.id, "Transition", minlen="1", color="midnightblue", fontcolor="midnightblue")
 
-    def _add_bb_edges(self, dot: graphviz.Digraph) -> None:
-        for edge in self.bb_edges:
-            dst_node: GraphNode = self.nodes[edge.dst_node_index]
-            src_id: str = f"{self.blackboard_id}:{self.bb_param_ids[edge.src_param]}"
-            dst_id: str = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
-            dot.edge(src_id, dst_id, edge.param_name, minlen="1", color="webgreen")
+    def _add_bb_edges(self, dot: graphviz.Digraph, split_bb: bool = False) -> None:
+        dst_node: GraphNode
+        src_id: str
+        dst_id: str
+        if not split_bb:
+            for edge in self.bb_edges:
+                dst_node = self.nodes[edge.dst_node_index]
+                src_id = f"{self.blackboard_id}:{self.bb_param_ids[edge.src_param]}"
+                dst_id = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
+                dot.edge(src_id, dst_id, edge.param_name, minlen="1", color="webgreen", fontcolor="webgreen")
+        else:
+            for edge in self.bb_edges:
+                dst_node = self.nodes[edge.dst_node_index]
+                src_id = self.bb_param_ids[edge.src_param]
+                dst_id = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
+                dot.edge(src_id, dst_id, edge.param_name, minlen="1", color="webgreen", fontcolor="webgreen")
 
-    def graph(self, dot: graphviz.Digraph) -> graphviz.Digraph:
+    def graph(self, dot: graphviz.Digraph, split_blackboard: bool = False) -> graphviz.Digraph:
         """
         Generate a graph onto the provided digraph
         """
-        self._add_blackboard(dot)
+        self._add_blackboard(dot, split_blackboard)
         for node in self.nodes.values():
             node._add_to_graph(dot)
         self._add_input_edges(dot)
         self._add_generic_edges(dot)
         self._add_transition_edges(dot)
-        self._add_bb_edges(dot)
+        self._add_bb_edges(dot, split_blackboard)
         if self.root_index != -1:
             root_node: GraphNode = self.nodes[self.root_index]
             root_id: str = get_id()
@@ -302,8 +327,12 @@ class Graph:
             dot.edge(root_id, root_node.id)
     
     def _process_param_source(self, node: Node, param_type: ParamType, param_index: int, param: InputParam, source: ParamSource) -> None:
+        if isinstance(param.source, list):
+            raise GraphError("Cannot have nested multi-params")
         if param.source.src_node_index != -1:
             if param.source.is_expression():
+                if self.ainb.expressions is None:
+                    raise GraphError(f"Node {node.index} requests an expression but file {self.ainb.filename} has no expression section")
                 # expressions are capable of transforming an output parameter from another node of a different datatype into the correct datatype
                 self.input_edges.add(
                     InputEdge(
@@ -408,7 +437,15 @@ def render_graph(graph: graphviz.Digraph, name: str, output_format: str = "svg",
     src.format = output_format
     src.render(filename=name, directory=output_dir, view=view)
 
-def graph_from_node(ainb: AINB, node_index: int, render: bool = False, output_format: str = "svg", output_dir: str = "", view: bool = False, stagger: int = 1) -> graphviz.Digraph:
+def graph_from_node(ainb: AINB,
+                    node_index: int,
+                    render: bool = False,
+                    output_format: str = "svg",
+                    output_dir: str = "",
+                    view: bool = False,
+                    stagger: int = 1,
+                    node_sep: float = 0.25,
+                    split_blackboard: bool = False) -> graphviz.Digraph:
     """
     Graph an AINB file starting from the specified node
 
@@ -420,6 +457,8 @@ def graph_from_node(ainb: AINB, node_index: int, render: bool = False, output_fo
         output_dir: Output directory path for rendered graph
         view: Automatically open rendered graph for viewing
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        node_sep: Node separation
+        split_blackboard: Split Blackboard into separate nodes
     """
     node: Node | None = ainb.get_node(node_index)
     if node is None:
@@ -430,15 +469,23 @@ def graph_from_node(ainb: AINB, node_index: int, render: bool = False, output_fo
     name: str = f"{node.name} ({node.index})" if node.type == NodeType.UserDefined else f"{node.type.name} ({node.index})"
 
     dot: graphviz.Digraph = graphviz.Digraph(name, node_attr={"shape" : "rectangle"})
-    dot.attr(compound="true")
-    graph.graph(dot)
+    dot.attr(node_sep=str(node_sep))
+    graph.graph(dot, split_blackboard)
 
     if render:
         render_graph(dot, name, output_format, output_dir, view, stagger)
 
     return dot
 
-def graph_command(ainb: AINB, cmd_name: str, render: bool = False, output_format: str = "svg", output_dir: str = "", view: bool = False, stagger: int = 1) -> graphviz.Digraph:
+def graph_command(ainb: AINB,
+                  cmd_name: str,
+                  render: bool = False,
+                  output_format: str = "svg",
+                  output_dir: str = "",
+                  view: bool = False,
+                  stagger: int = 1,
+                  node_sep: float = 0.25,
+                  split_blackboard: bool = False) -> graphviz.Digraph:
     """
     Graph a command from the provided AINB file
 
@@ -450,6 +497,8 @@ def graph_command(ainb: AINB, cmd_name: str, render: bool = False, output_format
         output_dir: Output directory path for rendered graph
         view: Automatically open rendered graph for viewing
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        node_sep: Node separation
+        split_blackboard: Split Blackboard into separate nodes
     """
     cmd: Command | None = ainb.get_command_by_name(cmd_name)
     if cmd is None:
@@ -461,15 +510,22 @@ def graph_command(ainb: AINB, cmd_name: str, render: bool = False, output_format
     graph.add_node(root_node, is_root=True, root_name=cmd_name)
 
     dot: graphviz.Digraph = graphviz.Digraph(cmd.name, node_attr={"shape" : "rectangle"})
-    dot.attr(compound="true")
-    graph.graph(dot)
+    dot.attr(node_sep=str(node_sep))
+    graph.graph(dot, split_blackboard)
 
     if render:
         render_graph(dot, cmd_name, output_format, output_dir, view, stagger)
 
     return dot
 
-def graph_all_nodes(ainb: AINB, render: bool = False, output_format: str = "svg", output_dir: str = "", view: bool = False, stagger: int = 1) -> graphviz.Digraph:
+def graph_all_nodes(ainb: AINB,
+                    render: bool = False,
+                    output_format: str = "svg",
+                    output_dir: str = "",
+                    view: bool = False,
+                    stagger: int = 1,
+                    node_sep: float = 0.25,
+                    split_blackboard: bool = False) -> graphviz.Digraph:
     """
     Graph all nodes in the provided AINB file (this is mostly useful for logic files which have no commands)
 
@@ -480,6 +536,8 @@ def graph_all_nodes(ainb: AINB, render: bool = False, output_format: str = "svg"
         output_dir: Output directory path for rendered graph
         view: Automatically open rendered graph for viewing
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        node_sep: Node separation
+        split_blackboard: Split Blackboard into separate nodes
     """
     
     graph: Graph = Graph(ainb)
@@ -487,15 +545,22 @@ def graph_all_nodes(ainb: AINB, render: bool = False, output_format: str = "svg"
         graph.add_node(node)
     
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(compound="true")
-    graph.graph(dot)
+    dot.attr(node_sep=str(node_sep))
+    graph.graph(dot, split_blackboard)
 
     if render:
         render_graph(dot, ainb.filename, output_format, output_dir, view, stagger)
 
     return dot
 
-def graph_all_commands(ainb: AINB, render: bool = False, output_format: str = "svg", output_dir: str = "", view: bool = False, stagger: int = 1) -> graphviz.Digraph:
+def graph_all_commands(ainb: AINB,
+                       render: bool = False,
+                       output_format: str = "svg",
+                       output_dir: str = "",
+                       view: bool = False,
+                       stagger: int = 1,
+                       node_sep: float = 0.25,
+                       split_blackboard: bool = False) -> graphviz.Digraph:
     """
     Graph all commands in the provided AINB file
 
@@ -506,15 +571,15 @@ def graph_all_commands(ainb: AINB, render: bool = False, output_format: str = "s
         output_dir: Output directory path for rendered graph
         view: Automatically open rendered graph for viewing
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        node_sep: Node separation
+        split_blackboard: Split Blackboard into separate nodes
     """
-    
+
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(compound="true", nodesep="3")
+    dot.attr(node_sep=str(node_sep))
     
     for cmd in ainb.commands:
-        dot.subgraph(graph_command(ainb, cmd.name))
-
-    dot = dot.unflatten(stagger=stagger)
+        dot.subgraph(graph_command(ainb, cmd.name, node_sep=node_sep, split_blackboard=split_blackboard))
 
     if render:
         render_graph(dot, ainb.filename, output_format, output_dir, view, stagger)

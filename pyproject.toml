@@ -23,6 +23,7 @@ graph = [
 
 [project.scripts]
 ainb = "ainb.__main__:main"
+ainb-graph = "ainb.graph.__main__:main"
 
 [tools.setuptools]
 include-package-data = true

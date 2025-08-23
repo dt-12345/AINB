@@ -6,8 +6,13 @@ import sys
 import typing
 
 from ainb.ainb import AINB
+try:
+    import ainb.graph as graph
+except ImportError as e:
+    raise ImportError(
+        "Graphing utilities must be installed for this script - pip install ainb[graph]"
+    ) from e
 
-# TODO: move this into ainb.py?
 GAME_TO_VERSION_MAP: typing.Dict[str, int | None] = {
     "s3"    : 0x404,
     "totk"  : 0x407,
@@ -17,14 +22,19 @@ GAME_TO_VERSION_MAP: typing.Dict[str, int | None] = {
 
 def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
-        prog="Command Line AINB Tool",
-        description="Simple command line utility for working with AINB files",
-        epilog="Example usage:\n    ainb MyAINBFile.ainb\n    ainb MyConvertedAINBFile.json\n    ainb AnotherAINBFile.ainb -o output",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        prog="AINB Graphing Tool",
+        description="Command line graphing tool for AINB files",
+        epilog="Example usage:\n    ainb-graph --command \"Root\" MyAINBFile.ainb\n    ainb-graph --all-nodes MyAINBFile.ainb",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("--intype", help="Input file type (either JSON or AINB) - resolved by default based on file extension", default="")
-    parser.add_argument("--outtype", help="Output file type (either JSON or AINB) - defaults to the opposite of the input file type", default="")
-    parser.add_argument("--output-path", "-o", help="Path to directory to output file", default="")
+    parser.add_argument("--intype", "-t", help="Input file type (either JSON or AINB) - resolved by default based on file extension", default="")
+    parser.add_argument("--node-index", help="Node index to begin graph at", default=-1)
+    parser.add_argument("--command-name", help="Command name to graph", default="")
+    parser.add_argument("--all-nodes", action="store_true", help="Graph all nodes in file", default=False)
+    parser.add_argument("--all-commands", action="store_true", help="Graph all commands in file", default=False)
+    parser.add_argument("--format", "-f", help="Output graph format (default is svg)", default="svg")
+    parser.add_argument("--view", "-v", action="store_true", help="Automatically open the rendered graph when finished", default=False)
+    parser.add_argument("--outpath", "-o", help="Output directory path", default="")
     parser.add_argument(
         "--game",
         "-g",
@@ -49,14 +59,12 @@ def main() -> None:
         print(f"{args.input_file_path} does not exist")
         sys.exit(0)
 
-    if args.output_path:
-        os.makedirs(args.output_path, exist_ok=True)
+    if args.outpath:
+        os.makedirs(args.outpath, exist_ok=True)
     
     in_file_type: str = args.intype.lower()
     if in_file_type == "":
         in_file_type = os.path.splitext(args.input_file_path)[1][1:]
-    
-    out_file_type: str = args.outtype.lower()
     
     expected_version: int | None = GAME_TO_VERSION_MAP.get(args.game, None)
 
@@ -74,26 +82,23 @@ def main() -> None:
                     AINB.set_enum_db(json.load(f))
             else:
                 print(f"Provided enum database path does not exist: {args.enum_db_path}")
-
+    
+    ainb: AINB
     if in_file_type == "ainb":
-        if out_file_type == "" or out_file_type == "json":
-            if expected_version is None or expected_version < 0x407:
-                AINB.from_file(args.input_file_path, read_only=False).save_json(args.output_path)
-            else:
-                AINB.from_file(args.input_file_path).save_json(args.output_path)
-        elif out_file_type == "ainb": # not sure why you'd need this but sure
-            pass # TODO
-        else:
-            print(f"Unknown output file type: {out_file_type}")
-    elif in_file_type == "json":
-        if out_file_type == "" or out_file_type == "ainb":
-            pass # TODO
-        elif out_file_type == "json": # not sure why you'd need this but sure
-            AINB.from_json(args.input_file_path).save_json(args.output_path)
-        else:
-            print(f"Unknown output file type: {out_file_type}")
+        ainb = AINB.from_file(args.input_file_path, read_only=expected_version is None or expected_version < 0x407)
     else:
-        print(f"Unknown input file type: {in_file_type}")
+        ainb = AINB.from_json(args.input_file_path)
+    
+    if args.all_commands:
+        graph.graph_all_commands(ainb, True, args.format, args.outpath, args.view)
+    elif args.all_nodes:
+        graph.graph_all_nodes(ainb, True, args.format, args.outpath, args.view)
+    elif args.command_name == "":
+        graph.graph_command(ainb, args.command_name, True, args.format, args.outpath, args.view)
+    elif args.node_index != -1:
+        graph.graph_from_node(ainb, args.node_index, True, args.format, args.outpath, args.view)
+    else:
+        print(f"Please specify an entry point with either --node-index, --command-name, --all-nodes, or --all-commands")
 
 if __name__ == "__main__":
     main()

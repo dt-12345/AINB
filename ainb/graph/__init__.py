@@ -1,3 +1,7 @@
+"""
+Requires a Graphviz installation on the system path
+"""
+
 from ainb.graph.graph import (
     GraphNode as GraphNode,
     Graph as Graph,

@@ -20,6 +20,9 @@ from ainb.property import PropertySet
 from ainb.replacement import ReplacementEntry, ReplacementType
 from ainb.utils import DictDecodeError, JSONType, ParseError, ParseWarning
 
+# TODO: serialization
+# TODO: editing API (at least add/remove nodes/plugs/etc.)
+
 # TODO: version 0x408 support if it's not too hard
 SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (0x404, 0x407)
 
@@ -526,6 +529,22 @@ class AINB:
         Deserialize a JSON string into an AINB object
         """
         return cls.from_dict(json.loads(text), override_filename)
+    
+    def get_node(self, node_index: int) -> Node | None:
+        if node_index < 0 or node_index >= len(self.nodes):
+            return None
+        return self.nodes[node_index]
+    
+    def get_command(self, cmd_index: int) -> Command | None:
+        if cmd_index < 0 or cmd_index >= len(self.commands):
+            return None
+        return self.commands[cmd_index]
+
+    def get_command_by_name(self, cmd_name: str) -> Command | None:
+        for cmd in self.commands:
+            if cmd.name == cmd_name:
+                return cmd
+        return None
 
 def set_game(game: str) -> None:
     """

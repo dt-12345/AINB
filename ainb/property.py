@@ -160,3 +160,6 @@ class PropertySet:
                 Property._from_dict(prop, p_type) for prop in data[p_type.name]
             ]
         return pset
+    
+    def __bool__(self) -> bool:
+        return any(p for p in self._properties)

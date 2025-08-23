@@ -499,6 +499,9 @@ class StringInputPlug(Plug):
         plug.node_index = reader.read_s32()
         plug.name = reader.read_string_offset()
         if reader.version > 0x404:
+            # TODO: so an issue here is that there is no stored default value here if the source node's output isn't a string type (in the case an expression transforms it)
+            # not that it really makes a difference or anything since these plugs are never read by the game afaik
+            # and it should be guaranteed to never throw an error either since the string offset is 0 which is always a valid offset
             plug.unknown = reader.read_u32()
             plug.default_value = reader.read_string_offset()
         return plug
@@ -549,6 +552,7 @@ class IntInputPlug(Plug):
         plug.node_index = reader.read_s32()
         plug.name = reader.read_string_offset()
         if reader.version > 0x404:
+            # TODO: same issue as with the string input plugs though even less relevant
             plug.unknown = reader.read_u32()
             plug.default_value = reader.read_s32()
         return plug
@@ -714,6 +718,12 @@ class Node:
     
     def get_plugs(self, plug_type: PlugType) -> typing.List[Plug]:
         return self._plugs[plug_type]
+    
+    def has_inputs(self) -> bool:
+        return self.params.has_inputs()
+    
+    def has_outputs(self) -> bool:
+        return self.params.has_outputs()
 
     @classmethod
     def _read(cls,

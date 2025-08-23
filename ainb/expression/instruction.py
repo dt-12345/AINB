@@ -263,11 +263,15 @@ class Operand:
     def _parse_generic(cls, text: str) -> "Operand":
         op: Operand = cls()
         op_match: re.Match[str] | None = re.match(OPERAND, text.strip())
+        argument: str
         if op_match is None:
-            raise ExpressionParseError(f"Could not decode operand: {text}")
-        datatype: str = op_match.group("datatype")
-        argument: str = op_match.group("argument")
-        op.datatype = REVERSE_DT_PREFIX[datatype.lower()]
+            # assume NONE datatype, this case must match a memory access otherwise it throws an error (only shows up for JZE)
+            op.datatype = InstDataType.NONE
+            argument = text.strip()
+        else:
+            datatype: str = op_match.group("datatype")
+            argument = op_match.group("argument")
+            op.datatype = REVERSE_DT_PREFIX[datatype.lower()]
         arg_match: re.Match[str] | None = re.match(MEMORY_OFFSET, argument)
         if arg_match is not None:
             op.type = REVERSE_OP_PREFIX[arg_match.group("source")]
@@ -1332,17 +1336,8 @@ class JumpIfZeroInstruction(JumpInstructionBase):
     @classmethod
     def _parse(cls, matches: re.Match[str]) -> "JumpIfZeroInstruction":
         inst: JumpIfZeroInstruction = cls()
-        arg_match: re.Match[str] | None = re.match(MEMORY_OFFSET, matches.group("op1"))
-        if arg_match is None:
-            raise ExpressionParseError(f"Failed to parse operand: {matches.group('op1')}")
-        inst.condition.type = InstOpType.GlobalMemory
-        inst.condition.datatype = InstDataType.NONE
-        offset: str = arg_match.group("offset")
-        if offset.startswith("0x"):
-            inst.condition.value = int(offset, 16)
-        else:
-            inst.condition.value = int(offset)
-        offset = matches.group("op2")
+        inst.condition = Operand._parse_generic(matches.group("op1"))
+        offset: str = matches.group("op2")
         if offset.startswith("0x"):
             inst.jump_address = int(offset, 16)
         else:

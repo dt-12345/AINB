@@ -65,12 +65,25 @@ class Expression:
     @staticmethod
     def _format_instructions(instructions: typing.List[InstructionBase]) -> str:
         return "\n".join(f"        {Expression._format_instruction(inst, i * 8)}" for i, inst in enumerate(instructions))
+
+    @staticmethod
+    def _format_instructions_single_indent(instructions: typing.List[InstructionBase]) -> str:
+        return "\n".join(f"    {Expression._format_instruction(inst, i * 8)}" for i, inst in enumerate(instructions))
     
     def _format(self) -> str:
         if self.setup_command:
             return f"    .setup\n{self._format_instructions(self.setup_command)}\n    .main\n{self._format_instructions(self.main_command)}\n"
         else:
             return f"    .main\n{self._format_instructions(self.main_command)}\n"
+    
+    def format(self) -> str:
+        """
+        Returns a formatted string of the expression
+        """
+        if self.setup_command:
+            return f".setup\n{self._format_instructions_single_indent(self.setup_command)}\n.main\n{self._format_instructions_single_indent(self.main_command)}\n"
+        else:
+            return f".main\n{self._format_instructions_single_indent(self.main_command)}\n"
     
     def _as_dict(self, index: int) -> JSONType:
         if self.setup_command:

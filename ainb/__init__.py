@@ -1,3 +1,5 @@
+__version__: str = "0.1.0"
+
 from ainb.action import Action as Action
 from ainb.ainb import (
     get_supported_versions as get_supported_versions,
@@ -68,4 +70,7 @@ from ainb.utils import (
 
 from ainb import expression as expression
 
-# TODO: optional graphing module
+try:
+    from ainb import graph as graph
+except ImportError:
+    pass

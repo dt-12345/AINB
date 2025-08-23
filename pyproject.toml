@@ -1,0 +1,34 @@
+# TODO: README, license
+
+[build-system]
+requires = [
+    "setuptools"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ainb"
+requires-python = ">=3.10"
+dependencies = [
+    "mmh3"
+]
+dynamic = [
+    "version"
+]
+
+[project.optional-dependencies]
+graph = [
+    "graphviz"
+]
+
+[project.scripts]
+ainb = "ainb.__main__:main"
+
+[tools.setuptools]
+include-package-data = true
+packages = [
+    "ainb"
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "ainb.__version__"}

@@ -40,6 +40,12 @@ class ParamSource(typing.NamedTuple):
         return cls(
             data["Node Index"], data["Output Index"], ParamFlag._from_dict(data)
         )
+    
+    def is_expression(self) -> bool:
+        return self.flags.is_expression()
+    
+    def is_blackboard(self) -> bool:
+        return self.flags.is_blackboard()
 
 INPUT_PARAM_SIZES: typing.Final[typing.Dict[ParamType, int]] = {
     ParamType.Int : 0x10,
@@ -250,6 +256,12 @@ class ParamSet:
     
     def get_outputs(self, param_type: ParamType) -> typing.List[OutputParam]:
         return self._outputs[param_type]
+    
+    def has_inputs(self) -> bool:
+        return any(p for p in self._inputs)
+
+    def has_outputs(self) -> bool:
+        return any(p for p in self._outputs)
     
     @classmethod
     def _read(cls, reader: AINBReader, end_offset: int, multi_params: typing.List[ParamSource]) -> "ParamSet":

@@ -1,10 +1,12 @@
+import dataclasses
 import typing
 
 from ainb.common import AINBReader
 from ainb.param_common import ParamType, ParamFlag
 from ainb.utils import DictDecodeError, JSONType, ParseError, ValueType
 
-class ParamSource(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class ParamSource:
     """
     Input parameter source information
     """
@@ -194,7 +196,8 @@ class OutputParam:
         output.is_output = data["Is Output"]
         return output
 
-class OffsetInfo(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class OffsetInfo:
     input_offset: int
     output_offset: int
 

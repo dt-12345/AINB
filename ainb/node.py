@@ -1,4 +1,5 @@
 import abc
+import dataclasses
 import enum
 import typing
 
@@ -20,7 +21,8 @@ def get_null_index() -> int:
     """
     return NULL_INDEX
 
-class Transition(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class Transition:
     """
     A transition command entry where the root node of the current context is swapped
     """
@@ -80,7 +82,8 @@ class PlugType(IntEnumEx):
     _08         = 8
     _09         = 9
 
-class PlugInfo(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class PlugInfo:
     plug_count: int
     base_index: int
 

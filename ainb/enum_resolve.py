@@ -1,6 +1,7 @@
-import typing
+import dataclasses
 
-class EnumEntry(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class EnumEntry:
     """
     Enum resolve table entry
     """

@@ -1,3 +1,4 @@
+import dataclasses
 import typing
 
 from ainb.common import AINBReader
@@ -76,12 +77,14 @@ class BBParam:
                     raise DictDecodeError("Pointer params must have a default value of null")
         return param
 
-class BBParamHeader(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class BBParamHeader:
     param_count: int
     base_index: int
     offset: int
 
-class BBParamInfo(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class BBParamInfo:
     file_ref_index: int
     name: str
     notes: str

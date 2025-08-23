@@ -1,8 +1,9 @@
-import typing
+import dataclasses
 
 from ainb.utils import JSONType
 
-class StateInfo(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class StateInfo:
     """
     Class representing game state information for a node
 

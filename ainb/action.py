@@ -1,8 +1,9 @@
-import typing
+import dataclasses
 
 from ainb.utils import JSONType
 
-class Action(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class Action:
     """
     Class representing an XLink action triggered by a node
     """

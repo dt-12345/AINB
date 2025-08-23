@@ -15,3 +15,5 @@ assert orig.as_dict() == new.as_dict(), "oops they don't match"
 
 ainb.graph.graph_all_commands(ainb.AINB.from_file("tests/data/Drake.sp.action.root.ainb"), render=True, output_dir="tests/output")
 ainb.graph.graph_all_commands(ainb.AINB.from_file("tests/data/DungeonBossRito.action.SpreadShootAttack.module.ainb"), render=True, output_dir="tests/output")
+ainb.graph.graph_all_commands(ainb.AINB.from_file("tests/data/Main.module.ainb"), render=True, output_dir="tests/output")
+ainb.graph.graph_all_commands(ainb.AINB.from_json("tests/output/SplPlayerMake.root.json"), render=True, output_dir="tests/output")

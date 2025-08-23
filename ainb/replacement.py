@@ -1,5 +1,5 @@
+import dataclasses
 import enum
-import typing
 
 from ainb.utils import JSONType
 
@@ -9,7 +9,8 @@ class ReplacementType(enum.Enum):
     ReplaceChild = 1
     RemoveAttachment = 2
 
-class ReplacementEntry(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class ReplacementEntry:
     """
     Class representing a runtime replacement entry
     """

@@ -13,6 +13,22 @@ from ainb.param_common import ParamType
 from ainb.property import Property
 
 # TODO: (probably not) expression control flow graph?
+# TODO: root node colored differently? unsure if that's desirable
+
+COLOR_MAP: typing.Dict[str, str] = {
+    "node-font" : "black",
+    "blackboard-font" : "black",
+    "query-edge" : "webgreen",
+    "query-edge-font" : "webgreen",
+    "generic-edge" : "firebrick",
+    "generic-edge-font" : "firebrick",
+    "transition-edge" : "midnightblue",
+    "transition-edge-font" : "midnightblue",
+    "blackboard-edge" : "webgreen",
+    "blackboard-edge-font" : "webgreen",
+    "entry-point-bg" : "mediumpurple",
+    "entry-point-font" : "white",
+}
 
 EXPRESSION_TYPE_MAP: typing.Dict[InstDataType, ParamType] = {
     InstDataType.BOOL       : ParamType.Bool,
@@ -90,13 +106,13 @@ class GraphNode:
         if param_type == ParamType.Pointer:
             return f"""
                     <tr>
-                        <td port=\"{id}\">[{param.classname}*] {param.name} (default = nullptr)</td>"
+                        <td port=\"{id}\">[{param.classname}*] {param.name} (default = nullptr) </td>"
                     </tr>
                     """
         else:
             return f"""
                     <tr>
-                        <td port=\"{id}\">[{param_type.name}] {param.name} (default = {param.default_value})</td>"
+                        <td port=\"{id}\">[{param_type.name}] {param.name} (default = {param.default_value}) </td>"
                     </tr>
                     """
         
@@ -105,7 +121,7 @@ class GraphNode:
         if param_type == ParamType.Pointer:
             return f"""
                     <tr>
-                        <td port=\"{id}\">[{param.classname}*] {param.name} (default = nullptr)</td>"
+                        <td port=\"{id}\">[{param.classname}*] {param.name} (default = nullptr) </td>"
                     </tr>
                     """
         else:
@@ -120,13 +136,13 @@ class GraphNode:
         if param_type == ParamType.Pointer:
             return f"""
                     <tr>
-                        <td>[{prop.classname}*] {prop.name} (default = nullptr)</td>"
+                        <td>[{prop.classname}*] {prop.name} (default = nullptr) </td>"
                     </tr>
                     """
         else:
             return f"""
                     <tr>
-                        <td>[{param_type.name}] {prop.name} (default = {prop.default_value})</td>"
+                        <td>[{param_type.name}] {prop.name} (default = {prop.default_value}) </td>"
                     </tr>
                     """
     
@@ -173,11 +189,39 @@ class GraphNode:
                     """
         return ""
 
+    def _format_expected_state(self) -> str:
+        if self._node.state_info is not None and self._node.state_info.desired_state != "":
+            return f"""
+                    <tr>
+                        <td>Expects: {self._node.state_info.desired_state} </td>
+                    </tr>
+                    """
+        return ""
+
     def _add_to_graph(self, dot: graphviz.Digraph) -> None:
-        dot.node(
+        if self._node.type == NodeType.Element_Sequential:
+            dot.node(
+                name=self.id,
+                label=f"""<
+                        <table border="1" cellborder="1" cellspacing="0">
+                            <tr>
+                                <td><b>{self._get_name()}</b></td>
+                            </tr>
+                            {self._format_expected_state()}
+                            {self._format_property_table()}
+                            {self._format_input_table()}
+                            {self._format_output_table()}
+                        </table>
+                    >""",
+                style="bold",
+                fontcolor=COLOR_MAP["node-font"],
+                ordering="out",
+            )
+        else:
+            dot.node(
             name=self.id,
             label=f"""<
-                    <table border="0" cellborder="1" cellspacing="0">
+                    <table border="1" cellborder="1" cellspacing="0">
                         <tr>
                             <td><b>{self._get_name()}</b></td>
                         </tr>
@@ -186,9 +230,9 @@ class GraphNode:
                         {self._format_output_table()}
                     </table>
                 >""",
-            style="bold"
+            style="bold",
+            fontcolor=COLOR_MAP["node-font"],
         )
-
 class Graph:
     """
     Class representing a node graph
@@ -210,13 +254,13 @@ class Graph:
         if param.file_ref != "":
             return f"""
                     <tr>
-                        <td port=\"{id}\">[{param.type.name}] {param.name} (source = {param.file_ref})</td>"
+                        <td port=\"{id}\">[{param.type.name}] {param.name} (source = {param.file_ref}) </td>"
                     </tr>
                     """
         else:
             return f"""
                     <tr>
-                        <td port=\"{id}\">[{param.type.name}] {param.name} (default = {param.default_value})</td>"
+                        <td port=\"{id}\">[{param.type.name}] {param.name} (default = {param.default_value}) </td>"
                     </tr>
                     """
 
@@ -251,7 +295,8 @@ class Graph:
                             {self._format_blackboard()}
                         </table>
                     >""",
-                style="bold"
+                style="bold",
+                fontcolor=COLOR_MAP["blackboard-font"],
             )
         else:
             for edge in self.bb_edges:
@@ -262,8 +307,9 @@ class Graph:
                 self.bb_param_ids[edge.src_param] = id
                 dot.node(
                     name=id,
-                    label=f"[BB {param.type.name}] {param.name}\n(source = {param.file_ref})" if param.file_ref else f"[BB {param.type.name}] {param.name}\n(default = {param.default_value})",
-                    style="bold"
+                    label=f"[BB {param.type.name}] {param.name}\n(source = {param.file_ref}) " if param.file_ref else f"[BB {param.type.name}] {param.name}\n(default = {param.default_value}) ",
+                    style="bold",
+                    fontcolor=COLOR_MAP["blackboard-font"],
                 )
 
     def _add_input_edges(self, dot: graphviz.Digraph) -> None:
@@ -273,7 +319,7 @@ class Graph:
                 dst_node: GraphNode = self.nodes[edge.dst_node_index]
                 src_id: str = f"{src_node.id}:{src_node.output_map[edge.src_param]}"
                 dst_id: str = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
-                dot.edge(src_id, dst_id, edge.param_name, minlen="1", color="limegreen", fontcolor="limegreen")
+                dot.edge(src_id, dst_id, edge.param_name, minlen="1", style="dashed", color=COLOR_MAP["query-edge"], fontcolor=COLOR_MAP["query-edge-font"])
             except Exception as e:
                 raise GraphError(f"Could not resolve edge: {edge}") from e
     
@@ -281,16 +327,16 @@ class Graph:
         for edge in self.generic_edges:
             node0: GraphNode = self.nodes[edge.node_index0]
             node1: GraphNode = self.nodes[edge.node_index1]
-            dot.edge(node0.id, node1.id, edge.edge_name, minlen="1", color="crimson", fontcolor="crimson")
+            dot.edge(node0.id, node1.id, edge.edge_name, minlen="1", style="bold", color=COLOR_MAP["generic-edge"], fontcolor=COLOR_MAP["generic-edge-font"])
     
     def _add_transition_edges(self, dot: graphviz.Digraph) -> None:
         for edge in self.transition_edges:
             src_node: GraphNode = self.nodes[edge.src_node_index]
             dst_node: GraphNode = self.nodes[edge.dst_node_index]
             if edge.edge_name != "":
-                dot.edge(src_node.id, dst_node.id, edge.edge_name, minlen="1", color="midnightblue", fontcolor="midnightblue")
+                dot.edge(src_node.id, dst_node.id, edge.edge_name, minlen="1", style="bold", color=COLOR_MAP["transition-edge"], fontcolor=COLOR_MAP["transition-edge-font"])
             else:
-                dot.edge(src_node.id, dst_node.id, "Transition", minlen="1", color="midnightblue", fontcolor="midnightblue")
+                dot.edge(src_node.id, dst_node.id, "Transition", minlen="1", style="bold", color=COLOR_MAP["transition-edge"], fontcolor=COLOR_MAP["transition-edge-font"])
 
     def _add_bb_edges(self, dot: graphviz.Digraph, split_bb: bool = False) -> None:
         dst_node: GraphNode
@@ -301,13 +347,13 @@ class Graph:
                 dst_node = self.nodes[edge.dst_node_index]
                 src_id = f"{self.blackboard_id}:{self.bb_param_ids[edge.src_param]}"
                 dst_id = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
-                dot.edge(src_id, dst_id, edge.param_name, minlen="1", color="webgreen", fontcolor="webgreen")
+                dot.edge(src_id, dst_id, edge.param_name, minlen="1", style="dashed", color=COLOR_MAP["blackboard-edge"], fontcolor=COLOR_MAP["blackboard-edge-font"])
         else:
             for edge in self.bb_edges:
                 dst_node = self.nodes[edge.dst_node_index]
                 src_id = self.bb_param_ids[edge.src_param]
                 dst_id = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
-                dot.edge(src_id, dst_id, edge.param_name, minlen="1", color="webgreen", fontcolor="webgreen")
+                dot.edge(src_id, dst_id, edge.param_name, minlen="1", style="dashed", color=COLOR_MAP["blackboard-edge"], fontcolor=COLOR_MAP["blackboard-edge-font"])
 
     def graph(self, dot: graphviz.Digraph, split_blackboard: bool = False) -> graphviz.Digraph:
         """
@@ -323,7 +369,7 @@ class Graph:
         if self.root_index != -1:
             root_node: GraphNode = self.nodes[self.root_index]
             root_id: str = get_id()
-            dot.node(name=root_id, label=f"<<b>{self.root_name}</b>>", color="mediumpurple", fontcolor="white", shape="ellipse", style="filled")
+            dot.node(name=root_id, label=f"<<b>{self.root_name}</b>>", color=COLOR_MAP["entry-point-bg"], fontcolor=COLOR_MAP["entry-point-font"], shape="ellipse", style="filled")
             dot.edge(root_id, root_node.id)
     
     def _process_param_source(self, node: Node, param_type: ParamType, param_index: int, param: InputParam, source: ParamSource) -> None:

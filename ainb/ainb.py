@@ -1,3 +1,4 @@
+import dataclasses
 import enum
 import importlib.resources
 import io
@@ -39,7 +40,8 @@ class FileCategory(enum.Enum):
     UniqueSequence      = enum.auto() # splatoon 3 only
     UniqueSequenceSPL   = enum.auto() # splatoon 3 only
 
-class UnknownSection0x58(typing.NamedTuple):
+@dataclasses.dataclass(slots=True)
+class UnknownSection0x58:
     description: str = ""
     unk04: int = 0
     unk08: int = 0

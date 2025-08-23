@@ -3,6 +3,7 @@ Requires a Graphviz installation on the system path
 """
 
 from ainb.graph.graph import (
+    COLOR_MAP as COLOR_MAP,
     GraphNode as GraphNode,
     Graph as Graph,
     graph_from_node as graph_from_node,

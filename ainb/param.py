@@ -89,6 +89,8 @@ class InputParam:
 
         if _input.source.is_multi:
             _input.source = multi_params[_input.source.multi_index:_input.source.multi_index+_input.source.multi_count]
+        # some input params seem to have the sign bit of their output index set which in theory should just result in it being ignored entirely?
+        # could just mean the plug is stubbed or something
         return _input
 
     @staticmethod

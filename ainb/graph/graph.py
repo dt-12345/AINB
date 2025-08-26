@@ -7,10 +7,11 @@ from ainb.ainb import AINB
 from ainb.blackboard import BBParamType, BBParam
 from ainb.command import Command
 from ainb.expression import InstDataType
-from ainb.node import Node, NodeType, S32SelectorPlug, F32SelectorPlug, StringSelectorPlug, RandomSelectorPlug
+from ainb.node import Node, NodeType, S32SelectorPlug, F32SelectorPlug, StringSelectorPlug, RandomSelectorPlug, get_null_index
 from ainb.param import InputParam, OutputParam, ParamSource
 from ainb.param_common import ParamType
 from ainb.property import Property
+from ainb.utils import WarningBase
 
 # TODO: (probably not) expression control flow graph?
 # TODO: root node colored differently? unsure if that's desirable
@@ -67,7 +68,11 @@ def escape_value(value: T | str) -> T | str:
 
 class GraphError(Exception):
     def __init__(self, msg: str) -> None:
-        super().__init__(msg)
+        super().__init__(f"Graphing error: {msg}")
+
+class GraphWarning(WarningBase):
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"Graphing warning: {msg}")
 
 class ParamLocation(typing.NamedTuple):
     param_type: ParamType
@@ -332,7 +337,7 @@ class Graph:
                 dst_id: str = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
                 dot.edge(src_id, dst_id, edge.param_name, minlen="1", style="dashed", color=COLOR_MAP["query-edge"], fontcolor=COLOR_MAP["query-edge-font"])
             except Exception as e:
-                raise GraphError(f"Could not resolve edge: {edge}") from e
+                GraphWarning(f"Could not resolve edge: {edge} ({e.args})")
     
     def _add_generic_edges(self, dot: graphviz.Digraph) -> None:
         for edge in self.generic_edges:
@@ -440,6 +445,8 @@ class Graph:
                 else:
                     self._process_param_source(node, p_type, i, param, param.source)
         for plug in node.child_plugs:
+            if plug.node_index == get_null_index():
+                continue
             if node.type == NodeType.Element_S32Selector:
                 s32_plug: S32SelectorPlug = typing.cast(S32SelectorPlug, plug)
                 self.generic_edges.add(

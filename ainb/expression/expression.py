@@ -31,9 +31,9 @@ class Expression:
         else:
             if setup_base_index != -1:
                 for i in range(setup_base_index, len(instructions)):
-                    inst: InstructionBase = instructions[i]
-                    expr.setup_command.append(inst)
-                    if inst.get_type() == InstType.END:
+                    s_inst: InstructionBase = instructions[i]
+                    expr.setup_command.append(s_inst)
+                    if s_inst.get_type() == InstType.END:
                         break
 
         main_base_index: int = reader.read_s32()
@@ -42,9 +42,9 @@ class Expression:
             expr.main_command = instructions[main_base_index:main_base_index+main_inst_count]
         else:
             for i in range(main_base_index, len(instructions)):
-                inst: InstructionBase = instructions[i]
-                expr.main_command.append(inst)
-                if inst.get_type() == InstType.END:
+                m_inst: InstructionBase = instructions[i]
+                expr.main_command.append(m_inst)
+                if m_inst.get_type() == InstType.END:
                     break
 
         # can be calculated later

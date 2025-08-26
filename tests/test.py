@@ -47,9 +47,9 @@ class GraphTest(unittest.TestCase):
                 continue
             try:
                 if ".logic" in file:
-                    ainb.graph.graph_all_nodes(ainb.AINB.from_file(os.path.join(INPUT_DIRECTORY, file), read_only=False))
+                    ainb.graph.graph_all_nodes(ainb.AINB.from_file(os.path.join(INPUT_DIRECTORY, file), read_only=False), render=False)
                 else:
-                    ainb.graph.graph_all_nodes(ainb.AINB.from_file(os.path.join(INPUT_DIRECTORY, file), read_only=False))
+                    ainb.graph.graph_all_nodes(ainb.AINB.from_file(os.path.join(INPUT_DIRECTORY, file), read_only=False), render=False)
             except Exception as e:
                 self.fail(f"Failed to graph {file}: {e.args}")
 

@@ -22,7 +22,7 @@ class VectorComponent(enum.Enum):
     NONE = 0
     X = 1
     Y = 2
-    Z = 2
+    Z = 3
 
 class ParamFlag(int):
     """

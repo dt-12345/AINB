@@ -1,4 +1,3 @@
-import dataclasses
 import enum
 import importlib.resources
 import io
@@ -11,20 +10,24 @@ from ainb.action import Action
 from ainb.attachment import Attachment
 from ainb.blackboard import Blackboard
 from ainb.command import Command
-from ainb.common import AINBReader
+from ainb.common import AINBReader, AINBWriter
 from ainb.enum_resolve import EnumEntry
-from ainb.expression import ExpressionModule
+from ainb.expression.module import ExpressionModule
 from ainb.module import Module
-from ainb.node import Node, Transition
+from ainb.node import Node
 from ainb.param import ParamSet, ParamSource
+from ainb.param_common import ParamType
 from ainb.property import PropertySet
 from ainb.replacement import ReplacementEntry, ReplacementType
+from ainb.transition import Transition
+from ainb.unknown import UnknownSection0x58
 from ainb.utils import DictDecodeError, JSONType, ParseError, ParseWarning
+from ainb.write_context import WriteContext
 
 # TODO: serialization
 # TODO: editing API (at least add/remove nodes/plugs/etc.)
 
-# TODO: version 0x408 support if it's not too hard
+# TODO: version 0x408 support if it's not too hard (seems to be u32 blackboard type)
 SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (0x404, 0x407)
 
 def get_supported_versions() -> typing.Tuple[int, ...]:
@@ -40,30 +43,6 @@ class FileCategory(enum.Enum):
     UniqueSequence      = enum.auto() # splatoon 3 only
     UniqueSequenceSPL   = enum.auto() # splatoon 3 only
 
-@dataclasses.dataclass(slots=True)
-class UnknownSection0x58:
-    description: str = ""
-    unk04: int = 0
-    unk08: int = 0
-    unk0c: int = 0
-
-    def _as_dict(self) -> JSONType:
-        return {
-            "Description" : self.description,
-            "Unknown04" : self.unk04,
-            "Unknown08" : self.unk08,
-            "Unknown0C" : self.unk0c,
-        }
-    
-    @classmethod
-    def _from_dict(cls, data: JSONType) -> "UnknownSection0x58":
-        return cls(
-            data["Description"],
-            data["Unknown04"],
-            data["Unknown08"],
-            data["Unknown0C"],
-        )
-
 class AINB:
     """
     Class representing an AINB file
@@ -71,7 +50,9 @@ class AINB:
 
     _ENUM_DB: typing.Dict[str, typing.Dict[str, int]] = {}
 
-    __slots__ = ["version", "filename", "category", "commands", "nodes", "blackboard", "expressions", "replacement_table", "modules", "unk_section0x58", "blackboard_id", "parent_blackboard_id"]
+    __slots__ = ["version", "filename", "category", "commands", "nodes", "blackboard", "expressions",
+                 "replacement_table", "modules", "unk_section0x58", "blackboard_id", "parent_blackboard_id",
+                 "exists_section_0x6c"]
 
     def __init__(self) -> None:
         self.version: int = 0
@@ -88,6 +69,7 @@ class AINB:
         # id of parent module to inherit blackboard from (only inherits if non-zero)
         # note that blackboards can be inherited even if the ids don't match so long as the parent module calls the module in question
         self.parent_blackboard_id: int = 0
+        self.exists_section_0x6c: bool = False
 
     @classmethod
     def read(cls, reader: AINBReader) -> "AINB":
@@ -212,8 +194,8 @@ class AINB:
                 ParseWarning(reader, "File indicates that replacements were already processed")
             _ = reader.read_u8() # padding
             replace_count: int = reader.read_u16()          # total entry count
-            node_entry_count: int = reader.read_u16()       # node-related entry count
-            attachment_entry_count: int = reader.read_u16() # attachment-related entry count
+            updated_node_count: int = reader.read_s16()       # file node count post-replacements
+            updated_attachment_count: int = reader.read_s16() # file attachment count post-replacements
             self.replacement_table = [
                 self._read_replacement(reader) for i in range(replace_count)
             ]
@@ -256,27 +238,22 @@ class AINB:
             count_maybe: int = reader.read_u32()
             if count_maybe != 0:
                 ParseWarning(reader, f"Section 0x6c of the header appears to exist with value: {count_maybe}")
+            self.exists_section_0x6c = True
+        else:
+            assert False
 
         return self
     
     @classmethod
-    def from_binary(cls, data: bytes | bytearray | typing.BinaryIO | io.BytesIO, read_only: bool = True, reader_name: str = "AINB Reader") -> "AINB":
+    def from_binary(cls, data: bytes | bytearray, reader_name: str = "AINB Reader") -> "AINB":
         """
         Load an AINB from the provided input buffer
 
         data is the input buffer
 
-        read_only is whether or not to create a read-only binary reader - this must be set to False for files with enum resolutions, default is True
-
         reader_name is an optional name for the binary reader instance (the name that will be shown if an error is thrown by the reader)
         """
-        if isinstance(data, bytes) or isinstance(data, bytearray):
-            return cls.read(AINBReader(io.BytesIO(memoryview(data)), name = reader_name))
-        else:
-            if read_only:
-                return cls.read(AINBReader(data, name = reader_name))
-            else:
-                return cls.read(AINBReader(io.BytesIO(memoryview(data.read())), name = reader_name))
+        return cls.read(AINBReader(io.BytesIO(memoryview(data)), name = reader_name))
 
     @classmethod
     def from_file(cls, file_path: str, read_only: bool = True) -> "AINB":
@@ -432,6 +409,7 @@ class AINB:
                 "Expressions" : self.expressions.as_dict() if self.expressions is not None else {},
                 "Modules" : [ module._as_dict() for module in self.modules ],
                 "Unknown Section 0x58" : self.unk_section0x58._as_dict() if self.unk_section0x58 is not None else {},
+                "Has Section 0x6C" : self.exists_section_0x6c,
             }
         else:
             return {
@@ -447,6 +425,7 @@ class AINB:
                 "Replacement Table" : [ entry._as_dict() for entry in self.replacement_table ],
                 "Modules" : [ module._as_dict() for module in self.modules ],
                 "Unknown Section 0x58" : self.unk_section0x58._as_dict() if self.unk_section0x58 is not None else {},
+                "Has Section 0x6C" : self.exists_section_0x6c,
             }
     
     def save_json(self, output_path: str = "", override_filename: str = "") -> None:
@@ -497,10 +476,10 @@ class AINB:
             Node._from_dict(node, i) for i, node in enumerate(data["Nodes"])
         ]
 
-        if (bb := data["Blackboard"]) != {}:
+        if (bb := data.get("Blackboard", {})) != {}:
             self.blackboard = Blackboard._from_dict(bb)
         
-        if (expr := data["Expressions"]) != {}:
+        if (expr := data.get("Expressions", {})) != {}:
             self.expressions = ExpressionModule.from_dict(expr)
 
         if self.version >= 0x407:
@@ -512,8 +491,10 @@ class AINB:
             Module._from_dict(module) for module in data["Modules"]
         ]
 
-        if (unk_section := data["Unknown Section 0x58"]) != {}:
+        if (unk_section := data.get("Unknown Section 0x58", {})) != {}:
             self.unk_section0x58 = UnknownSection0x58._from_dict(unk_section)
+        
+        self.exists_section_0x6c = data.get("Has Section 0x6C", False)
 
         return self
     
@@ -532,6 +513,308 @@ class AINB:
         """
         return cls.from_dict(json.loads(text), override_filename)
     
+    def _build_context(self, ctx: WriteContext) -> None:
+        node_size: int = 0x3c if self.version > 0x404 else 0x38
+        attachment_size: int = 0x10 if self.version > 0x404 else 0xc
+        ctx.version = self.version
+        ctx.command_count = len(self.commands)
+        ctx.node_count = len(self.nodes)
+        ctx.output_count = sum(1 for node in self.nodes if node.type.value >= 200 and node.type.value < 300)
+        ctx.query_count = sum(1 for node in self.nodes if node.flags.is_query())
+        ctx.blackboard_offset = 0x74 + 0x18 * ctx.command_count + node_size * ctx.node_count
+        if self.expressions is not None:
+            for expr in self.expressions.expressions:
+                expr._preprocess(ctx.expression_ctx)
+        curr_query_index: int = 0
+        for i, node in enumerate(self.nodes):
+            if node.flags.is_query():
+                ctx.query_map[i] = curr_query_index
+                curr_query_index += 1
+        if self.blackboard is not None:
+            ctx.curr_node_param_offset = ctx.blackboard_offset + self.blackboard._calc_size()
+        else:
+            ctx.curr_node_param_offset = ctx.blackboard_offset + 0x30
+        for node in self.nodes:
+            node._preprocess(ctx)
+        for attachment in ctx.attachments:
+            attachment_io_size: int = 0
+            attachment_expr_count: int = 0
+            for p_type in ParamType:
+                for prop in attachment.properties.get_properties(p_type):
+                    ctx.props._properties[p_type].append(prop)
+                    if prop.flags.is_expression():
+                        ctx.expression_ctx.instance_count += 1
+                        attachment_expr_count += 1
+                        attachment_io_size += ctx.expression_ctx.io_mem_sizes[prop.flags.get_index()]
+            ctx.attachment_expression_counts.append(attachment_expr_count)
+            ctx.attachment_expression_sizes.append(attachment_io_size)
+        ctx.attachment_index_offset = ctx.curr_node_param_offset
+        ctx.attachment_offset = ctx.attachment_index_offset + 4 * len(ctx.attachment_indices)
+        ctx.attachment_count = len(ctx.attachments)
+        ctx.attachment_prop_offset = ctx.attachment_offset + attachment_size * ctx.attachment_count
+        ctx.attachment_prop_offsets = [ctx.attachment_prop_offset + 0x64 * i for i in range(ctx.attachment_count)]
+        ctx.property_offset = ctx.attachment_prop_offset + 0x64 * ctx.attachment_count
+        ctx.io_param_offset = ctx.property_offset + 0x18 + sum(prop._get_binary_size(p_type) for p_type in ParamType for prop in ctx.props.get_properties(p_type))
+        ctx.multi_param_offset = ctx.io_param_offset + 0x30 \
+                                    + sum(param._get_binary_size(p_type) for p_type in ParamType for param in ctx.params.get_inputs(p_type)) \
+                                    + sum((8 if p_type == ParamType.Pointer else 4) * len(ctx.params.get_outputs(p_type)) for p_type in ParamType)
+        ctx.x50_offset = ctx.multi_param_offset + 0x8 * len(ctx.multi_params)
+        ctx.transition_offset = ctx.x50_offset
+        ctx.query_offset = ctx.transition_offset + sum(4 + (8 if transition.transition_type == 0 else 4) for transition in ctx.transitions)
+        if self.expressions is not None:
+            ctx.expression_binary = self.expressions.to_binary(ctx.expression_ctx)
+            ctx.expression_offset = ctx.query_offset + 4 * len(ctx.queries)
+            ctx.module_offset = ctx.expression_offset + len(ctx.expression_binary)
+        else:
+            ctx.expression_offset = 0
+            ctx.module_offset = ctx.query_offset + 4 * len(ctx.queries)
+        ctx.action_offset = ctx.module_offset + 4 + 0xc * len(self.modules)
+        ctx.bb_id_offset = ctx.action_offset + 4 + 0xc * len(ctx.actions)
+        state_offset: int
+        if self.unk_section0x58 is not None:
+            ctx.x58_offset = ctx.bb_id_offset + 8
+            state_offset = ctx.x58_offset + 0x10
+        else:
+            ctx.x58_offset = 0
+            state_offset = ctx.bb_id_offset + 8
+        if self.version < 0x407:
+            ctx.node_state_offsets = [state_offset + 0x14 * i for i, node in enumerate(self.nodes) if node.state_info is not None]
+            ctx.replacement_table_offset = 0
+            if self.exists_section_0x6c:
+                ctx.x6c_offset = ctx.node_state_offsets[-1] + 0x14
+                ctx.enum_resolve_offset = ctx.x6c_offset + 4
+            else:
+                ctx.x6c_offset = 0
+                ctx.enum_resolve_offset = ctx.node_state_offsets[-1] + 0x14
+        else:
+            ctx.replacement_table_offset = state_offset
+            if self.exists_section_0x6c:
+                ctx.x6c_offset = ctx.replacement_table_offset + 8 + 8 * len(self.replacement_table)
+                ctx.enum_resolve_offset = ctx.x6c_offset + 4
+            else:
+                ctx.x6c_offset = 0
+                ctx.enum_resolve_offset = ctx.replacement_table_offset + 8 + 8 * len(self.replacement_table)
+        # inline all enums when serializing
+        ctx.string_pool_offset = ctx.enum_resolve_offset + 4
+
+    def _write_header(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write(b"AIB ")
+        writer.write_u32(self.version)
+        writer.write_string_offset(self.filename)
+        writer.write_u32(ctx.command_count)
+        writer.write_u32(ctx.node_count)
+        writer.write_u32(ctx.query_count)
+        writer.write_u32(ctx.attachment_count)
+        writer.write_u32(ctx.output_count)
+        writer.write_u32(ctx.blackboard_offset)
+        writer.write_u32(ctx.string_pool_offset)
+        writer.write_u32(ctx.enum_resolve_offset)
+        writer.write_u32(ctx.property_offset)
+        writer.write_u32(ctx.transition_offset)
+        writer.write_u32(ctx.io_param_offset)
+        writer.write_u32(ctx.multi_param_offset)
+        writer.write_u32(ctx.attachment_offset)
+        writer.write_u32(ctx.attachment_index_offset)
+        writer.write_u32(ctx.expression_offset)
+        writer.write_u32(ctx.replacement_table_offset)
+        writer.write_u32(ctx.query_offset)
+        writer.write_u32(ctx.x50_offset)
+        writer.write_u32(ctx.x54_value)
+        writer.write_u32(ctx.x58_offset)
+        writer.write_u32(ctx.module_offset)
+        writer.write_string_offset(self.category)
+        if self.version > 0x404:
+            writer.write_u32(FileCategory[self.category].value)
+        else:
+            writer.write_u32(0)
+        writer.write_u32(ctx.action_offset)
+        writer.write_u32(ctx.x6c_offset)
+        writer.write_u32(ctx.bb_id_offset)
+
+    @staticmethod
+    def _write_transition(writer: AINBWriter, transition: Transition) -> None:
+        if transition.update_post_calc:
+            writer.write_u32(transition.transition_type | 0x80000000)
+        else:
+            writer.write_u32(transition.transition_type)
+        if transition.transition_type == 0:
+            writer.write_string_offset(transition.command_name)
+
+    @staticmethod
+    def _write_module(writer: AINBWriter, module: Module) -> None:
+        writer.write_string_offset(module.path)
+        writer.write_string_offset(module.category)
+        writer.write_u32(module.instance_count)
+
+    @staticmethod
+    def _write_action(writer: AINBWriter, index: int, action_slot: str, action: str) -> None:
+        writer.write_s32(index)
+        writer.write_string_offset(action_slot)
+        writer.write_string_offset(action)
+
+    @staticmethod
+    def _write_replacement(writer: AINBWriter, replacement: ReplacementEntry) -> None:
+        writer.write_u8(replacement.type.value)
+        writer.write_u8(0)
+        writer.write_s16(replacement.node_index)
+        writer.write_s16(replacement.replace_index)
+        writer.write_s16(replacement.new_index)
+
+    def write(self, writer: AINBWriter) -> None:
+        """
+        Serialize an AINB object to bytes using the provided writer
+        """
+        ctx: WriteContext = WriteContext()
+        self._build_context(ctx)
+
+        """
+        Section order:
+            - Header
+            - Commands
+            - Nodes
+            - Blackboard
+            - Node Params
+            - Attachment Indices
+            - Attachments
+            - Attachment Params
+            - Properties
+            - Input/Output Params
+            - Multi-Params
+            - 0x50 Section
+            - Transitions
+            - Queries
+            - Expressions
+            - Modules
+            - Actions
+            - Blackboard IDs
+            - 0x58 Section
+            - Node State Info
+            - Replacement Table
+            - 0x6c Section
+            - Enum Resolve Table
+            - String Pool
+        """
+
+        self._write_header(writer, ctx)
+
+        for cmd in self.commands:
+            cmd._write(writer)
+        
+        for i, node in enumerate(self.nodes):
+            node._write(writer, ctx, i)
+        
+        if self.blackboard:
+            self.blackboard._write(writer)
+        else:
+            writer.write(b"\x00" * 0x30) # files always have a blackboard section, just in case the user deleted it from the json
+        
+        for node in self.nodes:
+            node._write_params(writer, ctx)
+        
+        for i in ctx.attachment_indices:
+            writer.write_u32(i)
+        
+        param_offset: int = writer.tell() + (0x10 if self.version > 0x404 else 0xc) * len(ctx.attachments)
+        for i, attachment in enumerate(ctx.attachments):
+            attachment._write(writer, param_offset, i, ctx.attachment_expression_counts, ctx.attachment_expression_sizes, self.version > 0x404)
+            param_offset += 0x64
+        
+        for attachment in ctx.attachments:
+            attachment._write_params(writer, ctx.prop_indices)
+        
+        ctx.props._write(writer)
+        ctx.params._write(writer, ctx.multi_params)
+
+        for multi_param in ctx.multi_params:
+            multi_param._write(writer)
+        
+        trans_offset: int = writer.tell() + 4 * len(ctx.transitions)
+        for transition in ctx.transitions:
+            writer.write_u32(trans_offset)
+            trans_offset += (8 if transition.transition_type == 0 else 4)
+        for transition in ctx.transitions:
+            self._write_transition(writer, transition)
+        
+        for query in ctx.queries:
+            writer.write_u16(query)
+            writer.write_u16(0)
+        
+        if self.expressions is not None:
+            writer.write(ctx.expression_binary)
+        
+        writer.write_u32(len(self.modules))
+        for module in self.modules:
+            self._write_module(writer, module)
+        
+        writer.write_u32(len(ctx.actions))
+        for index, action_slot, action in ctx.actions:
+            self._write_action(writer, index, action_slot, action)
+        
+        writer.write_u32(self.blackboard_id)
+        writer.write_u32(self.parent_blackboard_id)
+
+        if self.unk_section0x58 is not None:
+            writer.write_string_offset(self.unk_section0x58.description)
+            writer.write_u32(self.unk_section0x58.unk04)
+            writer.write_u32(self.unk_section0x58.unk08)
+            writer.write_u32(self.unk_section0x58.unk0c)
+        
+        if ctx.state_info:
+            for state_info in ctx.state_info:
+                writer.write_string_offset(state_info.desired_state)
+                writer.write_u32(state_info.unk04)
+                writer.write_u32(state_info.unk08)
+                writer.write_u32(state_info.unk0c)
+                writer.write_u32(state_info.unk10)
+        
+        if self.version > 0x404:
+            writer.write_u16(0)
+            writer.write_u16(len(self.replacement_table))
+            exist_node: bool = False
+            exist_attach: bool = False
+            new_attach_count: int = ctx.attachment_count
+            new_node_count: int = ctx.node_count
+            for replacement in self.replacement_table:
+                if replacement.type == ReplacementType.RemoveAttachment:
+                    exist_attach = True
+                    new_attach_count -= 1
+                else:
+                    exist_node = True
+                    # TODO: is this correct? this is what I did before but unsure why it'd be 2 in the case of replacements
+                    new_node_count -= (1 if replacement.type == ReplacementType.RemoveChild else 2)
+            if exist_node:
+                writer.write_s16(new_node_count)
+            else:
+                writer.write_s16(-1)
+            if exist_attach:
+                writer.write_s16(new_attach_count)
+            else:
+                writer.write_s16(-1)
+            for replacement in self.replacement_table:
+                self._write_replacement(writer, replacement)
+        
+        if self.exists_section_0x6c:
+            writer.write_u32(0)
+        
+        writer.write_u32(0) # enum resolve table
+
+        writer.write_string_pool()
+
+    def to_binary(self) -> bytes:
+        """
+        Serialize an AINB object to bytes
+        """
+        writer: AINBWriter = AINBWriter(io.BytesIO(), name = "AINB Writer")
+        self.write(writer)
+        return writer.get_buffer()
+    
+    def save_ainb(self, output_path: str = "", override_filename: str = "") -> None:
+        if output_path:
+            os.makedirs(output_path, exist_ok=True)
+        output_filename: str = override_filename if override_filename else f"{self.filename}.ainb"
+        with open(os.path.join(output_path, output_filename), "wb") as f:
+            self.write(AINBWriter(f, name = output_filename))
+
     def get_node(self, node_index: int) -> Node | None:
         if node_index < 0 or node_index >= len(self.nodes):
             return None

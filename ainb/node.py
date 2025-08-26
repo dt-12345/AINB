@@ -5,13 +5,15 @@ import typing
 
 from ainb.action import Action
 from ainb.attachment import Attachment
-from ainb.common import AINBReader
+from ainb.common import AINBReader, AINBWriter
 from ainb.module import Module
-from ainb.param import ParamSet
+from ainb.param import ParamSet, InputParam
 from ainb.param_common import ParamType
 from ainb.property import PropertySet
 from ainb.state import StateInfo
-from ainb.utils import DictDecodeError, IntEnumEx, JSONType, ParseError, ParseWarning
+from ainb.transition import Transition
+from ainb.utils import calc_hash, DictDecodeError, IntEnumEx, JSONType, ParseError, ParseWarning
+from ainb.write_context import WriteContext
 
 NULL_INDEX: int = 0x7fff
 
@@ -20,18 +22,6 @@ def get_null_index() -> int:
     Returns the value representing a null (ignored) node index
     """
     return NULL_INDEX
-
-@dataclasses.dataclass(slots=True)
-class Transition:
-    """
-    A transition command entry where the root node of the current context is swapped
-    """
-
-    # 0 = state end transition
-    # 1 = generic transition
-    transition_type: int = 0
-    update_post_calc: bool = False
-    command_name: str = ""
 
 class NodeType(enum.Enum):
     """
@@ -116,6 +106,14 @@ class Plug(metaclass=abc.ABCMeta):
     def _from_dict(cls, data: JSONType) -> "Plug":
         pass
 
+    @abc.abstractmethod
+    def get_size(self) -> int:
+        pass
+
+    @abc.abstractmethod
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        pass
+
 class GenericPlug(Plug):
     __slots__ = ["name"]
 
@@ -133,7 +131,7 @@ class GenericPlug(Plug):
         plug.node_index = reader.read_s32()
         plug.name = reader.read_string_offset()
         return plug
-    
+
     def _as_dict(self) -> JSONType:
         return {
             "Node Index" : self.node_index,
@@ -146,6 +144,99 @@ class GenericPlug(Plug):
         plug.node_index = data["Node Index"]
         plug.name = data["Name"]
         return plug
+    
+    def get_size(self) -> int:
+        return 0x8
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+
+class BoolSelectorInputPlug(GenericPlug):
+    __slots__ = ["unk0", "unk1"]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.unk0: int = 0
+        self.unk1: int = 0
+
+    @classmethod
+    def _read(cls, reader: AINBReader) -> "BoolSelectorInputPlug":
+        plug: BoolSelectorInputPlug = cls()
+        plug.node_index = reader.read_s32()
+        plug.name = reader.read_string_offset()
+        plug.unk0 = reader.read_u32()
+        plug.unk1 = reader.read_u32() # default?
+        return plug
+    
+    def _as_dict(self) -> JSONType:
+        return {
+            "Node Index" : self.node_index,
+            "Name" : self.name,
+            "Unknown 1" : self.unk0,
+            "Unknown 2" : self.unk1,
+        }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "BoolSelectorInputPlug":
+        plug: BoolSelectorInputPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        plug.unk0 = data["Unknown 1"]
+        plug.unk1 = data["Unknown 2"]
+        return plug
+    
+    def get_size(self) -> int:
+        return 0x10
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        writer.write_u32(self.unk0)
+        writer.write_u32(self.unk1)
+
+class F32SelectorInputPlug(GenericPlug):
+    __slots__ = ["unk0", "unk1"]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.unk0: int = 0
+        self.unk1: float = 0
+
+    @classmethod
+    def _read(cls, reader: AINBReader) -> "F32SelectorInputPlug":
+        plug: F32SelectorInputPlug = cls()
+        plug.node_index = reader.read_s32()
+        plug.name = reader.read_string_offset()
+        plug.unk0 = reader.read_u32()
+        plug.unk1 = reader.read_f32()
+        return plug
+    
+    def _as_dict(self) -> JSONType:
+        return {
+            "Node Index" : self.node_index,
+            "Name" : self.name,
+            "Unknown 1" : self.unk0,
+            "Unknown 2" : self.unk1,
+        }
+    
+    @classmethod
+    def _from_dict(cls, data: JSONType) -> "F32SelectorInputPlug":
+        plug: F32SelectorInputPlug = cls()
+        plug.node_index = data["Node Index"]
+        plug.name = data["Name"]
+        plug.unk0 = data["Unknown 1"]
+        plug.unk1 = data["Unknown 2"]
+        return plug
+    
+    def get_size(self) -> int:
+        return 0x10
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        writer.write_u32(self.unk0)
+        writer.write_f32(self.unk1)
     
 class ChildPlug(Plug):
     __slots__ = ["name"]
@@ -177,6 +268,13 @@ class ChildPlug(Plug):
         plug.node_index = data["Node Index"]
         plug.name = data["Name"]
         return plug
+
+    def get_size(self) -> int:
+        return 0x8
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
 
 class S32SelectorPlug(ChildPlug):
     __slots__ = ["condition", "is_default", "blackboard_index"]
@@ -228,6 +326,22 @@ class S32SelectorPlug(ChildPlug):
         else:
             plug.is_default = data["Is Default"]
         return plug
+    
+    def get_size(self) -> int:
+        return 0x10
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        if self.blackboard_index != -1:
+            writer.write_s16(self.blackboard_index)
+            writer.write_u16(0x8000)
+        else:
+            writer.write_u32(0)
+        if self.is_default:
+            writer.write_u32(0)
+        else:
+            writer.write_s32(self.condition)
 
 class F32SelectorPlug(ChildPlug):
     __slots__ = ["condition_min", "blackboard_index_min", "condition_max", "blackboard_index_max", "is_default"]
@@ -247,8 +361,8 @@ class F32SelectorPlug(ChildPlug):
         plug.name = reader.read_string_offset()
         if is_last:
             plug.is_default = True
-            if (string := reader.read_string_offset()) != "その他":
-                raise ParseError(reader, f"F32SelectorPlug expected \"その他\" as default case string, got \"{string}\"")
+            # if (string := reader.read_string_offset()) != "その他":
+            #     raise ParseError(reader, f"F32SelectorPlug expected \"その他\" as default case string, got \"{string}\"")
         else:
             index: int = reader.read_s16()
             flag: int = reader.read_u16()
@@ -309,6 +423,32 @@ class F32SelectorPlug(ChildPlug):
             else:
                 plug.blackboard_index_max = data["Condition Max Blackboard Index"]
         return plug
+    
+    def get_size(self) -> int:
+        return 0x28
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        if self.is_default:
+            # writer.write_string_offset("その他")
+            writer.write(b"\x00" * 0x20)
+        else:
+            if self.blackboard_index_min != -1:
+                writer.write_s16(self.blackboard_index_min)
+                writer.write_u16(0x8000)
+                writer.write_u32(0)
+            else:
+                writer.write_u32(0)
+                writer.write_f32(self.condition_min)
+            if self.blackboard_index_max != -1:
+                writer.write_s16(self.blackboard_index_max)
+                writer.write_u16(0x8000)
+                writer.write_u32(0)
+            else:
+                writer.write_u32(0)
+                writer.write_f32(self.condition_max)
+            writer.write(b"\x00" * 0x10)
 
 class StringSelectorPlug(ChildPlug):
     __slots__ = ["condition", "is_default", "blackboard_index"]
@@ -360,6 +500,22 @@ class StringSelectorPlug(ChildPlug):
         else:
             plug.is_default = data["Is Default"]
         return plug
+    
+    def get_size(self) -> int:
+        return 0x10
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        if self.blackboard_index != -1:
+            writer.write_s16(self.blackboard_index)
+            writer.write_u16(0x8000)
+        else:
+            writer.write_u32(0)
+        if self.is_default:
+            writer.write_string_offset("その他")
+        else:
+            writer.write_string_offset(self.condition)
 
 class RandomSelectorPlug(ChildPlug):
     __slots__ = ["weight"]
@@ -390,6 +546,14 @@ class RandomSelectorPlug(ChildPlug):
         plug.name = data["Name"]
         plug.weight = data["Weight"]
         return plug
+    
+    def get_size(self) -> int:
+        return 0xc
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        writer.write_f32(self.weight)
 
 class BSASelectorUpdaterPlug(ChildPlug):
     __slots__ = ["unk0", "unk1"]
@@ -424,6 +588,15 @@ class BSASelectorUpdaterPlug(ChildPlug):
         plug.unk0 = data["Unknown0"]
         plug.unk1 = data["Unknown1"]
         return plug
+    
+    def get_size(self) -> int:
+        return 0x10
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        writer.write_u32(self.unk0)
+        writer.write_u32(self.unk1)
 
 class TransitionPlug(Plug):
     __slots__ = ["transition"]
@@ -480,37 +653,55 @@ class TransitionPlug(Plug):
                 data["Update Post Calc"],
             )
         return plug
+    
+    def get_size(self) -> int:
+        return 0x8
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_u32(ctx.transitions.index(self.transition))
 
-class StringInputPlug(Plug):
-    __slots__ = ["name", "unknown", "default_value", "_version"]
+# TODO: does any of this actually exist or was my old code just stupid
+# def should_skip_defaults(name: str, index: int, param: InputParam) -> bool:
+#     if name != param.name:
+#         return False
+#     if isinstance(param.source, list):
+#         for src in param.source:
+#             if src.flags.is_expression() and src.src_node_index == index:
+#                 return True
+#     else:
+#         if param.source.flags.is_expression() and param.source.src_node_index == index:
+#             return True
+#     return False
+
+class StringSelectorInputPlug(Plug):
+    __slots__ = ["name", "unknown", "default_value", "_read_extra"]
 
     def __init__(self) -> None:
         super().__init__()
         self.name: str = ""
         self.unknown: int = 0
         self.default_value: str = ""
-        self._version: int = 0 # fake member to track the version this plug was read from
+        self._read_extra: bool = False
 
     @classmethod
     def get_type(cls) -> PlugType:
         return PlugType.String
     
     @classmethod
-    def _read(cls, reader: AINBReader) -> "StringInputPlug":
-        plug: StringInputPlug = cls()
-        plug._version = reader.version
+    def _read(cls, reader: AINBReader) -> "StringSelectorInputPlug":
+        plug: StringSelectorInputPlug = cls()
         plug.node_index = reader.read_s32()
         plug.name = reader.read_string_offset()
-        if reader.version > 0x404:
-            # TODO: so an issue here is that there is no stored default value here if the source node's output isn't a string type (in the case an expression transforms it)
-            # not that it really makes a difference or anything since these plugs are never read by the game afaik
-            # and it should be guaranteed to never throw an error either since the string offset is 0 which is always a valid offset
-            plug.unknown = reader.read_u32()
-            plug.default_value = reader.read_string_offset()
+        if reader.version < 0x407:
+            return plug
+        plug._read_extra = True
+        plug.unknown = reader.read_u32()
+        plug.default_value = reader.read_string_offset()
         return plug
     
     def _as_dict(self) -> JSONType:
-        if self._version > 0x404:
+        if self._read_extra:
             return {
                 "Node Index" : self.node_index,
                 "Name" : self.name,
@@ -524,44 +715,54 @@ class StringInputPlug(Plug):
             }
     
     @classmethod
-    def _from_dict(cls, data: JSONType) -> "StringInputPlug":
-        plug: StringInputPlug = cls()
+    def _from_dict(cls, data: JSONType) -> "StringSelectorInputPlug":
+        plug: StringSelectorInputPlug = cls()
         plug.node_index = data["Node Index"]
         plug.name = data["Name"]
         if "Unknown" in data:
             plug.unknown = data["Unknown"]
             plug.default_value = data["Default Value"]
-            plug._version = 0x407
+            plug._read_extra = True
         return plug
+    
+    def get_size(self) -> int:
+        return 0x10 if self._read_extra else 0x8
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        if self._read_extra:
+            writer.write_u32(self.unknown)
+            writer.write_string_offset(self.default_value)
 
-class IntInputPlug(Plug):
-    __slots__ = ["name", "unknown", "default_value", "_version"]
+class S32SelectorInputPlug(Plug):
+    __slots__ = ["name", "unknown", "default_value", "_read_extra"]
 
     def __init__(self) -> None:
         super().__init__()
         self.name: str = ""
         self.unknown: int = 0
         self.default_value: int = 0
-        self._version: int = 0 # fake member to track the version this plug was read from
+        self._read_extra: bool = False
 
     @classmethod
     def get_type(cls) -> PlugType:
         return PlugType.Int
     
     @classmethod
-    def _read(cls, reader: AINBReader) -> "IntInputPlug":
-        plug: IntInputPlug = cls()
-        plug._version = reader.version
+    def _read(cls, reader: AINBReader) -> "S32SelectorInputPlug":
+        plug: S32SelectorInputPlug = cls()
         plug.node_index = reader.read_s32()
         plug.name = reader.read_string_offset()
-        if reader.version > 0x404:
-            # TODO: same issue as with the string input plugs though even less relevant
-            plug.unknown = reader.read_u32()
-            plug.default_value = reader.read_s32()
+        if reader.version < 0x407:
+            return plug
+        plug._read_extra = True
+        plug.unknown = reader.read_u32()
+        plug.default_value = reader.read_s32()
         return plug
     
     def _as_dict(self) -> JSONType:
-        if self._version > 0x404:
+        if self._read_extra:
             return {
                 "Node Index" : self.node_index,
                 "Name" : self.name,
@@ -575,15 +776,25 @@ class IntInputPlug(Plug):
             }
     
     @classmethod
-    def _from_dict(cls, data: JSONType) -> "IntInputPlug":
-        plug: IntInputPlug = cls()
+    def _from_dict(cls, data: JSONType) -> "S32SelectorInputPlug":
+        plug: S32SelectorInputPlug = cls()
         plug.node_index = data["Node Index"]
         plug.name = data["Name"]
         if "Unknown" in data:
             plug.unknown = data["Unknown"]
             plug.default_value = data["Default Value"]
-            plug._version = 0x407
+            plug._read_extra = True
         return plug
+    
+    def get_size(self) -> int:
+        return 0x10 if self._read_extra else 0x8
+    
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        writer.write_s32(self.node_index)
+        writer.write_string_offset(self.name)
+        if self._read_extra:
+            writer.write_u32(self.unknown)
+            writer.write_s32(self.default_value)
 
 class NodeFlag(int):
     """
@@ -690,18 +901,18 @@ class Node:
         return typing.cast(typing.List[TransitionPlug], self._plugs[PlugType.Transition])
     
     @property
-    def string_plugs(self) -> typing.List[StringInputPlug]:
+    def string_plugs(self) -> typing.List[StringSelectorInputPlug]:
         """
         String input plugs
         """
-        return typing.cast(typing.List[StringInputPlug], self._plugs[PlugType.String])
+        return typing.cast(typing.List[StringSelectorInputPlug], self._plugs[PlugType.String])
     
     @property
-    def int_plugs(self) -> typing.List[IntInputPlug]:
+    def int_plugs(self) -> typing.List[S32SelectorInputPlug]:
         """
         Int input plugs
         """
-        return typing.cast(typing.List[IntInputPlug], self._plugs[PlugType.Int])
+        return typing.cast(typing.List[S32SelectorInputPlug], self._plugs[PlugType.Int])
     
     @property
     def _06_plugs(self) -> typing.List[Plug]: # unused
@@ -819,7 +1030,15 @@ class Node:
     def _read_plug(self, reader: AINBReader, offset: int, plug_type: PlugType, is_last: bool, trans_info_list: typing.List[Transition]) -> Plug:
         reader.seek(offset)
         if plug_type == PlugType.Generic:
-            return GenericPlug._read(reader)
+            if self.type == NodeType.Element_BoolSelector:
+                return BoolSelectorInputPlug._read(reader)
+            elif self.type == NodeType.Element_F32Selector:
+                return F32SelectorInputPlug._read(reader)
+            elif self.type == NodeType.Element_Expression:
+                # S32SelectorInputPlug here just as a generic plug type, it should really use whatever type the plug is for but too lazy to add that here
+                return S32SelectorInputPlug._read(reader)
+            else:
+                return GenericPlug._read(reader)
         elif plug_type == PlugType.Child:
             if self.type == NodeType.Element_S32Selector:
                 return S32SelectorPlug._read(reader, is_last)
@@ -836,9 +1055,15 @@ class Node:
         elif plug_type == PlugType.Transition:
             return TransitionPlug._read(reader, trans_info_list)
         elif plug_type == PlugType.String:
-            return StringInputPlug._read(reader)
+            if self.type in [NodeType.Element_StringSelector, NodeType.Element_Expression]:
+                return StringSelectorInputPlug._read(reader)
+            else:
+                return GenericPlug._read(reader)
         elif plug_type == PlugType.Int:
-            return IntInputPlug._read(reader)
+            if self.type in [NodeType.Element_S32Selector, NodeType.Element_Expression]:
+                return S32SelectorInputPlug._read(reader)
+            else:
+                return GenericPlug._read(reader)
         else:
             raise ParseError(reader, f"Unsupported plug type: {plug_type}")
     
@@ -879,7 +1104,15 @@ class Node:
 
     def _read_plug_from_dict(self, data: JSONType, plug_type: PlugType) -> Plug:
         if plug_type == PlugType.Generic:
-            return GenericPlug._from_dict(data)
+            if self.type == NodeType.Element_BoolSelector:
+                return BoolSelectorInputPlug._from_dict(data)
+            elif self.type == NodeType.Element_F32Selector:
+                return F32SelectorInputPlug._from_dict(data)
+            elif self.type == NodeType.Element_Expression:
+                # S32SelectorInputPlug here just as a generic plug type, it should really use whatever type the plug is for but too lazy to add that here
+                return S32SelectorInputPlug._from_dict(data)
+            else:
+                return GenericPlug._from_dict(data)
         elif plug_type == PlugType.Child:
             if self.type == NodeType.Element_S32Selector:
                 return S32SelectorPlug._from_dict(data)
@@ -896,9 +1129,15 @@ class Node:
         elif plug_type == PlugType.Transition:
             return TransitionPlug._from_dict(data)
         elif plug_type == PlugType.String:
-            return StringInputPlug._from_dict(data)
+            if self.type in [NodeType.Element_StringSelector, NodeType.Element_Expression]:
+                return StringSelectorInputPlug._from_dict(data)
+            else:
+                return GenericPlug._from_dict(data)
         elif plug_type == PlugType.Int:
-            return IntInputPlug._from_dict(data)
+            if self.type in [NodeType.Element_S32Selector, NodeType.Element_Expression]:
+                return S32SelectorInputPlug._from_dict(data)
+            else:
+                return GenericPlug._from_dict(data)
         else:
             raise DictDecodeError(f"Unsupported plug type: {plug_type}")
 
@@ -929,3 +1168,116 @@ class Node:
         if "State Info" in data:
             node.state_info = StateInfo._from_dict(data["State Info"])
         return node
+    
+    def _preprocess(self, ctx: WriteContext) -> None:
+        ctx.node_param_offsets.append(ctx.curr_node_param_offset)
+        ctx.curr_node_param_offset += 0xa4 + sum(plug.get_size() + 4 for plug_type in PlugType for plug in self.get_plugs(plug_type))
+
+        ctx.transitions.extend(plug.transition for plug in self.transition_plugs)
+
+        io_size: int = 0
+        expr_count: int = 0
+        multi_count: int = 0
+        for p_type in ParamType:
+            for prop in self.properties.get_properties(p_type):
+                ctx.props._properties[p_type].append(prop)
+                if prop.flags.is_expression():
+                    ctx.expression_ctx.instance_count += 1
+                    expr_count += 1
+                    io_size += ctx.expression_ctx.io_mem_sizes[prop.flags.get_index()]
+            for param in self.params.get_inputs(p_type):
+                ctx.params._inputs[p_type].append(param)
+                if isinstance(param.source, list):
+                    for src in param.source:
+                        if src.flags.is_expression():
+                            ctx.expression_ctx.instance_count += 1
+                            expr_count += 1
+                            io_size += ctx.expression_ctx.io_mem_sizes[src.flags.get_index()]
+                        ctx.multi_params.append(src)
+                        multi_count += 1
+                else:
+                    if param.source.flags.is_expression():
+                        ctx.expression_ctx.instance_count += 1
+                        expr_count += 1
+                        io_size += ctx.expression_ctx.io_mem_sizes[param.source.flags.get_index()]
+            ctx.params._outputs[p_type].extend(self.params.get_outputs(p_type))
+        ctx.node_expression_counts.append(expr_count)
+        ctx.node_expression_sizes.append(io_size)
+        ctx.multi_param_counts.append(multi_count)
+
+        # TODO: figure out how they're generating this array (this doesn't match, but it works fine)
+        query_count: int = len(self.queries)
+        if query_count > 0:
+            ctx.query_base_indices.append(ctx.curr_query_index)
+            ctx.curr_query_index += query_count
+            ctx.queries.extend(ctx.query_map[i] for i in self.queries)
+        else:
+            ctx.query_base_indices.append(0)
+        
+        ctx.actions.extend((self.index, action.action_slot, action.action) for action in self.actions)
+
+        ctx.base_attachment_indices.append(ctx.curr_attachment_index)
+        for attachment in self.attachments:
+            ctx.curr_attachment_index += 1
+            if attachment in ctx.attachments:
+                ctx.attachment_indices.append(ctx.attachments.index(attachment))
+            else:
+                ctx.attachment_indices.append(len(ctx.attachments))
+                ctx.attachments.append(attachment)
+        
+        if self.state_info is not None:
+            ctx.state_info.append(self.state_info)
+
+    def _write(self, writer: AINBWriter, ctx: WriteContext, index: int) -> None:
+        writer.write_u16(self.type.value)
+        writer.write_s16(index)
+        writer.write_u16(len(self.attachments))
+        writer.write_u8(self.flags)
+        writer.write(b"\x00") # padding
+        writer.write_string_offset(self.name)
+        if ctx.version > 0x404:
+            writer.write_u32(calc_hash(self.name))
+        writer.write_u32(0)
+        writer.write_u32(ctx.node_param_offsets[index])
+        writer.write_u16(ctx.node_expression_counts[index])
+        writer.write_u16(ctx.node_expression_sizes[index])
+        writer.write_u16(ctx.multi_param_counts[index])
+        writer.write_u16(0)
+        writer.write_u32(ctx.base_attachment_indices[index])
+        writer.write_u16(ctx.query_base_indices[index])
+        writer.write_u16(len(self.queries))
+        if self.state_info is not None:
+            writer.write_u32(ctx.node_state_offsets[index])
+        else:
+            writer.write_u32(0)
+        writer.write_guid(self.guid)
+    
+    def _write_params(self, writer: AINBWriter, ctx: WriteContext) -> None:
+        for p_type in ParamType:
+            prop_count: int = len(self.properties.get_properties(p_type))
+            writer.write_u32(ctx.prop_indices[p_type])
+            ctx.prop_indices[p_type] += prop_count
+            writer.write_u32(prop_count)
+        for p_type in ParamType:
+            input_count: int = len(self.params.get_inputs(p_type))
+            writer.write_u32(ctx.input_indices[p_type])
+            ctx.input_indices[p_type] += input_count
+            writer.write_u32(input_count)
+            writer.write_u32(ctx.output_indices[p_type])
+            output_count: int = len(self.params.get_outputs(p_type))
+            ctx.output_indices[p_type] += output_count
+            writer.write_u32(output_count)
+        curr_index: int = 0
+        for plug_type in PlugType:
+            plug_count: int = len(self.get_plugs(plug_type))
+            writer.write_u8(plug_count)
+            writer.write_u8(curr_index)
+            curr_index += plug_count
+        curr_offset: int = writer.tell() + curr_index * 4
+        for plug_type in PlugType:
+            for plug in self.get_plugs(plug_type):
+                writer.write_u32(curr_offset)
+                curr_offset += plug.get_size()
+        for plug_type in PlugType:
+            for plug in self.get_plugs(plug_type):
+                plug._write(writer, ctx)

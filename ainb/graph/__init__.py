@@ -1,5 +1,7 @@
 """
 Requires a Graphviz installation on the system path
+
+Simple AINB Graphing Utilities
 """
 
 from ainb.graph.graph import (

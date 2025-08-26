@@ -1,4 +1,4 @@
-from ainb.common import AINBReader
+from ainb.common import AINBReader, AINBWriter
 from ainb.utils import JSONType
 
 class Command:
@@ -46,3 +46,9 @@ class Command:
         cmd.root_node_index = data["Root Node Index"]
         cmd.secondary_root_node_index = data.get("Secondary Root Node Index", -1)
         return cmd
+    
+    def _write(self, writer: AINBWriter) -> None:
+        writer.write_string_offset(self.name)
+        writer.write_guid(self.guid)
+        writer.write_u16(self.root_node_index)
+        writer.write_u16(self.secondary_root_node_index + 1)

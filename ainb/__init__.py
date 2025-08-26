@@ -1,3 +1,9 @@
+"""
+AINB Utilities
+"""
+
+# TODO: clean up public-facing API, proper editing support?
+
 __version__: str = "0.1.0"
 
 from ainb.action import Action as Action
@@ -17,17 +23,17 @@ from ainb.blackboard import (
 )
 from ainb.command import Command as Command
 from ainb.common import (
-    AINBReader as AINBReader
+    AINBReader as AINBReader,
+    AINBWriter as AINBWriter,
 )
-from ainb.enum_resolve import EnumEntry as EnumEntry
 from ainb.module import Module as Module
-from ainb.node_def import *
 from ainb.node import (
     get_null_index as get_null_index,
     NodeType as NodeType,
     PlugType as PlugType,
-    Transition as Transition,
     GenericPlug as GenericPlug,
+    BoolSelectorInputPlug as BoolSelectorInputPlug,
+    F32SelectorInputPlug as F32SelectorInputPlug,
     ChildPlug as ChildPlug,
     S32SelectorPlug as S32SelectorPlug,
     F32SelectorPlug as F32SelectorPlug,
@@ -35,8 +41,8 @@ from ainb.node import (
     RandomSelectorPlug as RandomSelectorPlug,
     BSASelectorUpdaterPlug as BSASelectorUpdaterPlug,
     TransitionPlug as TransitionPlug,
-    StringInputPlug as StringInputPlug,
-    IntInputPlug as IntInputPlug,
+    StringSelectorInputPlug as StringSelectorInputPlug,
+    S32SelectorInputPlug as S32SelectorInputPlug,
     NodeFlag as NodeFlag,
     Node as Node,
 )
@@ -60,6 +66,7 @@ from ainb.replacement import (
     ReplacementEntry as ReplacementEntry,
 )
 from ainb.state import StateInfo as StateInfo
+from ainb.transition import Transition as Transition
 from ainb.utils import (
     Reader as Reader,
     ReaderWithStrPool as ReaderWithStrPool,

@@ -14,8 +14,11 @@ from ainb.property import Property
 
 # TODO: (probably not) expression control flow graph?
 # TODO: root node colored differently? unsure if that's desirable
+# TODO: state end colored differently? edge between state end and next state if possible?
+# TODO: different colors for module input/outputs/children?
 
 COLOR_MAP: typing.Dict[str, str] = {
+    "graph-bg" : "lightgray",
     "node-font" : "black",
     "blackboard-font" : "black",
     "query-edge" : "webgreen",
@@ -53,6 +56,14 @@ def get_id() -> str:
     id: int = ID_ITER
     ID_ITER += 1
     return str(id)
+
+T = typing.TypeVar("T")
+
+def escape_value(value: T | str) -> T | str:
+    if isinstance(value, str):
+        return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;")
+    else:
+        return value
 
 class GraphError(Exception):
     def __init__(self, msg: str) -> None:
@@ -112,7 +123,7 @@ class GraphNode:
         else:
             return f"""
                     <tr>
-                        <td port=\"{id}\">[{param_type.name}] {param.name} (default = {param.default_value}) </td>"
+                        <td port=\"{id}\">[{param_type.name}] {param.name} (default = {escape_value(param.default_value)}) </td>"
                     </tr>
                     """
         
@@ -142,7 +153,7 @@ class GraphNode:
         else:
             return f"""
                     <tr>
-                        <td>[{param_type.name}] {prop.name} (default = {prop.default_value}) </td>"
+                        <td>[{param_type.name}] {prop.name} (default = {escape_value(prop.default_value)}) </td>"
                     </tr>
                     """
     
@@ -254,13 +265,13 @@ class Graph:
         if param.file_ref != "":
             return f"""
                     <tr>
-                        <td port=\"{id}\">[{param.type.name}] {param.name} (source = {param.file_ref}) </td>"
+                        <td port=\"{id}\">[{param.type.name}] {param.name} (source = {escape_value(param.file_ref)}) </td>"
                     </tr>
                     """
         else:
             return f"""
                     <tr>
-                        <td port=\"{id}\">[{param.type.name}] {param.name} (default = {param.default_value}) </td>"
+                        <td port=\"{id}\">[{param.type.name}] {param.name} (default = {escape_value(param.default_value)}) </td>"
                     </tr>
                     """
 
@@ -373,18 +384,18 @@ class Graph:
             dot.edge(root_id, root_node.id)
     
     def _process_param_source(self, node: Node, param_type: ParamType, param_index: int, param: InputParam, source: ParamSource) -> None:
-        if isinstance(param.source, list):
+        if isinstance(source, list):
             raise GraphError("Cannot have nested multi-params")
-        if param.source.src_node_index != -1:
-            if param.source.is_expression():
+        if source.src_node_index != -1:
+            if source.is_expression():
                 if self.ainb.expressions is None:
                     raise GraphError(f"Node {node.index} requests an expression but file {self.ainb.filename} has no expression section")
                 # expressions are capable of transforming an output parameter from another node of a different datatype into the correct datatype
                 self.input_edges.add(
                     InputEdge(
-                        param.source.src_node_index,
+                        source.src_node_index,
                         ParamLocation(
-                            EXPRESSION_TYPE_MAP[self.ainb.expressions.expressions[param.source.flags.get_index()].output_datatype], param.source.src_output_index
+                            EXPRESSION_TYPE_MAP[self.ainb.expressions.expressions[source.flags.get_index()].input_datatype], source.src_output_index
                         ),
                         node.index,
                         ParamLocation(param_type, param_index),
@@ -394,17 +405,17 @@ class Graph:
             else:
                 self.input_edges.add(
                     InputEdge(
-                        param.source.src_node_index,
-                        ParamLocation(param_type, param.source.src_output_index),
+                        source.src_node_index,
+                        ParamLocation(param_type, source.src_output_index),
                         node.index,
                         ParamLocation(param_type, param_index),
                         param.name,
                     )
                 )
-        elif param.source.is_blackboard():
+        elif source.is_blackboard():
             self.bb_edges.add(
                 BlackboardEdge(
-                    BlackboardLocation(BLACKBOARD_TYPE_MAP[param_type], param.source.flags.get_index()),
+                    BlackboardLocation(BLACKBOARD_TYPE_MAP[param_type], source.flags.get_index()),
                     node.index,
                     ParamLocation(param_type, param_index),
                     f"{param.name} (BLACKBOARD)",
@@ -476,20 +487,26 @@ class Graph:
                 raise GraphError(f"Node index {node.index} has query with index {query} which does not exist")
             self.add_node(query_node)
 
-def render_graph(graph: graphviz.Digraph, name: str, output_format: str = "svg", output_dir: str = "", view: bool = False, stagger: int = 1) -> None:
-    src: graphviz.Source = graph.unflatten(stagger=stagger)
+def render_graph(graph: graphviz.Digraph, name: str, output_format: str = "svg", output_dir: str = "", view: bool = False, unflatten: bool = True, stagger: int = 1) -> None:
     if output_dir != "":
         os.makedirs(output_dir, exist_ok=True)
-    src.format = output_format
-    src.render(filename=name, directory=output_dir, view=view)
+    if unflatten:
+        src: graphviz.Source = graph.unflatten(stagger=stagger)
+        src.format = output_format
+        src.render(filename=name, directory=output_dir, view=view)
+    else:
+        graph.format = output_format
+        graph.render(filename=name, directory=output_dir, view=view)
 
 def graph_from_node(ainb: AINB,
                     node_index: int,
-                    render: bool = False,
+                    render: bool = True,
                     output_format: str = "svg",
                     output_dir: str = "",
                     view: bool = False,
+                    unflatten: bool = True,
                     stagger: int = 1,
+                    dpi: float = 96.0,
                     node_sep: float = 0.25,
                     split_blackboard: bool = False) -> graphviz.Digraph:
     """
@@ -502,7 +519,9 @@ def graph_from_node(ainb: AINB,
         output_format: Output format of rendered graph (defaults to svg)
         output_dir: Output directory path for rendered graph
         view: Automatically open rendered graph for viewing
+        unflatten: Unflatten graph
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         split_blackboard: Split Blackboard into separate nodes
     """
@@ -515,21 +534,25 @@ def graph_from_node(ainb: AINB,
     name: str = f"{node.name} ({node.index})" if node.type == NodeType.UserDefined else f"{node.type.name} ({node.index})"
 
     dot: graphviz.Digraph = graphviz.Digraph(name, node_attr={"shape" : "rectangle"})
-    dot.attr(node_sep=str(node_sep))
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"])
+    if output_format != "svg":
+        dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
 
     if render:
-        render_graph(dot, name, output_format, output_dir, view, stagger)
+        render_graph(dot, name, output_format, output_dir, view, unflatten, stagger)
 
     return dot
 
 def graph_command(ainb: AINB,
                   cmd_name: str,
-                  render: bool = False,
+                  render: bool = True,
                   output_format: str = "svg",
                   output_dir: str = "",
                   view: bool = False,
+                  unflatten: bool = True,
                   stagger: int = 1,
+                  dpi: float = 96.0,
                   node_sep: float = 0.25,
                   split_blackboard: bool = False) -> graphviz.Digraph:
     """
@@ -542,7 +565,9 @@ def graph_command(ainb: AINB,
         output_format: Output format of rendered graph (defaults to svg)
         output_dir: Output directory path for rendered graph
         view: Automatically open rendered graph for viewing
+        unflatten: Unflatten graph
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         split_blackboard: Split Blackboard into separate nodes
     """
@@ -556,20 +581,24 @@ def graph_command(ainb: AINB,
     graph.add_node(root_node, is_root=True, root_name=cmd_name)
 
     dot: graphviz.Digraph = graphviz.Digraph(cmd.name, node_attr={"shape" : "rectangle"})
-    dot.attr(node_sep=str(node_sep))
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"])
+    if output_format != "svg":
+        dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
 
     if render:
-        render_graph(dot, cmd_name, output_format, output_dir, view, stagger)
+        render_graph(dot, cmd_name, output_format, output_dir, view, unflatten, stagger)
 
     return dot
 
 def graph_all_nodes(ainb: AINB,
-                    render: bool = False,
+                    render: bool = True,
                     output_format: str = "svg",
                     output_dir: str = "",
                     view: bool = False,
+                    unflatten: bool = True,
                     stagger: int = 1,
+                    dpi: float = 96.0,
                     node_sep: float = 0.25,
                     split_blackboard: bool = False) -> graphviz.Digraph:
     """
@@ -581,7 +610,9 @@ def graph_all_nodes(ainb: AINB,
         output_format: Output format of rendered graph (defaults to svg)
         output_dir: Output directory path for rendered graph
         view: Automatically open rendered graph for viewing
+        unflatten: Unflatten graph
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         split_blackboard: Split Blackboard into separate nodes
     """
@@ -591,20 +622,24 @@ def graph_all_nodes(ainb: AINB,
         graph.add_node(node)
     
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(node_sep=str(node_sep))
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"])
+    if output_format != "svg":
+        dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
 
     if render:
-        render_graph(dot, ainb.filename, output_format, output_dir, view, stagger)
+        render_graph(dot, ainb.filename, output_format, output_dir, view, unflatten, stagger)
 
     return dot
 
 def graph_all_commands(ainb: AINB,
-                       render: bool = False,
+                       render: bool = True,
                        output_format: str = "svg",
                        output_dir: str = "",
                        view: bool = False,
+                       unflatten: bool = True,
                        stagger: int = 1,
+                       dpi: float = 96.0,
                        node_sep: float = 0.25,
                        split_blackboard: bool = False) -> graphviz.Digraph:
     """
@@ -616,18 +651,22 @@ def graph_all_commands(ainb: AINB,
         output_format: Output format of rendered graph (defaults to svg)
         output_dir: Output directory path for rendered graph
         view: Automatically open rendered graph for viewing
+        unflatten: Unflatten graph
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         split_blackboard: Split Blackboard into separate nodes
     """
 
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(node_sep=str(node_sep))
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"])
+    if output_format != "svg":
+        dot.attr(dpi=str(dpi))
     
     for cmd in ainb.commands:
-        dot.subgraph(graph_command(ainb, cmd.name, node_sep=node_sep, split_blackboard=split_blackboard))
+        dot.subgraph(graph_command(ainb, cmd.name, render=False, node_sep=node_sep, split_blackboard=split_blackboard))
 
     if render:
-        render_graph(dot, ainb.filename, output_format, output_dir, view, stagger)
+        render_graph(dot, ainb.filename, output_format, output_dir, view, unflatten, stagger)
 
     return dot

@@ -1,8 +1,9 @@
 import dataclasses
+import os
 import typing
 
-from ainb.common import AINBReader
-from ainb.utils import DictDecodeError, IntEnumEx, JSONType, ValueType
+from ainb.common import AINBReader, AINBWriter
+from ainb.utils import calc_hash, DictDecodeError, IntEnumEx, JSONType, SerializeError, ValueType, Vector3f
 
 class BBParamType(IntEnumEx):
     """
@@ -76,6 +77,13 @@ class BBParam:
                 if param.default_value is not None:
                     raise DictDecodeError("Pointer params must have a default value of null")
         return param
+    
+    def _calc_size(self, file_refs: typing.Set[str]) -> int:
+        if self.file_ref != "" and self.file_ref not in file_refs:
+            file_refs.add(self.file_ref)
+            return 0x18 + (0xc if self.type == BBParamType.Vec3f else 0 if self.type == BBParamType.VoidPtr else 4)
+        else:
+            return 8 + (0xc if self.type == BBParamType.Vec3f else 0 if self.type == BBParamType.VoidPtr else 4)
 
 @dataclasses.dataclass(slots=True)
 class BBParamHeader:
@@ -232,3 +240,71 @@ class Blackboard:
                 BBParam._from_dict(param, p_type) for param in data[p_type.name]
             ]
         return bb
+
+    def _calc_size(self) -> int:
+        file_refs: typing.Set[str] = set()
+        return 0x30 + sum(param._calc_size(file_refs) for p_type in BBParamType for param in self.get_params(p_type))
+
+    def _write(self, writer: AINBWriter) -> None:
+        index: int = 0
+        pos: int = 0
+        for p_type in BBParamType:
+            param_count: int = len(self.get_params(p_type))
+            writer.write_u16(param_count)
+            writer.write_u16(index)
+            index += param_count
+            writer.write_u16(pos)
+            if p_type == BBParamType.Vec3f:
+                pos += 0xc * param_count
+            elif p_type == BBParamType.VoidPtr:
+                pass
+            else:
+                pos += 4 * param_count
+            writer.write_u16(0)
+        file_refs: typing.List[str] = []
+        for p_type in BBParamType:
+            for param in self.get_params(p_type):
+                name_offset: int = writer.add_string(param.name)
+                if param.file_ref != "":
+                    if param.file_ref not in file_refs:
+                        file_refs.append(param.file_ref)
+                    name_offset |= (1 << 0x1f) | (file_refs.index(param.file_ref) << 0x18) | (param.flags << 0x16)
+                else:
+                    name_offset |= (param.flags << 0x16)
+                writer.write_u32(name_offset)
+                writer.write_string_offset(param.notes)
+        offset: int = 0
+        for p_type in BBParamType:
+            for param in self.get_params(p_type):
+                match (p_type):
+                    case BBParamType.String:
+                        if typing.TYPE_CHECKING:
+                            assert isinstance(param.default_value, str)
+                        writer.write_string_offset(param.default_value)
+                        offset += 4
+                    case BBParamType.S32:
+                        if typing.TYPE_CHECKING:
+                            assert isinstance(param.default_value, int)
+                        writer.write_s32(param.default_value)
+                        offset += 4
+                    case BBParamType.F32:
+                        if typing.TYPE_CHECKING:
+                            assert isinstance(param.default_value, float)
+                        writer.write_f32(param.default_value)
+                        offset += 4
+                    case BBParamType.Bool:
+                        if typing.TYPE_CHECKING:
+                            assert isinstance(param.default_value, bool)
+                        writer.write_u32(1 if param.default_value else 0)
+                        offset += 4
+                    case BBParamType.Vec3f:
+                        if typing.TYPE_CHECKING:
+                            assert isinstance(param.default_value, tuple)
+                        writer.write_vec3(param.default_value)
+                        offset += 0xc
+                    # pointer types aren't written
+        for file_ref in file_refs:
+            writer.write_string_offset(file_ref)
+            writer.write_u32(calc_hash(file_ref))
+            writer.write_u32(calc_hash(os.path.splitext(os.path.basename(file_ref))[0]))
+            writer.write_u32(calc_hash(os.path.splitext(file_ref)[1].replace('.', '')))

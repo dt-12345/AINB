@@ -1,6 +1,6 @@
 import typing
 
-from ainb.common import AINBReader
+from ainb.common import AINBReader, AINBWriter
 from ainb.param_common import ParamType, ParamFlag
 from ainb.utils import DictDecodeError, JSONType, ValueType
 
@@ -93,6 +93,28 @@ class Property:
                     raise DictDecodeError("Pointer properties must have a default value of null")
         prop.flags = ParamFlag._from_dict(data)
         return prop
+    
+    def _write_value(self, writer: AINBWriter, param_type: ParamType) -> None:
+        match (param_type):
+            case ParamType.Int:
+                writer.write_s32(self.default_value) # type: ignore
+            case ParamType.Bool:
+                writer.write_u32(self.default_value) != 0 # type: ignore
+            case ParamType.Float:
+                writer.write_f32(self.default_value) # type: ignore
+            case ParamType.String:
+                writer.write_string_offset(self.default_value) # type: ignore
+            case ParamType.Vector3F:
+                writer.write_vec3(self.default_value) # type: ignore
+            case ParamType.Pointer:
+                pass
+    
+    def _write(self, writer: AINBWriter, param_type: ParamType) -> None:
+        writer.write_string_offset(self.name)
+        if param_type == ParamType.Pointer:
+            writer.write_string_offset(self.classname)
+        writer.write_u32(self.flags)
+        self._write_value(writer, param_type)
 
 class PropertySet:
     """
@@ -163,3 +185,15 @@ class PropertySet:
     
     def __bool__(self) -> bool:
         return any(p for p in self._properties)
+    
+    def clear(self) -> None:
+        self._properties = [[], [], [], [], [], []]
+
+    def _write(self, writer: AINBWriter) -> None:
+        base_offset: int = writer.tell() + 0x18
+        for p_type in ParamType:
+            writer.write_u32(base_offset)
+            base_offset += Property._get_binary_size(p_type) * len(self.get_properties(p_type))
+        for p_type in ParamType:
+            for prop in self.get_properties(p_type):
+                prop._write(writer, p_type)

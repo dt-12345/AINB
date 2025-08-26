@@ -1,9 +1,9 @@
 import dataclasses
 import typing
 
-from ainb.common import AINBReader
+from ainb.common import AINBReader, AINBWriter
 from ainb.param_common import ParamType, ParamFlag
-from ainb.utils import DictDecodeError, JSONType, ParseError, ValueType
+from ainb.utils import DictDecodeError, JSONType, ParseError, SerializeError, ValueType
 
 @dataclasses.dataclass(slots=True)
 class ParamSource:
@@ -12,7 +12,7 @@ class ParamSource:
     """
 
     src_node_index: int = -1
-    src_output_index: int = -1
+    src_output_index: int = 0
     flags: ParamFlag = ParamFlag()
 
     @classmethod
@@ -48,6 +48,11 @@ class ParamSource:
     
     def is_blackboard(self) -> bool:
         return self.flags.is_blackboard()
+
+    def _write(self, writer: AINBWriter) -> None:
+        writer.write_s16(self.src_node_index)
+        writer.write_s16(self.src_output_index)
+        writer.write_u32(self.flags)
 
 INPUT_PARAM_SIZES: typing.Final[typing.Dict[ParamType, int]] = {
     ParamType.Int : 0x10,
@@ -151,6 +156,42 @@ class InputParam:
             _input.source = ParamSource._from_dict(data)
         return _input
 
+    def _write_value(self, writer: AINBWriter, param_type: ParamType) -> None:
+        match (param_type):
+            case ParamType.Int:
+                writer.write_s32(self.default_value)  # type: ignore
+            case ParamType.Bool:
+                writer.write_u32(1 if self.default_value else 0)
+            case ParamType.Float:
+                writer.write_f32(self.default_value) # type: ignore
+            case ParamType.String:
+                writer.write_string_offset(self.default_value) # type: ignore
+            case ParamType.Vector3F:
+                writer.write_vec3(self.default_value) # type: ignore
+            case ParamType.Pointer:
+                if self.default_value is not None:
+                    raise SerializeError(writer, f"Non-zero default value for a pointer input parameter: {self.default_value}")
+                writer.write_u32(0)
+
+    def _write(self, writer: AINBWriter, param_type: ParamType, multi_params: typing.List[ParamSource]) -> None:
+        writer.write_string_offset(self.name)
+        if param_type == ParamType.Pointer:
+            writer.write_string_offset(self.classname)
+        if isinstance(self.source, list):
+            src: ParamSource = ParamSource()
+            src_count: int = len(self.source)
+            for i in range(len(multi_params) - src_count + 1):
+                if multi_params[i:i+src_count] == self.source:
+                    src.src_node_index = -100 - i
+                    break
+            if src.src_node_index == -1:
+                raise SerializeError(writer, f"Could not find matching multi-param window for input {self.name}")
+            src.src_output_index = src_count
+            src._write(writer)
+        else:
+            self.source._write(writer)
+        self._write_value(writer, param_type)
+
 class OutputParam:
     """
     A single output parameter of a node
@@ -195,6 +236,14 @@ class OutputParam:
             output.classname = data["Classname"]
         output.is_output = data["Is Output"]
         return output
+    
+    def _write(self, writer: AINBWriter, param_type: ParamType) -> None:
+        if self.is_output:
+            writer.write_u32(writer.add_string(self.name) | 0x80000000)
+        else:
+            writer.write_u32(writer.add_string(self.name))
+        if param_type == ParamType.Pointer:
+            writer.write_string_offset(self.classname)
 
 @dataclasses.dataclass(slots=True)
 class OffsetInfo:
@@ -320,3 +369,26 @@ class ParamSet:
                     OutputParam._from_dict(param, p_type) for param in data["Outputs"][p_type.name]
                 ]
         return pset
+    
+    def clear_inputs(self) -> None:
+        self._inputs = [[], [], [], [], [], []]
+    
+    def clear_outputs(self) -> None:
+        self._outputs = [[], [], [], [], [], []]
+    
+    def clear(self) -> None:
+        self.clear_inputs()
+        self.clear_outputs()
+    
+    def _write(self, writer: AINBWriter, multi_params: typing.List[ParamSource]) -> None:
+        offset: int = writer.tell() + 0x30
+        for p_type in ParamType:
+            writer.write_u32(offset)
+            offset += len(self.get_inputs(p_type)) * InputParam._get_binary_size(p_type)
+            writer.write_u32(offset)
+            offset += len(self.get_outputs(p_type)) * (8 if p_type == ParamType.Pointer else 4)
+        for p_type in ParamType:
+            for input_param in self.get_inputs(p_type):
+                input_param._write(writer, p_type, multi_params)
+            for output_param in self.get_outputs(p_type):
+                output_param._write(writer, p_type)

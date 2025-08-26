@@ -14,3 +14,35 @@ pip install ainb[graph]
 ```
 
 Graphing requires installation of [Graphviz](https://www.graphviz.org/) (make sure to add it to your system path)
+
+## Usage
+
+### Python
+```py
+import ainb
+import ainb.graph
+
+# load an AINB file and save it as JSON
+script = ainb.AINB.from_file("AWonderfullyNamedFile.root.ainb")
+script.save_json("output_directory")
+
+# graph a file
+ainb.graph.graph_all_commands(script, output_format="png", dpi=120.0)
+```
+
+### Command Line
+```bash
+# load an AINB file and save it as JSON
+ainb AWonderfullyNamedFile.root.ainb
+
+# graph a file
+ainb-graph -f png --dpi --all-commands 120 AWonderfullyNamedFile.root.ainb
+```
+
+## Documentation
+
+TODO
+
+## License
+
+This software is licensed under GPLv2.

@@ -34,8 +34,10 @@ def main() -> None:
     parser.add_argument("--all-commands", action="store_true", help="Graph all commands in file", default=False)
     parser.add_argument("--format", "-f", help="Output graph format (default is svg)", default="svg")
     parser.add_argument("--view", "-v", action="store_true", help="Automatically open the rendered graph when finished", default=False)
+    parser.add_argument("--no-unflatten", action="store_false", help="Don't unflatten graph", default=True)
     parser.add_argument("--outpath", "-o", help="Output directory path", default="")
     parser.add_argument("--stagger", "-s", type=int, help="Node staggering", default=1)
+    parser.add_argument("--dpi", type=float, help="Output image DPI (does not affect SVG)", default=96.0)
     parser.add_argument("--node-sep", type=float, help="Node separation", default=0.25)
     parser.add_argument("--split-blackboard", action="store_true", help="Split Blackboard into separate nodes", default=False)
     parser.add_argument(
@@ -93,13 +95,13 @@ def main() -> None:
         ainb = AINB.from_json(args.input_file_path)
     
     if args.all_commands:
-        graph.graph_all_commands(ainb, True, args.format, args.outpath, args.view, args.stagger, args.node_sep, args.split_blackboard)
+        graph.graph_all_commands(ainb, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.split_blackboard)
     elif args.all_nodes:
-        graph.graph_all_nodes(ainb, True, args.format, args.outpath, args.view, args.stagger, args.node_sep, args.split_blackboard)
+        graph.graph_all_nodes(ainb, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.split_blackboard)
     elif args.command_name == "":
-        graph.graph_command(ainb, args.command_name, True, args.format, args.outpath, args.view, args.stagger, args.node_sep, args.split_blackboard)
+        graph.graph_command(ainb, args.command_name, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.split_blackboard)
     elif args.node_index != -1:
-        graph.graph_from_node(ainb, args.node_index, True, args.format, args.outpath, args.view, args.stagger, args.node_sep, args.split_blackboard)
+        graph.graph_from_node(ainb, args.node_index, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.split_blackboard)
     else:
         print(f"Please specify an entry point with either --node-index, --command-name, --all-nodes, or --all-commands")
 

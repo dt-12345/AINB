@@ -549,7 +549,7 @@ class StringPool:
         for off, string in self._strings.items():
             assert offset == off, f"String \"{string}\" in string pool was written at offset {hex(offset)} but expected offset {hex(off)}"
             writer.write_string(string, self._encoding)
-            offset += len(string) + 1
+            offset += len(string.encode(self._encoding)) + 1
     
     def get_string(self, offset: int) -> str:
         """
@@ -624,14 +624,16 @@ class WriterWithStrPool(Writer):
         self._string_pool: StringPool = StringPool()
         self._string_map: typing.Dict[str, int] = {}
     
-    def add_string(self, string: str) -> None:
+    def add_string(self, string: str) -> int:
         """
         Adds a new string to the string pool
         """
         if string in self._string_map:
-            return
-        self._string_map[string] = self._string_pool._offset
+            return self._string_map[string]
+        offset: int = self._string_pool._offset
+        self._string_map[string] = offset
         self._string_pool.add_string(string)
+        return offset
     
     def write_string_offset(self, string: str) -> None:
         """
@@ -639,8 +641,7 @@ class WriterWithStrPool(Writer):
         """
         offset: int | None = self._string_map.get(string, None)
         if offset is None:
-            self.add_string(string)
-            offset = self._string_map[string]
+            offset = self.add_string(string)
         self.write_u32(offset)
     
     def write_string_pool(self) -> None:
@@ -648,3 +649,6 @@ class WriterWithStrPool(Writer):
         Writes the current string pool into the buffer
         """
         self._string_pool.write(self)
+
+    def get_string_offset(self, string: str) -> int:
+        return self._string_map[string]

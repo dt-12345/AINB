@@ -73,4 +73,6 @@ from ainb.utils import (
     Vector3f as Vector3f,
     Writer as Writer,
     WriterWithStrPool as WriterWithStrPool,
+    ParseError as ParseError,
+    SerializeError as SerializeError,
 )

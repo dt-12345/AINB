@@ -1,6 +1,6 @@
 import typing
 
-from ainb.expression.common import ExpressionReader, ExpressionWriter, ExpressionPreProcessErorr
+from ainb.expression.common import ExpressionReader, ExpressionWriter, ExpressionPreProcessError
 from ainb.expression.instruction import InstType, InstDataType, InstructionBase, Sizes
 from ainb.expression.parser import parse_instruction
 from ainb.expression.write_context import ExpressionWriteContext
@@ -162,6 +162,6 @@ class Expression:
         if ctx.version < 2:
             if self.setup_command:
                 if self.setup_command[-1].get_type() != InstType.END:
-                    raise ExpressionPreProcessErorr("The last instruction in a setup expression must be END")
+                    raise ExpressionPreProcessError("The last instruction in a setup expression must be END")
             if self.main_command[-1].get_type() != InstType.END:
-                raise ExpressionPreProcessErorr("The last instruction in a main expression must be END")
+                raise ExpressionPreProcessError("The last instruction in a main expression must be END")

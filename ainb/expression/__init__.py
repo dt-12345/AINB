@@ -5,6 +5,8 @@ Expression Utilities
 from ainb.expression.common import (
     ExpressionReader as ExpressionReader,
     ExpressionWriter as ExpressionWriter,
+    ExpressionParseError as ExpressionParseError,
+    ExpressionPreProcessError as ExpressionPreProcessError,
 )
 from ainb.expression.disassemble import disassemble as disassemble
 from ainb.expression.expression import Expression as Expression

@@ -75,4 +75,5 @@ from ainb.utils import (
     WriterWithStrPool as WriterWithStrPool,
     ParseError as ParseError,
     SerializeError as SerializeError,
+    DictDecodeError as DictDecodeError,
 )

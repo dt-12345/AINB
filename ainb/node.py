@@ -7,7 +7,7 @@ from ainb.action import Action
 from ainb.attachment import Attachment
 from ainb.common import AINBReader, AINBWriter
 from ainb.module import Module
-from ainb.param import ParamSet, InputParam
+from ainb.param import ParamSet
 from ainb.param_common import ParamType
 from ainb.property import PropertySet
 from ainb.state import StateInfo

@@ -36,7 +36,7 @@ ainb.graph.graph_all_commands(script, output_format="png", dpi=120.0)
 ainb AWonderfullyNamedFile.root.ainb
 
 # graph a file
-ainb-graph -f png --dpi --all-commands 120 AWonderfullyNamedFile.root.ainb
+ainb-graph -f png --dpi 120 --all-commands AWonderfullyNamedFile.root.ainb
 ```
 
 ## Documentation

@@ -25,3 +25,4 @@ class ExpressionWriteContext:
         self.signature_table: typing.List[int] = []
         self.signature_list: typing.List[str] = []
         self.writer: ExpressionWriter = ExpressionWriter(io.BytesIO(), name = "Expression Writer")
+        self.version: int = 0

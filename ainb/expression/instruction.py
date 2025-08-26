@@ -260,7 +260,7 @@ class Operand:
             case builtins.bool:
                 self.type = InstOpType.Immediate
             case builtins.float:
-                if self.value > 65535.0 or self.value < 0.0 or not self.value.is_integer(): # type: ignore
+                if self.value > 65535.0 or self.value < 0.0 or not self.value.is_integer() or ctx.version < 2: # type: ignore
                     if (self.value, builtins.float) not in ctx.param_table:
                         ctx.param_table[(self.value, builtins.float)] = ctx.current_param_table_offset
                         ctx.current_param_table_offset += 4

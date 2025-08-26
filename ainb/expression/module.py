@@ -11,7 +11,7 @@ from ainb.utils import JSONType, ParseError
 
 # TODO: proper version 1 support => no setup expressions
 # TODO: version 3 support => u32 datatype
-SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (2,)
+SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (1, 2)
 
 def get_supported_versions() -> typing.Tuple[int, ...]:
     """
@@ -44,6 +44,7 @@ class ExpressionModule:
         self.version = reader.read_u32()
         if self.version not in SUPPORTED_VERSIONS:
             raise ParseError(reader, f"Unsupported EXB version: {self.version:#x} - see ainb.expression.get_supported_versions()")
+        reader.version = self.version
 
         (
             # can be calculated later
@@ -128,6 +129,14 @@ class ExpressionModule:
         ]
         return self
     
+    def build_context(self, instance_count: int) -> ExpressionWriteContext:
+        ctx: ExpressionWriteContext = ExpressionWriteContext()
+        ctx.version = self.version
+        for expr in self.expressions:
+            expr._preprocess(ctx)
+        ctx.instance_count = instance_count
+        return ctx
+
     def write(self, writer: ExpressionWriter, ctx: ExpressionWriteContext) -> None:
         writer.write(b"EXB ")
         writer.write_u32(self.version)
@@ -137,7 +146,10 @@ class ExpressionModule:
         writer.write_u32(sum(ctx.local64_mem_sizes))
         offset: int = 0x2c # header size
         writer.write_u32(offset) # expression offset, should always be the same
-        offset += 4 + 0x1c * len(self.expressions)
+        if self.version > 1:
+            offset += 4 + 0x1c * len(self.expressions)
+        else:
+            offset += 4 + 0x14 * len(self.expressions)
         writer.write_u32(offset) # instruction offset
         offset += 4 + 8 * ctx.instruction_count
         writer.write_u32(offset) # signature table

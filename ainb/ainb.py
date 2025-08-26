@@ -523,6 +523,7 @@ class AINB:
         ctx.query_count = sum(1 for node in self.nodes if node.flags.is_query())
         ctx.blackboard_offset = 0x74 + 0x18 * ctx.command_count + node_size * ctx.node_count
         if self.expressions is not None:
+            ctx.expression_ctx.version = self.expressions.version
             for expr in self.expressions.expressions:
                 expr._preprocess(ctx.expression_ctx)
         curr_query_index: int = 0

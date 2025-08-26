@@ -7,6 +7,10 @@ class ExpressionParseError(Exception):
     def __init__(self, msg: str) -> None:
         super().__init__(f"An error occurred while parsing the expression: {msg}")
 
+class ExpressionPreProcessErorr(Exception):
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"An error occurred while preprocessing the expression: {msg}")
+
 class ExpressionReader(ReaderWithStrPool):
     """
     Expression reader

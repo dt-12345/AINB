@@ -1,7 +1,7 @@
 import typing
 
-from ainb.expression.common import ExpressionReader, ExpressionWriter
-from ainb.expression.instruction import InstDataType, InstructionBase, Sizes
+from ainb.expression.common import ExpressionReader, ExpressionWriter, ExpressionPreProcessErorr
+from ainb.expression.instruction import InstType, InstDataType, InstructionBase, Sizes
 from ainb.expression.parser import parse_instruction
 from ainb.expression.write_context import ExpressionWriteContext
 from ainb.utils import JSONType
@@ -24,13 +24,28 @@ class Expression:
     def _read(cls, reader: ExpressionReader, instructions: typing.List[InstructionBase]) -> "Expression":
         expr: Expression = cls()
         setup_base_index: int = reader.read_s32()
-        setup_inst_count: int = reader.read_u32()
-        if setup_base_index != -1:
-            expr.setup_command = instructions[setup_base_index:setup_base_index+setup_inst_count]
+        if reader.version > 1:
+            setup_inst_count: int = reader.read_u32()
+            if setup_base_index != -1:
+                expr.setup_command = instructions[setup_base_index:setup_base_index+setup_inst_count]
+        else:
+            if setup_base_index != -1:
+                for i in range(setup_base_index, len(instructions)):
+                    inst: InstructionBase = instructions[i]
+                    expr.setup_command.append(inst)
+                    if inst.get_type() == InstType.END:
+                        break
 
         main_base_index: int = reader.read_s32()
-        main_inst_count: int = reader.read_u32()
-        expr.main_command = instructions[main_base_index:main_base_index+main_inst_count]
+        if reader.version > 1:
+            main_inst_count: int = reader.read_u32()
+            expr.main_command = instructions[main_base_index:main_base_index+main_inst_count]
+        else:
+            for i in range(main_base_index, len(instructions)):
+                inst: InstructionBase = instructions[i]
+                expr.main_command.append(inst)
+                if inst.get_type() == InstType.END:
+                    break
 
         # can be calculated later
         global_mem_usage: int = reader.read_u32()
@@ -104,9 +119,11 @@ class Expression:
     
     def _write(self, writer: ExpressionWriter, ctx: ExpressionWriteContext, index: int) -> None:
         writer.write_s32(ctx.base_setup_indices[index])
-        writer.write_u32(len(self.setup_command))
+        if ctx.version > 1:
+            writer.write_u32(len(self.setup_command))
         writer.write_s32(ctx.base_indices[index])
-        writer.write_u32(len(self.main_command))
+        if ctx.version > 1:
+            writer.write_u32(len(self.main_command))
         writer.write_u32(ctx.global_mem_sizes[index])
         writer.write_u16(ctx.local32_mem_sizes[index])
         writer.write_u16(ctx.local64_mem_sizes[index])
@@ -141,3 +158,10 @@ class Expression:
         ctx.local32_mem_sizes.append(max(main_size.local32_mem, setup_size.local32_mem))
         ctx.local64_mem_sizes.append(max(main_size.local64_mem, setup_size.local64_mem))
         ctx.io_mem_sizes.append(max(main_size.io_mem, setup_size.io_mem))
+
+        if ctx.version < 2:
+            if self.setup_command:
+                if self.setup_command[-1].get_type() != InstType.END:
+                    raise ExpressionPreProcessErorr("The last instruction in a setup expression must be END")
+            if self.main_command[-1].get_type() != InstType.END:
+                raise ExpressionPreProcessErorr("The last instruction in a main expression must be END")

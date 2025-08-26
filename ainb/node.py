@@ -661,19 +661,6 @@ class TransitionPlug(Plug):
         writer.write_s32(self.node_index)
         writer.write_u32(ctx.transitions.index(self.transition))
 
-# TODO: does any of this actually exist or was my old code just stupid
-# def should_skip_defaults(name: str, index: int, param: InputParam) -> bool:
-#     if name != param.name:
-#         return False
-#     if isinstance(param.source, list):
-#         for src in param.source:
-#             if src.flags.is_expression() and src.src_node_index == index:
-#                 return True
-#     else:
-#         if param.source.flags.is_expression() and param.source.src_node_index == index:
-#             return True
-#     return False
-
 class StringSelectorInputPlug(Plug):
     __slots__ = ["name", "unknown", "default_value", "_read_extra"]
 

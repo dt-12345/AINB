@@ -82,12 +82,15 @@ def main() -> None:
             else:
                 AINB.from_file(args.input_file_path).save_json(args.output_path)
         elif out_file_type == "ainb": # not sure why you'd need this but sure
-            pass # TODO
+            if expected_version is None or expected_version < 0x407:
+                AINB.from_file(args.input_file_path, read_only=False).save_ainb(args.output_path)
+            else:
+                AINB.from_file(args.input_file_path).save_ainb(args.output_path)
         else:
             print(f"Unknown output file type: {out_file_type}")
     elif in_file_type == "json":
         if out_file_type == "" or out_file_type == "ainb":
-            pass # TODO
+            AINB.from_json(args.input_file_path).save_ainb(args.output_path)
         elif out_file_type == "json": # not sure why you'd need this but sure
             AINB.from_json(args.input_file_path).save_json(args.output_path)
         else:

@@ -24,7 +24,6 @@ from ainb.unknown import UnknownSection0x58
 from ainb.utils import DictDecodeError, JSONType, ParseError, ParseWarning
 from ainb.write_context import WriteContext
 
-# TODO: serialization
 # TODO: editing API (at least add/remove nodes/plugs/etc.)
 
 # TODO: version 0x408 support if it's not too hard (seems to be u32 blackboard type)
@@ -781,7 +780,6 @@ class AINB:
                     new_attach_count -= 1
                 else:
                     exist_node = True
-                    # TODO: is this correct? this is what I did before but unsure why it'd be 2 in the case of replacements
                     new_node_count -= (1 if replacement.type == ReplacementType.RemoveChild else 2)
             if exist_node:
                 writer.write_s16(new_node_count)

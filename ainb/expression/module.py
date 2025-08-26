@@ -9,7 +9,6 @@ from ainb.expression.instruction import InstructionBase
 from ainb.expression.write_context import ExpressionWriteContext
 from ainb.utils import JSONType, ParseError
 
-# TODO: proper version 1 support => no setup expressions
 # TODO: version 3 support => u32 datatype
 SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (1, 2)
 
@@ -121,7 +120,6 @@ class ExpressionModule:
         """
         Load an expression module from a dictionary
         """
-        # TODO: instance count
         self: ExpressionModule = cls()
         self.version = data["Version"]
         self.expressions = [

@@ -43,6 +43,13 @@ ainb-graph -f png --dpi --all-commands 120 AWonderfullyNamedFile.root.ainb
 
 TODO
 
+## Building
+
+To build from source:
+```bash
+pip install -e .
+```
+
 ## License
 
 This software is licensed under GPLv2.

@@ -264,6 +264,11 @@ class Graph:
         self.blackboard_id: str = ""
         self.bb_param_ids: typing.Dict[BlackboardLocation, str] = {}
         self.bb_edges: typing.Set[BlackboardEdge] = set()
+
+        # always add module output nodes
+        for node in self.ainb.nodes:
+            if node.type.value >= 200 and node.type.value < 300:
+                self.add_node(node)
     
     @staticmethod
     def _format_bb_param(id: str, param: BBParam) -> str:
@@ -392,6 +397,8 @@ class Graph:
         if isinstance(source, list):
             raise GraphError("Cannot have nested multi-params")
         if source.src_node_index != -1:
+            if source.src_node_index not in self.nodes:
+                self.add_node(self.ainb.nodes[source.src_node_index]) # sometimes this is necessary if the source node isn't a query for this node
             if source.is_expression():
                 if self.ainb.expressions is None:
                     raise GraphError(f"Node {node.index} requests an expression but file {self.ainb.filename} has no expression section")
@@ -437,6 +444,11 @@ class Graph:
         if node.index in self.nodes:
             return
         self.nodes[node.index] = GraphNode(node)
+        for query in node.queries:
+            query_node: Node | None = self.ainb.get_node(query)
+            if query_node is None:
+                raise GraphError(f"Node index {node.index} has query with index {query} which does not exist")
+            self.add_node(query_node)
         for p_type in ParamType:
             for i, param in enumerate(node.params.get_inputs(p_type)):
                 if isinstance(param.source, list):
@@ -488,11 +500,6 @@ class Graph:
             if target_node is None:
                 raise GraphError(f"Node index {node.index} has transition target with index {transition.node_index} which does not exist")
             self.add_node(target_node)
-        for query in node.queries:
-            query_node: Node | None = self.ainb.get_node(query)
-            if query_node is None:
-                raise GraphError(f"Node index {node.index} has query with index {query} which does not exist")
-            self.add_node(query_node)
 
 def render_graph(graph: graphviz.Digraph, name: str, output_format: str = "svg", output_dir: str = "", view: bool = False, unflatten: bool = True, stagger: int = 1) -> None:
     if output_dir != "":

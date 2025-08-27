@@ -337,7 +337,7 @@ class Graph:
                 dst_id: str = f"{dst_node.id}:{dst_node.input_map[edge.dst_param]}"
                 dot.edge(src_id, dst_id, edge.param_name, minlen="1", style="dashed", color=COLOR_MAP["query-edge"], fontcolor=COLOR_MAP["query-edge-font"])
             except Exception as e:
-                GraphWarning(f"Could not resolve edge: {edge} ({e.args})")
+                raise GraphError(f"Could not resolve edge: {edge}") from e
     
     def _add_generic_edges(self, dot: graphviz.Digraph) -> None:
         for edge in self.generic_edges:
@@ -400,7 +400,7 @@ class Graph:
                     InputEdge(
                         source.src_node_index,
                         ParamLocation(
-                            EXPRESSION_TYPE_MAP[self.ainb.expressions.expressions[source.flags.get_index()].input_datatype], source.src_output_index
+                            EXPRESSION_TYPE_MAP[self.ainb.expressions.expressions[source.flags.get_index()].input_datatype], source.src_output_index & 0x7fff
                         ),
                         node.index,
                         ParamLocation(param_type, param_index),
@@ -411,7 +411,7 @@ class Graph:
                 self.input_edges.add(
                     InputEdge(
                         source.src_node_index,
-                        ParamLocation(param_type, source.src_output_index),
+                        ParamLocation(param_type, source.src_output_index & 0x7fff),
                         node.index,
                         ParamLocation(param_type, param_index),
                         param.name,

@@ -522,6 +522,7 @@ def graph_from_node(ainb: AINB,
                     stagger: int = 1,
                     dpi: float = 96.0,
                     node_sep: float = 0.25,
+                    line_type: str = "true",
                     split_blackboard: bool = False) -> graphviz.Digraph:
     """
     Graph an AINB file starting from the specified node
@@ -537,6 +538,7 @@ def graph_from_node(ainb: AINB,
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
+        line_type: Edge line type
         split_blackboard: Split Blackboard into separate nodes
     """
     node: Node | None = ainb.get_node(node_index)
@@ -548,7 +550,7 @@ def graph_from_node(ainb: AINB,
     name: str = f"{node.name} ({node.index})" if node.type == NodeType.UserDefined else f"{node.type.name} ({node.index})"
 
     dot: graphviz.Digraph = graphviz.Digraph(name, node_attr={"shape" : "rectangle"})
-    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"])
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
@@ -568,6 +570,7 @@ def graph_command(ainb: AINB,
                   stagger: int = 1,
                   dpi: float = 96.0,
                   node_sep: float = 0.25,
+                  line_type: str = "true",
                   split_blackboard: bool = False) -> graphviz.Digraph:
     """
     Graph a command from the provided AINB file
@@ -583,6 +586,7 @@ def graph_command(ainb: AINB,
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
+        line_type: Edge line type
         split_blackboard: Split Blackboard into separate nodes
     """
     cmd: Command | None = ainb.get_command_by_name(cmd_name)
@@ -595,7 +599,7 @@ def graph_command(ainb: AINB,
     graph.add_node(root_node, is_root=True, root_name=cmd_name)
 
     dot: graphviz.Digraph = graphviz.Digraph(cmd.name, node_attr={"shape" : "rectangle"})
-    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"])
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
@@ -614,6 +618,7 @@ def graph_all_nodes(ainb: AINB,
                     stagger: int = 1,
                     dpi: float = 96.0,
                     node_sep: float = 0.25,
+                    line_type: str = "true",
                     split_blackboard: bool = False) -> graphviz.Digraph:
     """
     Graph all nodes in the provided AINB file (this is mostly useful for logic files which have no commands)
@@ -628,6 +633,7 @@ def graph_all_nodes(ainb: AINB,
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
+        line_type: Edge line type
         split_blackboard: Split Blackboard into separate nodes
     """
     
@@ -636,7 +642,7 @@ def graph_all_nodes(ainb: AINB,
         graph.add_node(node)
     
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"])
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
@@ -655,6 +661,7 @@ def graph_all_commands(ainb: AINB,
                        stagger: int = 1,
                        dpi: float = 96.0,
                        node_sep: float = 0.25,
+                       line_type: str = "true",
                        split_blackboard: bool = False) -> graphviz.Digraph:
     """
     Graph all commands in the provided AINB file
@@ -669,16 +676,17 @@ def graph_all_commands(ainb: AINB,
         stagger: Minimum length of leaf edges are staggered between 1 and stagger
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
+        line_type: Edge line type
         split_blackboard: Split Blackboard into separate nodes
     """
 
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"])
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"], splines=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     
     for cmd in ainb.commands:
-        dot.subgraph(graph_command(ainb, cmd.name, render=False, node_sep=node_sep, split_blackboard=split_blackboard))
+        dot.subgraph(graph_command(ainb, cmd.name, render=False, node_sep=node_sep, line_type=line_type, split_blackboard=split_blackboard))
 
     if render:
         render_graph(dot, ainb.filename, output_format, output_dir, view, unflatten, stagger)

@@ -75,28 +75,38 @@ def main() -> None:
             else:
                 print(f"Provided enum database path does not exist: {args.enum_db_path}")
 
-    if in_file_type == "ainb":
-        if out_file_type == "" or out_file_type == "json":
-            if expected_version is None or expected_version < 0x407:
-                AINB.from_file(args.input_file_path, read_only=False).save_json(args.output_path)
+    if os.path.isdir(args.input_file_path):
+        for file in os.listdir(args.input_file_path):
+            print(file)
+            if file.endswith(".ainb"):
+                AINB.from_file(os.path.join(args.input_file_path, file), read_only=False).save_json(args.output_path)
+            elif file.endswith(".json"):
+                AINB.from_json(os.path.join(args.input_file_path, file)).save_ainb(args.output_path)
             else:
-                AINB.from_file(args.input_file_path).save_json(args.output_path)
-        elif out_file_type == "ainb": # not sure why you'd need this but sure
-            if expected_version is None or expected_version < 0x407:
-                AINB.from_file(args.input_file_path, read_only=False).save_ainb(args.output_path)
-            else:
-                AINB.from_file(args.input_file_path).save_ainb(args.output_path)
-        else:
-            print(f"Unknown output file type: {out_file_type}")
-    elif in_file_type == "json":
-        if out_file_type == "" or out_file_type == "ainb":
-            AINB.from_json(args.input_file_path).save_ainb(args.output_path)
-        elif out_file_type == "json": # not sure why you'd need this but sure
-            AINB.from_json(args.input_file_path).save_json(args.output_path)
-        else:
-            print(f"Unknown output file type: {out_file_type}")
+                print(f"Unknown file extension: {file}")
     else:
-        print(f"Unknown input file type: {in_file_type}")
+        if in_file_type == "ainb":
+            if out_file_type == "" or out_file_type == "json":
+                if expected_version is None or expected_version < 0x407:
+                    AINB.from_file(args.input_file_path, read_only=False).save_json(args.output_path)
+                else:
+                    AINB.from_file(args.input_file_path).save_json(args.output_path)
+            elif out_file_type == "ainb": # not sure why you'd need this but sure
+                if expected_version is None or expected_version < 0x407:
+                    AINB.from_file(args.input_file_path, read_only=False).save_ainb(args.output_path)
+                else:
+                    AINB.from_file(args.input_file_path).save_ainb(args.output_path)
+            else:
+                print(f"Unknown output file type: {out_file_type}")
+        elif in_file_type == "json":
+            if out_file_type == "" or out_file_type == "ainb":
+                AINB.from_json(args.input_file_path).save_ainb(args.output_path)
+            elif out_file_type == "json": # not sure why you'd need this but sure
+                AINB.from_json(args.input_file_path).save_json(args.output_path)
+            else:
+                print(f"Unknown output file type: {out_file_type}")
+        else:
+            print(f"Unknown input file type: {in_file_type}")
 
 if __name__ == "__main__":
     main()

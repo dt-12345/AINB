@@ -3,7 +3,7 @@ import os
 import typing
 
 from ainb.common import AINBReader, AINBWriter
-from ainb.utils import calc_hash, DictDecodeError, IntEnumEx, JSONType, SerializeError, ValueType, Vector3f
+from ainb.utils import calc_hash, DictDecodeError, IntEnumEx, JSONType, ValueType
 
 class BBParamType(IntEnumEx):
     """

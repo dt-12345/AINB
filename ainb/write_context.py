@@ -1,6 +1,5 @@
 import typing
 
-from ainb.action import Action
 from ainb.attachment import Attachment
 from ainb.expression.write_context import ExpressionWriteContext
 from ainb.param import ParamSet, ParamSource

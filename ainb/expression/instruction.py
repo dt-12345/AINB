@@ -883,7 +883,7 @@ class DecrementInstruction(SingleOpInstruction):
     """
     Decrement instruction
 
-    op += 1
+    op -= 1
     """
 
     def __init__(self) -> None:
@@ -1282,7 +1282,7 @@ class XORInstruction(DualOpInstruction):
     """
     XOR instruction
 
-    op1 &= op2
+    op1 ^= op2
     """
 
     def __init__(self) -> None:
@@ -1317,7 +1317,7 @@ class ORInstruction(DualOpInstruction):
     """
     OR instruction
 
-    op1 &= op2
+    op1 |= op2
     """
 
     def __init__(self) -> None:

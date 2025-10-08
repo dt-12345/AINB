@@ -99,7 +99,7 @@ def main() -> None:
         graph.graph_all_commands(ainb, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.line_type, args.split_blackboard)
     elif args.all_nodes:
         graph.graph_all_nodes(ainb, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.line_type, args.split_blackboard)
-    elif args.command_name == "":
+    elif args.command_name != "":
         graph.graph_command(ainb, args.command_name, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.line_type, args.split_blackboard)
     elif args.node_index != -1:
         graph.graph_from_node(ainb, args.node_index, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.line_type, args.split_blackboard)

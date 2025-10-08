@@ -32,7 +32,7 @@ graph = [
 ainb = "ainb.__main__:main"
 ainb-graph = "ainb.graph.__main__:main"
 
-[tools.setuptools]
+[tool.setuptools]
 include-package-data = true
 packages = [
     "ainb"

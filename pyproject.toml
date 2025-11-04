@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ainb"
 requires-python = ">=3.10"
-urls = {Homepage = "https://github.com/dt-12345/AINB"}
+urls = {Source = "https://github.com/dt-12345/AINB"}
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",

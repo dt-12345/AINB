@@ -556,37 +556,49 @@ class RandomSelectorPlug(ChildPlug):
         writer.write_f32(self.weight)
 
 class BSASelectorUpdaterPlug(ChildPlug):
-    __slots__ = ["unk0", "unk1"]
+    __slots__ = ["child_enum_bb_index", "child_enum_value"]
 
     def __init__(self) -> None:
         super().__init__()
-        self.unk0: int = 0
-        self.unk1: int = 0
+        self.child_enum_bb_index: int = -1
+        self.child_enum_value: int = 0
 
     @classmethod
     def _read(cls, reader: AINBReader) -> "BSASelectorUpdaterPlug":
         plug: BSASelectorUpdaterPlug = cls()
         plug.node_index = reader.read_s32()
         plug.name = reader.read_string_offset()
-        plug.unk0 = reader.read_u32()
-        plug.unk1 = reader.read_u32()
+        bb_flag: int = reader.read_u32()
+        if (bb_flag >> 0x1f & 1) != 0:
+            plug.child_enum_bb_index = bb_flag & 0xffff # int blackboard index
+            _ = reader.read_u32()
+        else:
+            plug.child_enum_value = reader.read_u32()
         return plug
     
     def _as_dict(self) -> JSONType:
-        return {
-            "Node Index" : self.node_index,
-            "Name" : self.name,
-            "Unknown0" : self.unk0,
-            "Unknown1" : self.unk1,
-        }
+        if self.child_enum_bb_index < 0:
+            return {
+                "Node Index" : self.node_index,
+                "Name" : self.name,
+                "Child Enum Value" : self.child_enum_value,
+            }
+        else:
+            return {
+                "Node Index" : self.node_index,
+                "Name" : self.name,
+                "Child Enum BB Index" : self.child_enum_bb_index,
+            }
     
     @classmethod
     def _from_dict(cls, data: JSONType) -> "BSASelectorUpdaterPlug":
         plug: BSASelectorUpdaterPlug = cls()
         plug.node_index = data["Node Index"]
         plug.name = data["Name"]
-        plug.unk0 = data["Unknown0"]
-        plug.unk1 = data["Unknown1"]
+        if "Child Enum Value" in data:
+            plug.child_enum_value = data["Child Enum Value"]
+        else:
+            plug.child_enum_bb_index = data["Child Enum BB Index"]
         return plug
     
     def get_size(self) -> int:
@@ -595,8 +607,12 @@ class BSASelectorUpdaterPlug(ChildPlug):
     def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
         writer.write_s32(self.node_index)
         writer.write_string_offset(self.name)
-        writer.write_u32(self.unk0)
-        writer.write_u32(self.unk1)
+        if self.child_enum_bb_index < 0:
+            writer.write_u32(0)
+            writer.write_u32(self.child_enum_value)
+        else:
+            writer.write_u32(self.child_enum_bb_index | 0x8000000)
+            writer.write_u32(0)
 
 class TransitionPlug(Plug):
     __slots__ = ["transition"]

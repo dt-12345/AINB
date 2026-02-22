@@ -692,3 +692,84 @@ def graph_all_commands(ainb: AINB,
         render_graph(dot, ainb.filename, output_format, output_dir, view, unflatten, stagger)
 
     return dot
+
+def graph_modules(ainb: AINB,
+                  render: bool = True,
+                  output_format: str = "svg",
+                  output_dir: str = "",
+                  view: bool = False,
+                  unflatten: bool = True,
+                  stagger: int = 1,
+                  dpi: float = 96.0,
+                  node_sep: float = 0.25,
+                  line_type: str = "true",
+                  search_dirs: list[str] | None = None) -> graphviz.Digraph:
+    """
+    Graph module relationships of an AINB file
+
+    Args:
+        ainb: Input AINB object
+        render: Render graph to file
+        output_format: Output format of rendered graph (defaults to svg)
+        output_dir: Output directory path for rendered graph
+        view: Automatically open rendered graph for viewing
+        unflatten: Unflatten graph
+        stagger: Minimum length of leaf edges are staggered between 1 and stagger
+        dpi: Pixels per inch for output image (does not affect SVG)
+        node_sep: Node separation
+        line_type: Edge line type
+        search_dirs: Directories to search for modules in
+    """
+    dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
+    dot.attr(node_sep=str(node_sep), bgcolor=COLOR_MAP["graph-bg"], splines=line_type)
+    if output_format != "svg":
+        dot.attr(dpi=str(dpi))
+    
+    def normalize_name(name: str) -> str:
+        return os.path.basename(name).replace(".ainb", "").replace(".json", "")
+
+    file_map: dict[str, str] = {}
+    def get_or_add_module(name: str, is_root: bool = False) -> str:
+        adj_name: str = normalize_name(name)
+        if adj_name in file_map:
+            return file_map[adj_name]
+        id: str = get_id()
+        file_map[adj_name] = id
+        if is_root:
+            dot.node(id, adj_name, shape="ellipse", style="filled", color=COLOR_MAP["entry-point-bg"], fontcolor=COLOR_MAP["entry-point-font"])
+        else:
+            dot.node(id, adj_name, shape="ellipse", style="filled", fontcolor=COLOR_MAP["node-font"])
+        return id
+
+    seen: set[str] = set()
+    def process_file(file: AINB, is_root: bool = False) -> None:
+        seen.add(normalize_name(file.filename))
+        root_id: str = get_or_add_module(file.filename, is_root)
+        for module in file.modules:
+            id: str = get_or_add_module(module.path)
+            dot.edge(root_id, id, minlen="1")
+
+            if normalize_name(module.path) in seen:
+                continue
+
+            module_ainb: AINB | None = None
+            for path in search_dirs:
+                if os.path.exists(os.path.join(path, module.path)):
+                    module_ainb = AINB.from_file(os.path.join(path, module.path))
+                    break
+                elif os.path.exists(os.path.join(path, module.path.replace(".ainb", ".json"))):
+                    module_ainb = AINB.from_json(os.path.join(path, module.path.replace(".ainb", ".json")))
+                    break
+            
+            if module_ainb is None:
+                print(f"Warning: could not find file for {module.path}")
+                continue
+            
+            process_file(module_ainb)
+    
+    process_file(ainb, True)
+
+    if render:
+        render_graph(dot, ainb.filename, output_format, output_dir, view, unflatten, stagger)
+
+    return dot

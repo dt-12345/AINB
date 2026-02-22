@@ -13,4 +13,5 @@ from ainb.graph.graph import (
     graph_command as graph_command,
     graph_all_nodes as graph_all_nodes,
     graph_all_commands as graph_all_commands,
+    graph_modules as graph_modules,
 )

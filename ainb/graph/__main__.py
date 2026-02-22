@@ -32,6 +32,7 @@ def main() -> None:
     parser.add_argument("--command-name", help="Command name to graph", default="")
     parser.add_argument("--all-nodes", action="store_true", help="Graph all nodes in file", default=False)
     parser.add_argument("--all-commands", action="store_true", help="Graph all commands in file", default=False)
+    parser.add_argument("--modules", "-m", action="store_true", help="Graph only module relationships for file", default=False)
     parser.add_argument("--format", "-f", help="Output graph format (default is svg)", default="svg")
     parser.add_argument("--view", "-v", action="store_true", help="Automatically open the rendered graph when finished", default=False)
     parser.add_argument("--no-unflatten", action="store_false", help="Don't unflatten graph", default=True)
@@ -41,6 +42,7 @@ def main() -> None:
     parser.add_argument("--dpi", type=float, help="Output image DPI (does not affect SVG)", default=96.0)
     parser.add_argument("--node-sep", type=float, help="Node separation", default=0.25)
     parser.add_argument("--split-blackboard", action="store_true", help="Split Blackboard into separate nodes", default=False)
+    parser.add_argument("--search-paths", nargs="*", help="Search paths for modules", default=[])
     parser.add_argument(
         "--game",
         "-g",
@@ -95,6 +97,9 @@ def main() -> None:
     else:
         ainb = AINB.from_json(args.input_file_path)
     
+    if not args.search_paths:
+        args.search_paths = [os.path.dirname(args.input_file_path)]
+    
     if args.all_commands:
         graph.graph_all_commands(ainb, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.line_type, args.split_blackboard)
     elif args.all_nodes:
@@ -103,6 +108,8 @@ def main() -> None:
         graph.graph_command(ainb, args.command_name, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.line_type, args.split_blackboard)
     elif args.node_index != -1:
         graph.graph_from_node(ainb, args.node_index, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.line_type, args.split_blackboard)
+    elif args.modules:
+        graph.graph_modules(ainb, True, args.format, args.outpath, args.view, args.no_unflatten, args.stagger, args.dpi, args.node_sep, args.line_type, args.search_paths)
     else:
         print(f"Please specify an entry point with either --node-index, --command-name, --all-nodes, or --all-commands")
 

@@ -309,11 +309,18 @@ class S32SelectorPlug(ChildPlug):
                 "Name" : self.name,
                 "Is Default" : self.is_default,
             }
-        else:
+        elif self.blackboard_index == -1:
             return {
                 "Node Index" : self.node_index,
                 "Name" : self.name,
                 "Condition" : self.condition,
+            }
+        else:
+            return {
+                "Node Index" : self.node_index,
+                "Name" : self.name,
+                "Blackboard Index" : self.blackboard_index,
+                "Default Condition" : self.condition,
             }
     
     @classmethod
@@ -323,6 +330,9 @@ class S32SelectorPlug(ChildPlug):
         plug.name = data["Name"]
         if "Condition" in data:
             plug.condition = data["Condition"]
+        elif "Default Condition" in data:
+            plug.condition = data["Default Condition"]
+            plug.blackboard_index = data["Blackboard Index"]
         else:
             plug.is_default = data["Is Default"]
         return plug
@@ -483,11 +493,18 @@ class StringSelectorPlug(ChildPlug):
                 "Name" : self.name,
                 "Is Default" : self.is_default,
             }
-        else:
+        elif self.blackboard_index == -1:
             return {
                 "Node Index" : self.node_index,
                 "Name" : self.name,
                 "Condition" : self.condition,
+            }
+        else:
+            return {
+                "Node Index" : self.node_index,
+                "Name" : self.name,
+                "Blackboard Index" : self.blackboard_index,
+                "Default Condition" : self.condition,
             }
     
     @classmethod
@@ -497,6 +514,9 @@ class StringSelectorPlug(ChildPlug):
         plug.name = data["Name"]
         if "Condition" in data:
             plug.condition = data["Condition"]
+        elif "Default Condition" in data:
+            plug.condition = data["Default Condition"]
+            plug.blackboard_index = data["Blackboard Index"]
         else:
             plug.is_default = data["Is Default"]
         return plug
@@ -518,10 +538,11 @@ class StringSelectorPlug(ChildPlug):
             writer.write_string_offset(self.condition)
 
 class RandomSelectorPlug(ChildPlug):
-    __slots__ = ["weight"]
+    __slots__ = ["blackboard_index", "weight"]
 
     def __init__(self) -> None:
         super().__init__()
+        self.blackboard_index: int = -1
         self.weight: float = 0.0
 
     @classmethod
@@ -529,30 +550,51 @@ class RandomSelectorPlug(ChildPlug):
         plug: RandomSelectorPlug = cls()
         plug.node_index = reader.read_s32()
         plug.name = reader.read_string_offset()
+        index: int = reader.read_s16()
+        flag: int = reader.read_u16()
+        if flag >> 0xf != 0:
+            plug.blackboard_index = index
         plug.weight = reader.read_f32()
         return plug
     
     def _as_dict(self) -> JSONType:
-        return {
-            "Node Index" : self.node_index,
-            "Name" : self.name,
-            "Weight" : self.weight,
-        }
+        if self.blackboard_index == -1:
+            return {
+                "Node Index" : self.node_index,
+                "Name" : self.name,
+                "Weight" : self.weight,
+            }
+        else:
+            return {
+                "Node Index" : self.node_index,
+                "Name" : self.name,
+                "Blackboard Index" : self.blackboard_index,
+                "Default Weight" : self.weight,
+            }
     
     @classmethod
     def _from_dict(cls, data: JSONType) -> "RandomSelectorPlug":
         plug: RandomSelectorPlug = cls()
         plug.node_index = data["Node Index"]
         plug.name = data["Name"]
-        plug.weight = data["Weight"]
+        if "Weight" in data:
+            plug.weight = data["Weight"]
+        else:
+            plug.blackboard_index = data["Blackboard Index"]
+            plug.weight = data["Default Weight"]
         return plug
     
     def get_size(self) -> int:
-        return 0xc
+        return 0x10
     
     def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
         writer.write_s32(self.node_index)
         writer.write_string_offset(self.name)
+        if self.blackboard_index != -1:
+            writer.write_s16(self.blackboard_index)
+            writer.write_u16(0x8000)
+        else:
+            writer.write_u32(0)
         writer.write_f32(self.weight)
 
 class BSASelectorUpdaterPlug(ChildPlug):

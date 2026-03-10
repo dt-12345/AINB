@@ -21,7 +21,7 @@ def align_up(value: int, alignment: int) -> int:
 
 class EnumEx(enum.Enum):
     """
-    Enum but with a different string covnersion
+    Enum but with a different string conversion
     """
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}.{self._name_}"

@@ -523,6 +523,7 @@ def graph_from_node(ainb: AINB,
                     dpi: float = 96.0,
                     node_sep: float = 0.25,
                     rank_sep: float = 0.25,
+                    rank_dir: str = "TB",
                     line_type: str = "true",
                     split_blackboard: bool = False) -> graphviz.Digraph:
     """
@@ -540,6 +541,7 @@ def graph_from_node(ainb: AINB,
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         rank_sep: Rank separation
+        rank_dir: Rank direction
         line_type: Edge line type
         split_blackboard: Split Blackboard into separate nodes
     """
@@ -552,7 +554,7 @@ def graph_from_node(ainb: AINB,
     name: str = f"{node.name} ({node.index})" if node.type == NodeType.UserDefined else f"{node.type.name} ({node.index})"
 
     dot: graphviz.Digraph = graphviz.Digraph(name, node_attr={"shape" : "rectangle"})
-    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
+    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), rankdir=rank_dir, bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
@@ -573,6 +575,7 @@ def graph_command(ainb: AINB,
                   dpi: float = 96.0,
                   node_sep: float = 0.25,
                   rank_sep: float = 0.25,
+                  rank_dir: str = "TB",
                   line_type: str = "true",
                   split_blackboard: bool = False) -> graphviz.Digraph:
     """
@@ -590,6 +593,7 @@ def graph_command(ainb: AINB,
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         rank_sep: Rank separation
+        rank_dir: Rank direction
         line_type: Edge line type
         split_blackboard: Split Blackboard into separate nodes
     """
@@ -603,7 +607,7 @@ def graph_command(ainb: AINB,
     graph.add_node(root_node, is_root=True, root_name=cmd_name)
 
     dot: graphviz.Digraph = graphviz.Digraph(cmd.name, node_attr={"shape" : "rectangle"})
-    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
+    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), rankdir=rank_dir, bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
@@ -623,6 +627,7 @@ def graph_all_nodes(ainb: AINB,
                     dpi: float = 96.0,
                     node_sep: float = 0.25,
                     rank_sep: float = 0.25,
+                    rank_dir: str = "TB",
                     line_type: str = "true",
                     split_blackboard: bool = False) -> graphviz.Digraph:
     """
@@ -639,6 +644,7 @@ def graph_all_nodes(ainb: AINB,
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         rank_sep: Rank separation
+        rank_dir: Rank direction
         line_type: Edge line type
         split_blackboard: Split Blackboard into separate nodes
     """
@@ -648,7 +654,7 @@ def graph_all_nodes(ainb: AINB,
         graph.add_node(node)
     
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
+    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), rankdir=rank_dir, bgcolor=COLOR_MAP["graph-bg"], spline=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     graph.graph(dot, split_blackboard)
@@ -668,6 +674,7 @@ def graph_all_commands(ainb: AINB,
                        dpi: float = 96.0,
                        node_sep: float = 0.25,
                        rank_sep: float = 0.25,
+                       rank_dir: str = "TB",
                        line_type: str = "true",
                        split_blackboard: bool = False) -> graphviz.Digraph:
     """
@@ -684,17 +691,18 @@ def graph_all_commands(ainb: AINB,
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         rank_sep: Rank separation
+        rank_dir: Rank direction
         line_type: Edge line type
         split_blackboard: Split Blackboard into separate nodes
     """
 
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), bgcolor=COLOR_MAP["graph-bg"], splines=line_type)
+    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), rankdir=rank_dir, bgcolor=COLOR_MAP["graph-bg"], splines=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     
     for cmd in ainb.commands:
-        dot.subgraph(graph_command(ainb, cmd.name, render=False, node_sep=node_sep, rank_sep=rank_sep, line_type=line_type, split_blackboard=split_blackboard))
+        dot.subgraph(graph_command(ainb, cmd.name, render=False, node_sep=node_sep, rank_sep=rank_sep, rank_dir=rank_dir, line_type=line_type, split_blackboard=split_blackboard))
 
     if render:
         render_graph(dot, ainb.filename, output_format, output_dir, view, unflatten, stagger)
@@ -711,6 +719,7 @@ def graph_modules(ainb: AINB,
                   dpi: float = 96.0,
                   node_sep: float = 0.25,
                   rank_sep: float = 0.25,
+                  rank_dir: str = "TB",
                   line_type: str = "true",
                   search_dirs: list[str] | None = None) -> graphviz.Digraph:
     """
@@ -727,11 +736,12 @@ def graph_modules(ainb: AINB,
         dpi: Pixels per inch for output image (does not affect SVG)
         node_sep: Node separation
         rank_sep: Rank separation
+        rank_dir: Rank direction
         line_type: Edge line type
         search_dirs: Directories to search for modules in
     """
     dot: graphviz.Digraph = graphviz.Digraph(ainb.filename, node_attr={"shape" : "rectangle"})
-    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), bgcolor=COLOR_MAP["graph-bg"], splines=line_type)
+    dot.attr(nodesep=str(node_sep), ranksep=str(rank_sep), rankdir=rank_dir, bgcolor=COLOR_MAP["graph-bg"], splines=line_type)
     if output_format != "svg":
         dot.attr(dpi=str(dpi))
     

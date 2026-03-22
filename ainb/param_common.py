@@ -29,9 +29,9 @@ class ParamFlag(int):
     Common parameter flags
     """
 
-    def is_pulse_tls(self) -> bool:
+    def is_affect_state(self) -> bool:
         """
-        Returns True if this parameter should pulse AIMgr's TLS slot with 0x80000001 when set
+        Returns True if this parameter sets the state dirty flag when written to with a new vaue
         """
         return self & 0x800000 != 0
     
@@ -74,15 +74,15 @@ class ParamFlag(int):
         """
         return self & 0xffff
     
-    def set_pulse_tls(self, b: bool = True) -> "ParamFlag":
+    def set_affects_state(self, b: bool = True) -> "ParamFlag":
         """
-        Set pulse TLS flag
+        Set whether or not this parameter sets the state dirty flag when written to with a new value
         """
         return ParamFlag(self & 0xff7fffff | int(b) << 0x17)
     
     def set_output(self, b: bool = True) -> "ParamFlag":
         """
-        Returns whether or not this parameter has bit 0 of its pointer set
+        Set whether or not this parameter has bit 0 of its pointer set
 
         Note this method name is definitely wrong
         """
@@ -116,8 +116,8 @@ class ParamFlag(int):
         output: JSONType = {
             "Flags" : [],
         }
-        if self.is_pulse_tls():
-            output["Flags"].append("Pulse TLS")
+        if self.is_affect_state():
+            output["Flags"].append("Affects State")
         if self.is_output():
             output["Flags"].append("Is Output")
         if self.is_expression():
@@ -132,8 +132,8 @@ class ParamFlag(int):
     @classmethod
     def _from_dict(cls, data: JSONType) -> "ParamFlag":
         flag: ParamFlag = cls()
-        if "Pulse TLS" in data["Flags"]:
-            flag = flag.set_pulse_tls()
+        if "Affects State" in data["Flags"]:
+            flag = flag.set_affects_state()
         if "Is Output" in data["Flags"]:
             flag = flag.set_output()
         if "Expression Index" in data:

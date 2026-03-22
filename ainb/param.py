@@ -49,9 +49,12 @@ class ParamSource:
     def is_blackboard(self) -> bool:
         return self.flags.is_blackboard()
 
-    def _write(self, writer: AINBWriter) -> None:
+    def _write(self, writer: AINBWriter, is_blackboard: bool = False) -> None:
         writer.write_s16(self.src_node_index)
-        writer.write_s16(self.src_output_index)
+        if is_blackboard:
+            writer.write_u16(self.src_output_index | 1 << 0xf)
+        else:
+            writer.write_s16(self.src_output_index)
         writer.write_u32(self.flags)
 
 INPUT_PARAM_SIZES: typing.Final[typing.Dict[ParamType, int]] = {
@@ -68,7 +71,7 @@ class InputParam:
     A single input parameter of a node
     """
 
-    __slots__ = ["name", "classname", "type", "default_value", "source"]
+    __slots__ = ["name", "classname", "type", "default_value", "source", "is_blackboard_input"]
 
     def __init__(self, param_type: ParamType) -> None:
         self.name: str = ""
@@ -77,6 +80,7 @@ class InputParam:
         self.default_value: ValueType = None
 
         self.source: ParamSource | typing.List[ParamSource] = ParamSource()
+        self.is_blackboard_input: bool = False
 
     @classmethod
     def _read(cls, reader: AINBReader, param_type: ParamType, multi_params: typing.List[ParamSource]) -> "InputParam":
@@ -89,9 +93,9 @@ class InputParam:
 
         if _input.source.is_multi:
             _input.source = multi_params[_input.source.multi_index:_input.source.multi_index+_input.source.multi_count]
-        # sometimes the top bit is set which seemingly does absolutely nothing (probably just debug stuff)
-        # elif _input.source.src_output_index < 0:
-        #     _input.source.src_output_index &= 0x7fff
+        elif _input.source.src_output_index < 0:
+            _input.source.src_output_index &= 0x7fff
+            _input.is_blackboard_input = True
         return _input
 
     @staticmethod
@@ -128,6 +132,8 @@ class InputParam:
             output |= self.source._as_dict()
         else:
             output["Sources"] = [ src._as_dict() for src in self.source ]
+        if self.is_blackboard_input:
+            output["Is Set Blackboard"] = True
         return output
     
     @classmethod
@@ -157,6 +163,7 @@ class InputParam:
             ]
         else:
             _input.source = ParamSource._from_dict(data)
+        _input.is_blackboard_input = data.get("Is Set Blackboard", False)
         return _input
 
     def _write_value(self, writer: AINBWriter, param_type: ParamType) -> None:
@@ -192,7 +199,7 @@ class InputParam:
             src.src_output_index = src_count
             src._write(writer)
         else:
-            self.source._write(writer)
+            self.source._write(writer, self.is_blackboard_input)
         self._write_value(writer, param_type)
 
 class OutputParam:

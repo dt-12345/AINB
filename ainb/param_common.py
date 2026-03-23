@@ -29,9 +29,9 @@ class ParamFlag(int):
     Common parameter flags
     """
 
-    def is_affect_state(self) -> bool:
+    def is_use_default(self) -> bool:
         """
-        Returns True if this parameter sets the state dirty flag when written to with a new vaue
+        Returns True if this parameter uses the provided default value (aka the value is constant)
         """
         return self & 0x800000 != 0
     
@@ -74,9 +74,9 @@ class ParamFlag(int):
         """
         return self & 0xffff
     
-    def set_affects_state(self, b: bool = True) -> "ParamFlag":
+    def set_uses_default(self, b: bool = True) -> "ParamFlag":
         """
-        Set whether or not this parameter sets the state dirty flag when written to with a new value
+        Set whether or not this parameter uses the provided default value (aka the value is constant)
         """
         return ParamFlag(self & 0xff7fffff | int(b) << 0x17)
     
@@ -116,8 +116,8 @@ class ParamFlag(int):
         output: JSONType = {
             "Flags" : [],
         }
-        if self.is_affect_state():
-            output["Flags"].append("Affects State")
+        if self.is_use_default():
+            output["Flags"].append("Uses Default")
         if self.is_output():
             output["Flags"].append("Is Output")
         if self.is_expression():
@@ -132,8 +132,8 @@ class ParamFlag(int):
     @classmethod
     def _from_dict(cls, data: JSONType) -> "ParamFlag":
         flag: ParamFlag = cls()
-        if "Affects State" in data["Flags"]:
-            flag = flag.set_affects_state()
+        if "Uses Default" in data["Flags"]:
+            flag = flag.set_uses_default()
         if "Is Output" in data["Flags"]:
             flag = flag.set_output()
         if "Expression Index" in data:

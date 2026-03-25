@@ -100,7 +100,7 @@ class InputParam:
 
     @staticmethod
     def _read_value(reader: AINBReader, param_type: ParamType) -> ValueType:
-        match (param_type):
+        match param_type:
             case ParamType.Int:
                 return reader.read_s32()
             case ParamType.Bool:
@@ -142,7 +142,7 @@ class InputParam:
         _input.name = data["Name"]
         if param_type == ParamType.Pointer:
             _input.classname = data["Classname"]
-        match (param_type):
+        match param_type:
             case ParamType.Int:
                 _input.default_value = int(data["Default Value"])
             case ParamType.Bool:
@@ -167,7 +167,7 @@ class InputParam:
         return _input
 
     def _write_value(self, writer: AINBWriter, param_type: ParamType) -> None:
-        match (param_type):
+        match param_type:
             case ParamType.Int:
                 writer.write_s32(self.default_value)  # type: ignore
             case ParamType.Bool:

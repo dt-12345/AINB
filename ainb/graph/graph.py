@@ -37,6 +37,7 @@ COLOR_MAP: typing.Dict[str, str] = {
 EXPRESSION_TYPE_MAP: typing.Dict[InstDataType, ParamType] = {
     InstDataType.BOOL       : ParamType.Bool,
     InstDataType.INT        : ParamType.Int,
+    InstDataType.UINT       : ParamType.Int, # TODO: verify
     InstDataType.FLOAT      : ParamType.Float,
     InstDataType.STRING     : ParamType.String,
     InstDataType.VECTOR3F   : ParamType.Vector3F,

@@ -1,6 +1,6 @@
 import typing
 
-from ainb.expression.common import ExpressionReader, ExpressionWriter, ExpressionPreProcessError
+from ainb.expression.common import ExpressionReader, ExpressionWriter, ExpressionPreProcessError, ExpressionSerializeError
 from ainb.expression.instruction import InstType, InstDataType, InstructionBase, Sizes
 from ainb.expression.parser import parse_instruction
 from ainb.expression.write_context import ExpressionWriteContext
@@ -52,8 +52,17 @@ class Expression:
         local32_mem_usage: int = reader.read_u16()
         local64_mem_usage: int = reader.read_u16()
 
-        expr.output_datatype = InstDataType(reader.read_u16())
-        expr.input_datatype = InstDataType(reader.read_u16())
+        def parse_inst_data_type() -> InstDataType:
+            value: int = reader.read_u16()
+            if value < 4:
+                return InstDataType(value)
+            elif reader.version >= 3:
+                return InstDataType(value)
+            else:
+                return InstDataType(value + 1)
+
+        expr.output_datatype = parse_inst_data_type()
+        expr.input_datatype = parse_inst_data_type()
 
         # TODO: verify input/output types match with actual instructions
 
@@ -127,8 +136,19 @@ class Expression:
         writer.write_u32(ctx.global_mem_sizes[index])
         writer.write_u16(ctx.local32_mem_sizes[index])
         writer.write_u16(ctx.local64_mem_sizes[index])
-        writer.write_u16(self.output_datatype.value)
-        writer.write_u16(self.input_datatype.value)
+
+        def write_inst_data_type(value: InstDataType) -> int:
+            if value.value < 4:
+                writer.write_u16(value.value)
+            elif ctx.version >= 3:
+                writer.write_u16(value.value)
+            else:
+                if value == InstDataType.UINT:
+                    raise ExpressionSerializeError(f"UInt datatype is not supported on version {ctx.version}")
+                writer.write_u16(value.value - 1)
+
+        write_inst_data_type(self.output_datatype)
+        write_inst_data_type(self.input_datatype)
 
     def _write_instructions(self, writer: ExpressionWriter, ctx: ExpressionWriteContext) -> None:
         for inst in self.setup_command:

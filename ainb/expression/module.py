@@ -9,8 +9,7 @@ from ainb.expression.instruction import InstructionBase
 from ainb.expression.write_context import ExpressionWriteContext
 from ainb.utils import JSONType, ParseError
 
-# TODO: version 3 support => u32 datatype
-SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (1, 2)
+SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (1, 2, 3)
 
 def get_supported_versions() -> typing.Tuple[int, ...]:
     """
@@ -169,7 +168,7 @@ class ExpressionModule:
             writer.write_u32(off)
 
         for value, value_t in ctx.param_table:
-            match(value_t):
+            match value_t:
                 case builtins.int:
                     writer.write_s32(value) # type: ignore
                 case builtins.bool:

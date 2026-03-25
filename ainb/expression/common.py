@@ -11,6 +11,10 @@ class ExpressionPreProcessError(Exception):
     def __init__(self, msg: str) -> None:
         super().__init__(f"An error occurred while preprocessing the expression: {msg}")
 
+class ExpressionSerializeError(Exception):
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"An error occurred while serializing the expression: {msg}")
+
 class ExpressionReader(ReaderWithStrPool):
     """
     Expression reader
@@ -36,6 +40,10 @@ class ExpressionReader(ReaderWithStrPool):
     def read_s32_param_table(self, offset: int) -> int:
         with self.temp_seek(self._param_table_offset + offset):
             return self.read_s32()
+    
+    def read_u32_param_table(self, offset: int) -> int:
+        with self.temp_seek(self._param_table_offset + offset):
+            return self.read_u32()
     
     def read_f32_param_table(self, offset: int) -> float:
         with self.temp_seek(self._param_table_offset + offset):

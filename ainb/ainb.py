@@ -26,8 +26,7 @@ from ainb.write_context import WriteContext
 
 # TODO: editing API (at least add/remove nodes/plugs/etc.)
 
-# TODO: version 0x408 support if it's not too hard (seems to be u32 blackboard type)
-SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (0x404, 0x407)
+SUPPORTED_VERSIONS: typing.Tuple[int, ...] = (0x404, 0x407, 0x408)
 
 def get_supported_versions() -> typing.Tuple[int, ...]:
     """
@@ -530,10 +529,11 @@ class AINB:
             if node.flags.is_query():
                 ctx.query_map[i] = curr_query_index
                 curr_query_index += 1
+        blackboard_header_size: int = 0x38 if ctx.version >= 0x408 else 0x30
         if self.blackboard is not None:
-            ctx.curr_node_param_offset = ctx.blackboard_offset + self.blackboard._calc_size()
+            ctx.curr_node_param_offset = ctx.blackboard_offset + blackboard_header_size + self.blackboard._calc_size()
         else:
-            ctx.curr_node_param_offset = ctx.blackboard_offset + 0x30
+            ctx.curr_node_param_offset = ctx.blackboard_offset + blackboard_header_size
         for node in self.nodes:
             node._preprocess(ctx)
         for attachment in ctx.attachments:
@@ -704,7 +704,7 @@ class AINB:
             node._write(writer, ctx, i)
         
         if self.blackboard:
-            self.blackboard._write(writer)
+            self.blackboard._write(writer, ctx)
         else:
             writer.write(b"\x00" * 0x30) # files always have a blackboard section, just in case the user deleted it from the json
         

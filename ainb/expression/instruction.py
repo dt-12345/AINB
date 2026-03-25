@@ -4,7 +4,7 @@ import dataclasses
 import re
 import typing
 
-from ainb.expression.common import ExpressionParseError, ExpressionReader, ExpressionWriter
+from ainb.expression.common import ExpressionParseError, ExpressionReader, ExpressionSerializeError, ExpressionWriter
 from ainb.expression.write_context import ExpressionWriteContext
 from ainb.utils import EnumEx, ParseError, ParseWarning, ValueType
 
@@ -59,9 +59,29 @@ class InstDataType(EnumEx):
     IMM         = 1 # only used for command input type
     BOOL        = 2
     INT         = 3
-    FLOAT       = 4
-    STRING      = 5
-    VECTOR3F    = 6
+    UINT        = 4 # version 3+
+    FLOAT       = 5
+    STRING      = 6
+    VECTOR3F    = 7
+
+def parse_inst_data_type(reader: ExpressionReader) -> InstDataType:
+    value: int = reader.read_u8()
+    if value < 4:
+        return InstDataType(value)
+    elif reader.version >= 3:
+        return InstDataType(value)
+    else:
+        return InstDataType(value + 1)
+
+def convert_inst_data_type(ctx: ExpressionWriteContext, value: InstDataType) -> int:
+    if value.value < 4:
+        return value.value
+    elif ctx.version >= 3:
+        return value.value
+    else:
+        if value == InstDataType.UINT:
+            raise ExpressionSerializeError(f"UInt datatype is not supported on version {ctx.version}")
+        return value.value - 1
 
 class InstOpType(EnumEx):
     """
@@ -92,6 +112,7 @@ DT_PREFIX: typing.Final[typing.Dict[InstDataType, str]] = {
     InstDataType.IMM : "",
     InstDataType.BOOL : "bool ",
     InstDataType.INT : "int ",
+    InstDataType.UINT : "uint ",
     InstDataType.FLOAT : "float ",
     InstDataType.STRING : "str ",
     InstDataType.VECTOR3F : "vec3f ",
@@ -100,6 +121,7 @@ DT_PREFIX: typing.Final[typing.Dict[InstDataType, str]] = {
 REVERSE_DT_PREFIX: typing.Final[typing.Dict[str, InstDataType]] = {
     "bool" : InstDataType.BOOL,
     "int" : InstDataType.INT,
+    "uint" : InstDataType.UINT,
     "float" : InstDataType.FLOAT,
     "str" : InstDataType.STRING,
     "vec3f" : InstDataType.VECTOR3F,
@@ -134,6 +156,7 @@ VEC_OFFSET_MAP: typing.Final[typing.Dict[str, int]] = {
 DATATYPE_SIZES: typing.Final[typing.Dict[InstDataType, int]] = {
     InstDataType.BOOL : 4,
     InstDataType.INT : 4,
+    InstDataType.UINT : 4,
     InstDataType.FLOAT : 4,
     InstDataType.STRING : 8,
     InstDataType.VECTOR3F : 0xc,
@@ -192,12 +215,12 @@ class Operand:
         if self.datatype == InstDataType.NONE:
             self.value = raw
             return
-        match (self.type):
+        match self.type:
             case InstOpType.Immediate:
-                match (self.datatype):
+                match self.datatype:
                     case InstDataType.BOOL:
                         self.value = raw != 0
-                    case InstDataType.INT:
+                    case InstDataType.INT | InstDataType.UINT:
                         self.value = raw
                     case InstDataType.FLOAT:
                         self.value = float(raw)
@@ -208,11 +231,13 @@ class Operand:
             case InstOpType.GlobalMemory:
                 self.value = raw
             case InstOpType.ParamTable:
-                match (self.datatype):
+                match self.datatype:
                     case InstDataType.BOOL:
                         self.value = reader.read_bool_param_table(raw)
                     case InstDataType.INT:
                         self.value = reader.read_s32_param_table(raw)
+                    case InstDataType.UINT:
+                        self.value = reader.read_u32_param_table(raw)
                     case InstDataType.FLOAT:
                         self.value = reader.read_f32_param_table(raw)
                     case InstDataType.VECTOR3F:
@@ -248,7 +273,7 @@ class Operand:
         if self.type not in IMMEDIATE_TYPES:
             return
         # static type checking seems to not be able to handle this case
-        match(type(self.value)):
+        match type(self.value):
             case builtins.int:
                 if self.value > 0xffff: # type: ignore
                     if (self.value, builtins.int) not in ctx.param_table:
@@ -297,7 +322,7 @@ class Operand:
         Interestingly, there isn't actually any alignment requirement for the offset
         """
         if self.type == InstOpType.LocalMemory32:
-            if self.datatype not in [InstDataType.BOOL, InstDataType.INT, InstDataType.FLOAT, InstDataType.VECTOR3F]:
+            if self.datatype not in [InstDataType.BOOL, InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT, InstDataType.VECTOR3F]:
                 return False
         elif self.type == InstOpType.LocalMemory64:
             if self.datatype != InstDataType.STRING:
@@ -338,10 +363,22 @@ class Operand:
                     op.vec_offset = VEC_OFFSET_MAP[comp.lower()]
         else:
             op.type = InstOpType.Immediate # guess first, we'll fix this when serializing
-            match (op.datatype):
+            match op.datatype:
                 case InstDataType.BOOL:
                     op.value = argument.lower() == "true"
                 case InstDataType.INT:
+                    neg: bool = argument.startswith("-")
+                    if neg:
+                        argument = argument[1:]
+                    if argument.startswith("0x"):
+                        op.value = int(argument, 16)
+                    elif argument.startswith("0b"):
+                        op.value = int(argument, 2)
+                    else:
+                        op.value = int(argument)
+                    if neg:
+                        op.value *= -1
+                case InstDataType.UINT:
                     if argument.startswith("0x"):
                         op.value = int(argument, 16)
                     elif argument.startswith("0b"):
@@ -377,9 +414,9 @@ class Operand:
             else:
                 writer.write_u16(self.value) # type: ignore
         else:
-            match(self.type):
+            match self.type:
                 case InstOpType.Immediate:
-                    match(type(self.value)):
+                    match type(self.value):
                         case builtins.int:
                             writer.write_u16(self.value) # type: ignore
                         case builtins.bool:
@@ -424,7 +461,7 @@ class InstructionBase(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _read_ops_impl(reader: ExpressionReader, is_single: bool) -> typing.Tuple[Operand, Operand]:
-        datatype: InstDataType = InstDataType(reader.read_u8())
+        datatype: InstDataType = parse_inst_data_type(reader)
         op1: Operand = Operand()
         op1.type = InstOpType(reader.read_u8())
         op1.datatype = datatype
@@ -484,7 +521,7 @@ class SingleOpInstruction(InstructionBase):
     
     def _write(self, writer: ExpressionWriter, ctx: ExpressionWriteContext) -> None:
         writer.write_u8(self.get_type().value)
-        writer.write_u8(self.op.datatype.value)
+        writer.write_u8(convert_inst_data_type(ctx, self.op.datatype))
         writer.write_u8(self.op.type.value)
         writer.write_u8(0)
         self.op._write_value(writer, ctx)
@@ -533,7 +570,7 @@ class DualOpInstruction(InstructionBase):
     
     def _write(self, writer: ExpressionWriter, ctx: ExpressionWriteContext) -> None:
         writer.write_u8(self.get_type().value)
-        writer.write_u8(self.op1.datatype.value)
+        writer.write_u8(convert_inst_data_type(ctx, self.op1.datatype))
         writer.write_u8(self.op1.type.value)
         writer.write_u8(self.op2.type.value)
         self.op1._write_value(writer, ctx)
@@ -717,7 +754,7 @@ class AdditionInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Addition instruction addend ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op2.datatype not in [InstDataType.INT, InstDataType.FLOAT, InstDataType.VECTOR3F]:
+        if inst.op2.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT, InstDataType.VECTOR3F]:
             ParseWarning(reader, f"Invalid datatype for addition instruction: {inst.op2.datatype}")
 
         return inst
@@ -747,7 +784,7 @@ class SubtractionInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Subtraction instruction subtrahend ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op2.datatype not in [InstDataType.INT, InstDataType.FLOAT, InstDataType.VECTOR3F]:
+        if inst.op2.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT, InstDataType.VECTOR3F]:
             ParseWarning(reader, f"Invalid datatype for subtraction instruction: {inst.op2.datatype}")
 
         return inst
@@ -777,7 +814,7 @@ class MultiplicationInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Multiplication instruction multiplier ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op2.datatype not in [InstDataType.INT, InstDataType.FLOAT]:
+        if inst.op2.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT]:
             ParseWarning(reader, f"Invalid datatype for multiplication instruction: {inst.op2.datatype}")
 
         return inst
@@ -809,7 +846,7 @@ class DivisionInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Division instruction divisor ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op2.datatype not in [InstDataType.INT, InstDataType.FLOAT]:
+        if inst.op2.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT]:
             ParseWarning(reader, f"Invalid datatype for division instruction: {inst.op2.datatype}")
 
         return inst
@@ -841,11 +878,11 @@ class ModulusInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Modulus instruction divisor ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op1.datatype != InstDataType.INT:
+        if inst.op1.datatype != InstDataType.INT and inst.op1.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"Modulus instruction does not have INT datatype: {inst.op1.datatype}")
 
-        if inst.op2.datatype != InstDataType.INT:
+        if inst.op2.datatype != InstDataType.INT and inst.op2.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"Modulus instruction does not have INT datatype: {inst.op2.datatype}")
 
@@ -873,7 +910,7 @@ class IncrementInstruction(SingleOpInstruction):
         if not inst._is_valid_dst_op():
             ParseWarning(reader, f"Increment instruction cannot store into {inst.op.type}")
 
-        if inst.op.datatype != InstDataType.INT:
+        if inst.op.datatype != InstDataType.INT and inst.op.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"Increment instruction does not have INT datatype: {inst.op.datatype}")
 
@@ -901,7 +938,7 @@ class DecrementInstruction(SingleOpInstruction):
         if not inst._is_valid_dst_op():
             ParseWarning(reader, f"Decrement instruction cannot store into {inst.op.type}")
 
-        if inst.op.datatype != InstDataType.INT:
+        if inst.op.datatype != InstDataType.INT and inst.op.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"Decrement instruction does not have INT datatype: {inst.op.datatype}")
 
@@ -924,7 +961,7 @@ class ScalarMultiplicationInstruction(DualOpInstruction):
     @classmethod
     def _read(cls, reader: ExpressionReader) -> "ScalarMultiplicationInstruction":
         inst: ScalarMultiplicationInstruction = cls()
-        datatype: InstDataType = InstDataType(reader.read_u8())
+        datatype: InstDataType = parse_inst_data_type(reader)
         inst.op1.datatype = datatype
         inst.op2.datatype = InstDataType.FLOAT
         inst.op1.type = InstOpType(reader.read_u8())
@@ -961,7 +998,7 @@ class ScalarDivisionInstruction(DualOpInstruction):
     @classmethod
     def _read(cls, reader: ExpressionReader) -> "ScalarDivisionInstruction":
         inst: ScalarDivisionInstruction = cls()
-        datatype: InstDataType = InstDataType(reader.read_u8())
+        datatype: InstDataType = parse_inst_data_type(reader)
         inst.op1.datatype = datatype
         inst.op2.datatype = InstDataType.FLOAT
         inst.op1.type = InstOpType(reader.read_u8())
@@ -1006,11 +1043,11 @@ class LeftShiftInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Left shift instruction shift ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op1.datatype != InstDataType.INT:
+        if inst.op1.datatype != InstDataType.INT and inst.op1.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"Left shift instruction does not have INT datatype: {inst.op1.datatype}")
 
-        if inst.op2.datatype != InstDataType.INT:
+        if inst.op2.datatype != InstDataType.INT and inst.op2.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"Left shift instruction does not have INT datatype: {inst.op2.datatype}")
 
@@ -1041,11 +1078,11 @@ class RightShiftInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Right shift instruction shift ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op1.datatype != InstDataType.INT:
+        if inst.op1.datatype != InstDataType.INT and inst.op1.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"Right shift instruction does not have INT datatype: {inst.op1.datatype}")
 
-        if inst.op2.datatype != InstDataType.INT:
+        if inst.op2.datatype != InstDataType.INT and inst.op2.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"Right shift instruction does not have INT datatype: {inst.op2.datatype}")
 
@@ -1079,7 +1116,7 @@ class LessThanInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Less than instruction value ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
         
-        if inst.op1.datatype not in [InstDataType.INT, InstDataType.FLOAT]:
+        if inst.op1.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT]:
             ParseWarning(reader, f"Invalid datatype for less than instruction: {inst.op1.datatype}")
         
         return inst
@@ -1112,7 +1149,7 @@ class LessThanEqualInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Less than equal instruction value ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
         
-        if inst.op1.datatype not in [InstDataType.INT, InstDataType.FLOAT]:
+        if inst.op1.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT]:
             ParseWarning(reader, f"Invalid datatype for less than equal instruction: {inst.op1.datatype}")
         
         return inst
@@ -1145,7 +1182,7 @@ class GreaterThanInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Greater than instruction value ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
         
-        if inst.op1.datatype not in [InstDataType.INT, InstDataType.FLOAT]:
+        if inst.op1.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT]:
             ParseWarning(reader, f"Invalid datatype for greater than instruction: {inst.op1.datatype}")
         
         return inst
@@ -1178,7 +1215,7 @@ class GreaterThanEqualInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"Greater than equal instruction value ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
         
-        if inst.op1.datatype not in [InstDataType.INT, InstDataType.FLOAT]:
+        if inst.op1.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.FLOAT]:
             ParseWarning(reader, f"Invalid datatype for greater than equal instruction: {inst.op1.datatype}")
         
         return inst
@@ -1268,11 +1305,11 @@ class ANDInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"AND instruction value ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op1.datatype not in [InstDataType.INT, InstDataType.BOOL]:
+        if inst.op1.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.BOOL]:
             # this is not a hard requirement as the game does not check the type and assumes INT instead
             ParseWarning(reader, f"AND instruction does not have INT datatype: {inst.op1.datatype}")
 
-        if inst.op2.datatype not in [InstDataType.INT, InstDataType.BOOL]:
+        if inst.op2.datatype not in [InstDataType.INT, InstDataType.UINT, InstDataType.BOOL]:
             # this is not a hard requirement as the game does not check the type and assumes INT instead
             ParseWarning(reader, f"AND instruction does not have INT datatype: {inst.op2.datatype}")
 
@@ -1303,11 +1340,11 @@ class XORInstruction(DualOpInstruction):
         if not inst.op2._check_load_validity():
             ParseWarning(reader, f"XOR instruction value ({inst.op2.datatype}) loaded from invalid source ({inst.op2.type})")
 
-        if inst.op1.datatype != InstDataType.INT:
+        if inst.op1.datatype != InstDataType.INT and inst.op1.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"XOR instruction does not have INT datatype: {inst.op1.datatype}")
 
-        if inst.op2.datatype != InstDataType.INT:
+        if inst.op2.datatype != InstDataType.INT and inst.op2.datatype != InstDataType.UINT:
             # this is not a hard requirement as the game does not check the type and assumes it instead
             ParseWarning(reader, f"XOR instruction does not have INT datatype: {inst.op2.datatype}")
 
@@ -1438,7 +1475,7 @@ class CallFunctionInstruction(InstructionBase):
     @classmethod
     def _read(cls, reader: ExpressionReader) -> "CallFunctionInstruction":
         inst: CallFunctionInstruction = cls()
-        inst.datatype = InstDataType(reader.read_u8())
+        inst.datatype = parse_inst_data_type(reader)
         inst.args_offset = reader.read_u16()
         inst.func_signature = reader.get_signature(reader.read_u32())
 
@@ -1466,7 +1503,7 @@ class CallFunctionInstruction(InstructionBase):
     
     def _write(self, writer: ExpressionWriter, ctx: ExpressionWriteContext) -> None:
         writer.write_u8(self.get_type().value)
-        writer.write_u8(self.datatype.value)
+        writer.write_u8(convert_inst_data_type(ctx, self.datatype))
         writer.write_u16(self.args_offset)
         writer.write_u32(ctx.signature_list.index(self.func_signature))
 
@@ -1493,7 +1530,7 @@ class JumpIfZeroInstruction(JumpInstructionBase):
     @classmethod
     def _read(cls, reader: ExpressionReader) -> "JumpIfZeroInstruction":
         inst: JumpIfZeroInstruction = cls()
-        inst.condition.datatype = InstDataType(reader.read_u8())
+        inst.condition.datatype = parse_inst_data_type(reader)
         inst.condition.type = InstOpType(reader.read_u8())
         _ = reader.read_u8() # padding
         inst.condition._read_value(reader)
@@ -1524,7 +1561,7 @@ class JumpIfZeroInstruction(JumpInstructionBase):
     
     def _write(self, writer: ExpressionWriter, ctx: ExpressionWriteContext) -> None:
         writer.write_u8(self.get_type().value)
-        writer.write_u8(self.condition.datatype.value)
+        writer.write_u8(convert_inst_data_type(ctx, self.condition.datatype))
         writer.write_u8(self.condition.type.value)
         writer.write_u8(0)
         self.condition._write_value(writer, ctx)

@@ -3,7 +3,8 @@ import os
 import typing
 
 from ainb.common import AINBReader, AINBWriter
-from ainb.utils import calc_hash, DictDecodeError, IntEnumEx, JSONType, ValueType
+from ainb.utils import calc_hash, DictDecodeError, IntEnumEx, JSONType, SerializeWarning, ValueType
+from ainb.write_context import WriteContext
 
 class BBParamType(IntEnumEx):
     """
@@ -12,10 +13,11 @@ class BBParamType(IntEnumEx):
 
     String = 0
     S32 = 1
-    F32 = 2
-    Bool = 3
-    Vec3f = 4
-    VoidPtr = 5
+    U32 = 2 # version 0x408+
+    F32 = 3
+    Bool = 4
+    Vec3f = 5
+    VoidPtr = 6
 
 class BBParam:
     """
@@ -29,7 +31,7 @@ class BBParam:
         self.type: BBParamType = param_type
         self.notes: str = ""
         self.file_ref: str = ""
-        # 2 bits, lower bit is set for params that are inheritable between modules
+        # 2 bits, lower bit is set for params that are inheritable between modules, upper bit might be for module inputs mapped to blackboard?
         # if not inheriting, then both bits must be zero in order for params to automatically be matched between modules
         self.flags: int = 0
         self.default_value: ValueType = None
@@ -61,10 +63,12 @@ class BBParam:
         if "Source File" in data:
             param.file_ref = data["Source File"]
         param.flags = data["Flags"]
-        match (param_type):
+        match param_type:
             case BBParamType.String:
                 param.default_value = str(data["Default Value"])
             case BBParamType.S32:
+                param.default_value = int(data["Default Value"])
+            case BBParamType.U32:
                 param.default_value = int(data["Default Value"])
             case BBParamType.F32:
                 param.default_value = float(data["Default Value"])
@@ -87,9 +91,9 @@ class BBParam:
 
 @dataclasses.dataclass(slots=True)
 class BBParamHeader:
-    param_count: int
-    base_index: int
-    offset: int
+    param_count: int = 0
+    base_index: int = 0
+    offset: int = 0
 
 @dataclasses.dataclass(slots=True)
 class BBParamInfo:
@@ -106,9 +110,7 @@ class Blackboard:
     __slots__ = ["_params"]
 
     def __init__(self) -> None:
-        self._params: typing.List[typing.List[BBParam]] = [
-            [], [], [], [], [], []
-        ]
+        self._params: typing.List[typing.List[BBParam]] = [ [] for i in range(len(BBParamType)) ]
 
     @property
     def string_params(self) -> typing.List[BBParam]:
@@ -117,6 +119,10 @@ class Blackboard:
     @property
     def s32_params(self) -> typing.List[BBParam]:
         return self._params[BBParamType.S32]
+
+    @property
+    def u32_params(self) -> typing.List[BBParam]:
+        return self._params[BBParamType.U32]
 
     @property
     def f32_params(self) -> typing.List[BBParam]:
@@ -141,7 +147,7 @@ class Blackboard:
     def _read(cls, reader: AINBReader) -> "Blackboard":
         bb: Blackboard = cls()
         type_headers: typing.List[BBParamHeader] = [
-            cls._read_bb_header(reader) for i in range(len(BBParamType))
+            cls._read_bb_header(reader) if reader.version >= 0x408 or p_type != BBParamType.U32 else BBParamHeader() for p_type in BBParamType
         ]
         param_info: typing.List[typing.List[BBParamInfo]] = [
             [
@@ -190,11 +196,13 @@ class Blackboard:
         
     @staticmethod
     def _read_bb_param_value(reader: AINBReader, param_type: BBParamType) -> ValueType:
-        match (param_type):
+        match param_type:
             case BBParamType.String:
                 return reader.read_string_offset()
             case BBParamType.S32:
                 return reader.read_s32()
+            case BBParamType.U32:
+                return reader.read_u32()
             case BBParamType.F32:
                 return reader.read_f32()
             case BBParamType.Bool:
@@ -243,12 +251,14 @@ class Blackboard:
 
     def _calc_size(self) -> int:
         file_refs: typing.Set[str] = set()
-        return 0x30 + sum(param._calc_size(file_refs) for p_type in BBParamType for param in self.get_params(p_type))
+        return sum(param._calc_size(file_refs) for p_type in BBParamType for param in self.get_params(p_type))
 
-    def _write(self, writer: AINBWriter) -> None:
+    def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
         index: int = 0
         pos: int = 0
         for p_type in BBParamType:
+            if ctx.version < 0x408 and p_type == BBParamType.U32:
+                continue
             param_count: int = len(self.get_params(p_type))
             writer.write_u16(param_count)
             writer.write_u16(index)
@@ -263,6 +273,8 @@ class Blackboard:
             writer.write_u16(0)
         file_refs: typing.List[str] = []
         for p_type in BBParamType:
+            if ctx.version < 0x408 and p_type == BBParamType.U32:
+                continue
             for param in self.get_params(p_type):
                 name_offset: int = writer.add_string(param.name)
                 if param.file_ref != "":
@@ -275,8 +287,12 @@ class Blackboard:
                 writer.write_string_offset(param.notes)
         offset: int = 0
         for p_type in BBParamType:
+            if ctx.version < 0x408 and p_type == BBParamType.U32:
+                if self.get_params(p_type):
+                    SerializeWarning(writer, f"Version {ctx.version:#x} does not support U32 blackboard parameters")
+                continue
             for param in self.get_params(p_type):
-                match (p_type):
+                match p_type:
                     case BBParamType.String:
                         if typing.TYPE_CHECKING:
                             assert isinstance(param.default_value, str)
@@ -286,6 +302,11 @@ class Blackboard:
                         if typing.TYPE_CHECKING:
                             assert isinstance(param.default_value, int)
                         writer.write_s32(param.default_value)
+                        offset += 4
+                    case BBParamType.U32:
+                        if typing.TYPE_CHECKING:
+                            assert isinstance(param.default_value, int)
+                        writer.write_u32(param.default_value)
                         offset += 4
                     case BBParamType.F32:
                         if typing.TYPE_CHECKING:

@@ -13,6 +13,7 @@ from ainb.param_common import ParamType
 from ainb.property import Property
 from ainb.utils import WarningBase
 
+# TODO: apply replacement (as an option)
 # TODO: (probably not) expression control flow graph?
 # TODO: root node colored differently? unsure if that's desirable
 # TODO: state end colored differently? edge between state end and next state if possible?

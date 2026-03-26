@@ -19,6 +19,11 @@ class BBParamType(IntEnumEx):
     Vec3f = 5
     VoidPtr = 6
 
+    def is_supported(self, version: int) -> bool:
+        if version < 0x408 and self == BBParamType.U32:
+            return False
+        return True
+
 class BBParam:
     """
     Blackboard parameter class
@@ -147,7 +152,7 @@ class Blackboard:
     def _read(cls, reader: AINBReader) -> "Blackboard":
         bb: Blackboard = cls()
         type_headers: typing.List[BBParamHeader] = [
-            cls._read_bb_header(reader) if reader.version >= 0x408 or p_type != BBParamType.U32 else BBParamHeader() for p_type in BBParamType
+            cls._read_bb_header(reader) if p_type.is_supported(reader.version) else BBParamHeader() for p_type in BBParamType
         ]
         param_info: typing.List[typing.List[BBParamInfo]] = [
             [
@@ -249,15 +254,15 @@ class Blackboard:
             ]
         return bb
 
-    def _calc_size(self) -> int:
+    def _calc_size(self, version: int) -> int:
         file_refs: typing.Set[str] = set()
-        return sum(param._calc_size(file_refs) for p_type in BBParamType for param in self.get_params(p_type))
+        return sum(param._calc_size(file_refs) for p_type in BBParamType for param in self.get_params(p_type) if p_type.is_supported(version))
 
     def _write(self, writer: AINBWriter, ctx: WriteContext) -> None:
         index: int = 0
         pos: int = 0
         for p_type in BBParamType:
-            if ctx.version < 0x408 and p_type == BBParamType.U32:
+            if not p_type.is_supported(ctx.version):
                 continue
             param_count: int = len(self.get_params(p_type))
             writer.write_u16(param_count)
@@ -273,7 +278,7 @@ class Blackboard:
             writer.write_u16(0)
         file_refs: typing.List[str] = []
         for p_type in BBParamType:
-            if ctx.version < 0x408 and p_type == BBParamType.U32:
+            if not p_type.is_supported(ctx.version):
                 continue
             for param in self.get_params(p_type):
                 name_offset: int = writer.add_string(param.name)
@@ -287,9 +292,9 @@ class Blackboard:
                 writer.write_string_offset(param.notes)
         offset: int = 0
         for p_type in BBParamType:
-            if ctx.version < 0x408 and p_type == BBParamType.U32:
+            if not p_type.is_supported(ctx.version):
                 if self.get_params(p_type):
-                    SerializeWarning(writer, f"Version {ctx.version:#x} does not support U32 blackboard parameters")
+                    SerializeWarning(writer, f"Version {ctx.version:#x} does not support {p_type.name} blackboard parameters")
                 continue
             for param in self.get_params(p_type):
                 match p_type:

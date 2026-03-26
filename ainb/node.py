@@ -12,7 +12,7 @@ from ainb.param_common import ParamType
 from ainb.property import PropertySet
 from ainb.state import StateInfo
 from ainb.transition import Transition
-from ainb.utils import calc_hash, DictDecodeError, IntEnumEx, JSONType, ParseError, ParseWarning
+from ainb.utils import calc_hash, DictDecodeError, DictDecodeWarning, IntEnumEx, JSONType, ParseError, ParseWarning
 from ainb.write_context import WriteContext
 
 NULL_INDEX: int = 0x7fff
@@ -1191,7 +1191,8 @@ class Node:
         node: Node = cls(NodeType[data["Node Type"]])
         node.index = data["Node Index"]
         if node.index != index:
-            raise DictDecodeError(f"Node index {index} claims it has index {node.index}")
+            node.index = index
+            DictDecodeWarning(f"Node index {index} claims it has index {node.index}")
         node.name = data["Name"]
         node.guid = data["GUID"]
         node.flags = NodeFlag._from_flag_list(data["Flags"])

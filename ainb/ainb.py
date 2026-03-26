@@ -184,7 +184,7 @@ class AINB:
         self.blackboard_id = reader.read_u32()
         self.parent_blackboard_id = reader.read_u32()
 
-        # it doesn't seem to actually apply these in verisons < 0x407 but the header structure seems the same at least
+        # it doesn't seem to actually apply these in versions < 0x407 but the header structure seems the same at least
         if reader.version >= 0x407:
             reader.seek(replacement_offset)
             replaced: int = reader.read_u8()
@@ -531,7 +531,7 @@ class AINB:
                 curr_query_index += 1
         blackboard_header_size: int = 0x38 if ctx.version >= 0x408 else 0x30
         if self.blackboard is not None:
-            ctx.curr_node_param_offset = ctx.blackboard_offset + blackboard_header_size + self.blackboard._calc_size()
+            ctx.curr_node_param_offset = ctx.blackboard_offset + blackboard_header_size + self.blackboard._calc_size(ctx.version)
         else:
             ctx.curr_node_param_offset = ctx.blackboard_offset + blackboard_header_size
         for node in self.nodes:

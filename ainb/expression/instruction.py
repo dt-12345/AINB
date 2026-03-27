@@ -1491,7 +1491,7 @@ class CallFunctionInstruction(InstructionBase):
         inst: CallFunctionInstruction = cls()
         args_match: re.Match[str] | None = re.match(CALL_ARGS, matches.group("arguments"))
         if args_match is None:
-            raise ExpressionParseError(f"Failed to decode {matches.group("arguments")}")
+            raise ExpressionParseError(f"Failed to decode {matches.group('arguments')}")
         inst.datatype = InstDataType[args_match.group("return").upper()]
         inst.func_signature = args_match.group("signature")
         offset: str = args_match.group("offset")

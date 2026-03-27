@@ -53,6 +53,8 @@ BLACKBOARD_TYPE_MAP: typing.Dict[ParamType, BBParamType] = {
     ParamType.Pointer       : BBParamType.VoidPtr,
 }
 
+NEWLINE: str = "\n"
+
 ID_ITER: int = 0
 def get_id() -> str:
     global ID_ITER
@@ -185,7 +187,7 @@ class GraphNode:
                     <tr>
                         <td><b>Properties</b></td>
                     </tr>
-                    {'\n'.join(self._format_property(p_type, prop) for p_type in ParamType for i, prop in enumerate(self._node.properties.get_properties(p_type)))}"""
+                    {NEWLINE.join(self._format_property(p_type, prop) for p_type in ParamType for i, prop in enumerate(self._node.properties.get_properties(p_type)))}"""
         return ""
 
     def _format_input_table(self) -> str:
@@ -194,7 +196,7 @@ class GraphNode:
                     <tr>
                         <td><b>Inputs</b></td>
                     </tr>
-                    {'\n'.join(self._add_input(i, p_type, param) for p_type in ParamType for i, param in enumerate(self._node.params.get_inputs(p_type)))}"""
+                    {NEWLINE.join(self._add_input(i, p_type, param) for p_type in ParamType for i, param in enumerate(self._node.params.get_inputs(p_type)))}"""
         return ""
 
     def _format_output_table(self) -> str:
@@ -203,7 +205,7 @@ class GraphNode:
                     <tr>
                         <td><b>Outputs</b></td>
                     </tr>
-                    {'\n'.join(self._add_output(i, p_type, param) for p_type in ParamType for i, param in enumerate(self._node.params.get_outputs(p_type)))}
+                    {NEWLINE.join(self._add_output(i, p_type, param) for p_type in ParamType for i, param in enumerate(self._node.params.get_outputs(p_type)))}
                     """
         return ""
 
@@ -299,7 +301,7 @@ class Graph:
                 <tr>
                     <td><b>Properties</b></td>
                 </tr>
-                {'\n'.join(self._add_bb_param(i, param) for p_type in BBParamType for i, param in enumerate(self.ainb.blackboard.get_params(p_type)))}"""
+                {NEWLINE.join(self._add_bb_param(i, param) for p_type in BBParamType for i, param in enumerate(self.ainb.blackboard.get_params(p_type)))}"""
 
     def _add_blackboard(self, dot: graphviz.Digraph, split_bb: bool = False) -> None:
         if self.ainb.blackboard is None:

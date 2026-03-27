@@ -4,7 +4,7 @@ AINB Utilities
 
 # TODO: clean up public-facing API, proper editing support?
 
-__version__: str = "0.2.14"
+__version__: str = "0.2.15"
 
 from ainb.action import Action as Action
 from ainb.ainb import (

@@ -24,12 +24,17 @@ class BBParamType(IntEnumEx):
             return False
         return True
 
+class InheritMode(IntEnumEx):
+    InheritFromRoot     = 0 # inherit value from the root module
+    InheritFromParent   = 1 # inherit value from the calling module (parent blackboard hash needs to be non-zero)
+    DontInherit         = 2 # don't inherit value
+
 class BBParam:
     """
     Blackboard parameter class
     """
 
-    __slots__ = ["name", "type", "notes", "file_ref", "flags", "default_value"]
+    __slots__ = ["name", "type", "notes", "file_ref", "inherit_mode", "default_value"]
 
     def __init__(self, param_type: BBParamType) -> None:
         self.name: str = ""
@@ -38,7 +43,7 @@ class BBParam:
         self.file_ref: str = ""
         # 2 bits, lower bit is set for params that are inheritable between modules, upper bit might be for module inputs mapped to blackboard?
         # if not inheriting, then both bits must be zero in order for params to automatically be matched between modules
-        self.flags: int = 0
+        self.inherit_mode: InheritMode = InheritMode.DontInherit
         self.default_value: ValueType = None
 
     def _as_dict(self, index: int) -> JSONType:
@@ -48,7 +53,7 @@ class BBParam:
                 "Name" : self.name,
                 "Notes" : self.notes,
                 "Source File" : self.file_ref,
-                "Flags" : self.flags,
+                "Inherit Mode" : self.inherit_mode.name,
                 "Default Value" : self.default_value,
             }
         else:
@@ -56,7 +61,7 @@ class BBParam:
                 "Blackboard Index" : index,
                 "Name" : self.name,
                 "Notes" : self.notes,
-                "Flags" : self.flags,
+                "Inherit Mode" : self.inherit_mode.name,
                 "Default Value" : self.default_value,
             }
     
@@ -67,7 +72,7 @@ class BBParam:
         param.notes = data["Notes"]
         if "Source File" in data:
             param.file_ref = data["Source File"]
-        param.flags = data["Flags"]
+        param.inherit_mode = InheritMode[data["Inherit Mode"]]
         match param_type:
             case BBParamType.String:
                 param.default_value = str(data["Default Value"])
@@ -105,7 +110,7 @@ class BBParamInfo:
     file_ref_index: int
     name: str
     notes: str
-    flags: int
+    inherit_mode: InheritMode
 
 class Blackboard:
     """
@@ -189,14 +194,14 @@ class Blackboard:
                 flags >> 0x18 & 0x7f,                   # file reference index
                 reader.get_string(flags & 0x3fffff),    # param name
                 reader.read_string_offset(),            # param notes
-                flags >> 0x16 & 3                       # flags
+                InheritMode(flags >> 0x16 & 3),         # inheritance mode
             )
         else:
             return BBParamInfo(
                 -1,                                     # file reference index
                 reader.get_string(flags & 0x3fffff),    # param name
                 reader.read_string_offset(),            # param notes
-                flags >> 0x16 & 3                       # flags
+                InheritMode(flags >> 0x16 & 3),         # inheritance mode
             )
         
     @staticmethod
@@ -230,7 +235,7 @@ class Blackboard:
         param: BBParam = BBParam(param_type)
         param.name = info.name
         param.notes = info.notes
-        param.flags = info.flags
+        param.inherit_mode = info.inherit_mode
         param.default_value = Blackboard._read_bb_param_value(reader, param_type)
         if info.file_ref_index != -1:
             # each file reference entry is 0x10 bytes
@@ -285,9 +290,9 @@ class Blackboard:
                 if param.file_ref != "":
                     if param.file_ref not in file_refs:
                         file_refs.append(param.file_ref)
-                    name_offset |= (1 << 0x1f) | (file_refs.index(param.file_ref) << 0x18) | (param.flags << 0x16)
+                    name_offset |= (1 << 0x1f) | (file_refs.index(param.file_ref) << 0x18) | (param.inherit_mode.value << 0x16)
                 else:
-                    name_offset |= (param.flags << 0x16)
+                    name_offset |= (param.inherit_mode.value << 0x16)
                 writer.write_u32(name_offset)
                 writer.write_string_offset(param.notes)
         offset: int = 0

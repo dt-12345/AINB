@@ -1191,8 +1191,8 @@ class Node:
         node: Node = cls(NodeType[data["Node Type"]])
         node.index = data["Node Index"]
         if node.index != index:
-            node.index = index
             DictDecodeWarning(f"Node index {index} claims it has index {node.index}")
+            node.index = index
         node.name = data["Name"]
         node.guid = data["GUID"]
         node.flags = NodeFlag._from_flag_list(data["Flags"])

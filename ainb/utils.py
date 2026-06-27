@@ -521,7 +521,7 @@ class StringPool:
         for string in raw:
             decoded = string.decode(format)
             if decoded in str_pool._string_set:
-                raise ValueError(f"Duplicate string {decoded} found in string pool at offset {str_pool._offset:#x}")
+                ParseWarning(f"Duplicate string {decoded} found in string pool at offset {str_pool._offset:#x}")
             str_pool._strings[str_pool._offset] = decoded
             str_pool._offset += len(string) + 1
             str_pool._string_set.add(decoded)

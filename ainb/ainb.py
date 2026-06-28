@@ -384,7 +384,7 @@ class AINB:
                 },
                 "EnumName2" : {
                     "Value1" : 1,
-                }
+                },
             }
         """
         assert cls._verify_enum_db(new_db), f"Invalid database!"
@@ -839,7 +839,7 @@ def set_game(game: str) -> None:
     """
     db_path: str = f"{game}.json"
     try:
-        with importlib.resources.open_text("ainb.data", db_path) as f:
+        with importlib.resources.files("ainb.data").joinpath(db_path).open() as f:
             db: typing.Dict[str, typing.Dict[str, int]] = json.load(f)
             AINB.set_enum_db(db)
     except (FileNotFoundError, json.JSONDecodeError) as e:

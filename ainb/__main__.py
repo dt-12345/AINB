@@ -63,7 +63,7 @@ def main() -> None:
     if args.game != "other":
         db_path: str = f"{args.game}.json"
         try:
-            with importlib.resources.open_text("ainb.data", db_path) as f:
+            with importlib.resources.files("ainb.data").joinpath(db_path).open() as f:
                 AINB.set_enum_db(json.load(f))
         except (FileNotFoundError, json.JSONDecodeError):
             pass

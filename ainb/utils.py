@@ -41,9 +41,9 @@ class IntEnumEx(enum.IntEnum):
         return self._name_
 
 # TODO: type Vector3f = ... once we drop 3.10/3.11 (same with the other ones)
-Vector3f = typing.Tuple[float, float, float]
-ValueType = int | bool | float | str | Vector3f | None
-JSONType = typing.Dict[str, typing.Any]
+Vector3f: typing.TypeAlias = typing.Tuple[float, float, float]
+ValueType: typing.TypeAlias = int | bool | float | str | Vector3f | None
+JSONType: typing.TypeAlias = typing.Dict[str, typing.Any]
 
 class Endian(enum.Enum):
     """
